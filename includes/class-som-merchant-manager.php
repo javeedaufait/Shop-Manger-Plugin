@@ -304,9 +304,9 @@ class SOM_Merchant_Manager {
 					</div>
 					<?php endif; ?>
 				</div>
-				<div class="som-card-actions" style="display:flex; gap:10px;">
-					<a href="<?php echo esc_url( $dashboard_url ); ?>" class="som-submit-btn som-btn-secondary" style="text-decoration:none; text-align:center; display:block; padding:12px; height:auto; min-height:auto; font-size:0.95rem;"><?php esc_html_e( 'Go to Dashboard →', 'shop-onboarding-manager' ); ?></a>
-					<a href="<?php echo esc_url( $logout_url ); ?>" class="som-btn-logout" style="width: auto; padding:12px 18px;"><?php esc_html_e( 'Log Out', 'shop-onboarding-manager' ); ?></a>
+				<div class="som-card-actions" style="display:flex; gap:12px; align-items:center;">
+					<a href="<?php echo esc_url( $dashboard_url ); ?>" class="som-submit-btn som-btn-secondary" style="flex:2; text-decoration:none; text-align:center; display:flex; align-items:center; justify-content:center; padding:12px 16px; height:48px; min-height:48px; font-size:1rem; white-space:nowrap;"><?php esc_html_e( 'Go to Dashboard →', 'shop-onboarding-manager' ); ?></a>
+					<a href="<?php echo esc_url( $logout_url ); ?>" class="som-btn-logout" style="flex:1; text-decoration:none; text-align:center; display:flex; align-items:center; justify-content:center; padding:12px 16px; height:48px; min-height:48px; font-size:1rem; white-space:nowrap; margin-top:0;"><?php esc_html_e( 'Log Out', 'shop-onboarding-manager' ); ?></a>
 				</div>
 			</div>
 			<?php
