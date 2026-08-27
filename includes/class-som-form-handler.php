@@ -59,12 +59,12 @@ class SOM_Form_Handler {
 				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
 				'nonce'   => wp_create_nonce( 'som_frontend_onboard_nonce' ),
 				'i18n'    => array(
-					'locationFetching'  => __( 'Fetching GPS location...', 'shop-onboarding-manager' ),
-					'locationSuccess'   => __( 'GPS Location Captured', 'shop-onboarding-manager' ),
-					'locationError'     => __( 'Unable to auto-get location. (Browser requires HTTPS for location API). You can manually enter coordinates below.', 'shop-onboarding-manager' ),
-					'duplicateWarning'  => __( 'A shop with this phone number or name & address already exists.', 'shop-onboarding-manager' ),
-					'submitting'        => __( 'Registering Shop...', 'shop-onboarding-manager' ),
-					'successMessage'    => __( 'Shop successfully registered!', 'shop-onboarding-manager' ),
+					'locationFetching' => __( 'Fetching GPS location...', 'shop-onboarding-manager' ),
+					'locationSuccess'  => __( 'GPS Location Captured', 'shop-onboarding-manager' ),
+					'locationError'    => __( 'Unable to auto-get location. (Browser requires HTTPS for location API). You can manually enter coordinates below.', 'shop-onboarding-manager' ),
+					'duplicateWarning' => __( 'A shop with this phone number or name & address already exists.', 'shop-onboarding-manager' ),
+					'submitting'       => __( 'Registering Shop...', 'shop-onboarding-manager' ),
+					'successMessage'   => __( 'Shop successfully registered!', 'shop-onboarding-manager' ),
 				),
 			)
 		);
@@ -106,11 +106,11 @@ class SOM_Form_Handler {
 			if ( $phone_query->have_posts() ) {
 				foreach ( $phone_query->posts as $p ) {
 					$duplicates[ $p->ID ] = array(
-						'id'         => $p->ID,
-						'title'      => get_the_title( $p->ID ),
-						'owner'      => get_post_meta( $p->ID, 'som_owner_name', true ),
-						'phone'      => get_post_meta( $p->ID, 'som_phone_number', true ),
-						'reason'     => __( 'Matched by phone number', 'shop-onboarding-manager' ),
+						'id'     => $p->ID,
+						'title'  => get_the_title( $p->ID ),
+						'owner'  => get_post_meta( $p->ID, 'som_owner_name', true ),
+						'phone'  => get_post_meta( $p->ID, 'som_phone_number', true ),
+						'reason' => __( 'Matched by phone number', 'shop-onboarding-manager' ),
 					);
 				}
 			}
@@ -167,21 +167,21 @@ class SOM_Form_Handler {
 
 		// Extract & Sanitize fields.
 		$shop_name        = isset( $_POST['shop_name'] ) ? sanitize_text_field( wp_unslash( $_POST['shop_name'] ) ) : '';
-		$owner_name        = isset( $_POST['owner_name'] ) ? sanitize_text_field( wp_unslash( $_POST['owner_name'] ) ) : '';
-		$phone             = isset( $_POST['phone'] ) ? sanitize_text_field( wp_unslash( $_POST['phone'] ) ) : '';
-		$address           = isset( $_POST['address'] ) ? sanitize_textarea_field( wp_unslash( $_POST['address'] ) ) : '';
-		$shop_type         = isset( $_POST['shop_type'] ) ? sanitize_text_field( wp_unslash( $_POST['shop_type'] ) ) : '';
-		$status_slug       = isset( $_POST['shop_status'] ) ? sanitize_key( wp_unslash( $_POST['shop_status'] ) ) : 'contacted';
-		$followup_date     = isset( $_POST['followup_date'] ) ? sanitize_text_field( wp_unslash( $_POST['followup_date'] ) ) : '';
-		$notes             = isset( $_POST['notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['notes'] ) ) : '';
-		$concerns          = isset( $_POST['concerns'] ) ? sanitize_textarea_field( wp_unslash( $_POST['concerns'] ) ) : '';
-		$latitude          = isset( $_POST['latitude'] ) ? SOM_Shop_Meta::sanitize_coordinate( $_POST['latitude'] ) : '';
-		$longitude         = isset( $_POST['longitude'] ) ? SOM_Shop_Meta::sanitize_coordinate( $_POST['longitude'] ) : '';
-		$gps_accuracy      = isset( $_POST['gps_accuracy'] ) ? SOM_Shop_Meta::sanitize_coordinate( $_POST['gps_accuracy'] ) : '';
-		$merchant_user_id  = isset( $_POST['merchant_user_id'] ) ? absint( $_POST['merchant_user_id'] ) : 0;
-		$create_m_account  = ! empty( $_POST['create_merchant_account'] );
-		$m_username        = isset( $_POST['merchant_username'] ) ? sanitize_user( wp_unslash( $_POST['merchant_username'] ) ) : '';
-		$m_password        = isset( $_POST['merchant_password'] ) ? $_POST['merchant_password'] : '';
+		$owner_name       = isset( $_POST['owner_name'] ) ? sanitize_text_field( wp_unslash( $_POST['owner_name'] ) ) : '';
+		$phone            = isset( $_POST['phone'] ) ? sanitize_text_field( wp_unslash( $_POST['phone'] ) ) : '';
+		$address          = isset( $_POST['address'] ) ? sanitize_textarea_field( wp_unslash( $_POST['address'] ) ) : '';
+		$shop_type        = isset( $_POST['shop_type'] ) ? sanitize_text_field( wp_unslash( $_POST['shop_type'] ) ) : '';
+		$status_slug      = isset( $_POST['shop_status'] ) ? sanitize_key( wp_unslash( $_POST['shop_status'] ) ) : 'contacted';
+		$followup_date    = isset( $_POST['followup_date'] ) ? sanitize_text_field( wp_unslash( $_POST['followup_date'] ) ) : '';
+		$notes            = isset( $_POST['notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['notes'] ) ) : '';
+		$concerns         = isset( $_POST['concerns'] ) ? sanitize_textarea_field( wp_unslash( $_POST['concerns'] ) ) : '';
+		$latitude         = isset( $_POST['latitude'] ) ? SOM_Shop_Meta::sanitize_coordinate( $_POST['latitude'] ) : '';
+		$longitude        = isset( $_POST['longitude'] ) ? SOM_Shop_Meta::sanitize_coordinate( $_POST['longitude'] ) : '';
+		$gps_accuracy     = isset( $_POST['gps_accuracy'] ) ? SOM_Shop_Meta::sanitize_coordinate( $_POST['gps_accuracy'] ) : '';
+		$merchant_user_id = isset( $_POST['merchant_user_id'] ) ? absint( $_POST['merchant_user_id'] ) : 0;
+		$create_m_account = ! empty( $_POST['create_merchant_account'] );
+		$m_username       = isset( $_POST['merchant_username'] ) ? sanitize_user( wp_unslash( $_POST['merchant_username'] ) ) : '';
+		$m_password       = isset( $_POST['merchant_password'] ) ? $_POST['merchant_password'] : '';
 
 		// Basic validation.
 		if ( empty( $shop_name ) ) {
@@ -190,10 +190,10 @@ class SOM_Form_Handler {
 
 		// Insert CPT post.
 		$post_data = array(
-			'post_title'   => $shop_name,
-			'post_type'    => 'shop',
-			'post_status'  => 'publish',
-			'post_author'  => get_current_user_id(),
+			'post_title'  => $shop_name,
+			'post_type'   => 'shop',
+			'post_status' => 'publish',
+			'post_author' => get_current_user_id(),
 		);
 
 		$post_id = wp_insert_post( $post_data );
@@ -264,24 +264,26 @@ class SOM_Form_Handler {
 	 */
 	public static function render_shortcode() {
 		if ( ! is_user_logged_in() || ! current_user_can( 'edit_posts' ) ) {
+			$staff_login_url = wp_login_url( home_url( '/onboard-shop/' ) );
 			return '<div class="som-onboarding-card" style="text-align:center; padding: 40px 20px;">' .
 				'<h2 style="margin-top:0; color:#0f172a;">🔒 ' . esc_html__( 'Internal Field Team Page', 'shop-onboarding-manager' ) . '</h2>' .
 				'<p style="color:#64748b; margin-bottom:24px;">' . esc_html__( 'Access to this registration form is restricted to authorized NearMart onboarding staff and administrators.', 'shop-onboarding-manager' ) . '</p>' .
 				'<div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">' .
-				'<a href="' . esc_url( home_url( '/join-nearmart/' ) ) . '" class="som-submit-btn som-btn-secondary" style="text-decoration:none; width:auto; padding:12px 24px;">' . esc_html__( 'Are you a shop owner? Learn how to join NearMart →', 'shop-onboarding-manager' ) . '</a>' .
+				'<a href="' . esc_url( $staff_login_url ) . '" class="som-submit-btn som-btn-secondary" style="text-decoration:none; width:auto; padding:12px 24px;">🔑 ' . esc_html__( 'Field Agent Login', 'shop-onboarding-manager' ) . '</a>' .
+				'<a href="' . esc_url( home_url( '/join-nearmart/' ) ) . '" class="som-submit-btn som-btn-outline" style="text-decoration:none; width:auto; padding:12px 24px; color:#475569; border:1px solid #cbd5e1;">' . esc_html__( 'Are you a shop owner? Learn how to join NearMart →', 'shop-onboarding-manager' ) . '</a>' .
 				'</div>' .
 				'</div>';
 		}
 
 		$shop_types = array(
-			'Supermarket'        => __( 'Supermarket', 'shop-onboarding-manager' ),
-			'Grocery'            => __( 'Grocery Store', 'shop-onboarding-manager' ),
-			'Convenience Store'  => __( 'Convenience Store', 'shop-onboarding-manager' ),
-			'Bakery'             => __( 'Bakery', 'shop-onboarding-manager' ),
-			'Butchery'           => __( 'Butchery', 'shop-onboarding-manager' ),
-			'Fruit & Vegetable'  => __( 'Fruit & Vegetable Market', 'shop-onboarding-manager' ),
-			'Specialty Store'    => __( 'Specialty Store', 'shop-onboarding-manager' ),
-			'Other'              => __( 'Other', 'shop-onboarding-manager' ),
+			'Supermarket'       => __( 'Supermarket', 'shop-onboarding-manager' ),
+			'Grocery'           => __( 'Grocery Store', 'shop-onboarding-manager' ),
+			'Convenience Store' => __( 'Convenience Store', 'shop-onboarding-manager' ),
+			'Bakery'            => __( 'Bakery', 'shop-onboarding-manager' ),
+			'Butchery'          => __( 'Butchery', 'shop-onboarding-manager' ),
+			'Fruit & Vegetable' => __( 'Fruit & Vegetable Market', 'shop-onboarding-manager' ),
+			'Specialty Store'   => __( 'Specialty Store', 'shop-onboarding-manager' ),
+			'Other'             => __( 'Other', 'shop-onboarding-manager' ),
 		);
 
 		$statuses = array(
@@ -311,7 +313,7 @@ class SOM_Form_Handler {
 			<!-- Duplicate Warning Banner -->
 			<div id="som_duplicate_warning" class="som-duplicate-banner" style="display: none;">
 				<div class="som-duplicate-header">
-					<span class="som-icon-warning">âš ï¸</span>
+					<span class="som-icon-warning">⚠️</span>
 					<strong><?php esc_html_e( 'Possible Duplicate Detected', 'shop-onboarding-manager' ); ?></strong>
 				</div>
 				<div id="som_duplicate_list" class="som-duplicate-list"></div>
@@ -369,11 +371,11 @@ class SOM_Form_Handler {
 					<div class="som-file-uploader">
 						<input type="file" id="som_f_shop_photo" name="shop_photo" accept="image/*" capture="environment" class="som-file-input" />
 						<label for="som_f_shop_photo" class="som-file-btn">
-							ðŸ“· <?php esc_html_e( 'Take / Upload Photo', 'shop-onboarding-manager' ); ?>
+							📷 <?php esc_html_e( 'Take / Upload Photo', 'shop-onboarding-manager' ); ?>
 						</label>
 						<div id="som_photo_preview_container" class="som-photo-preview" style="display: none;">
 							<img id="som_photo_img" src="" alt="Preview" />
-							<button type="button" id="som_remove_photo" class="som-remove-btn">âœ• Remove</button>
+							<button type="button" id="som_remove_photo" class="som-remove-btn">✖ Remove</button>
 						</div>
 					</div>
 				</div>
@@ -383,7 +385,7 @@ class SOM_Form_Handler {
 					<div class="som-gps-header">
 						<label class="som-label"><?php esc_html_e( 'GPS Location', 'shop-onboarding-manager' ); ?></label>
 						<button type="button" id="som_btn_get_location" class="som-gps-btn">
-							ðŸ“ <?php esc_html_e( 'Capture GPS', 'shop-onboarding-manager' ); ?>
+							📍 <?php esc_html_e( 'Capture GPS', 'shop-onboarding-manager' ); ?>
 						</button>
 					</div>
 					<div id="som_gps_status_msg" class="som-gps-status"></div>
@@ -456,7 +458,7 @@ class SOM_Form_Handler {
 				<!-- Submit Button -->
 				<div class="som-form-actions">
 					<button type="submit" id="som_btn_submit" class="som-submit-btn">
-						ðŸš€ <?php esc_html_e( 'Register Shop', 'shop-onboarding-manager' ); ?>
+						🚀 <?php esc_html_e( 'Register Shop', 'shop-onboarding-manager' ); ?>
 					</button>
 				</div>
 

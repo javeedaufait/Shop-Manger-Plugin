@@ -22,6 +22,19 @@
 	padding-bottom: 16px;
 }
 
+.som-card-header h2 {
+	font-size: 1.6rem;
+	font-weight: 700;
+	color: #0f172a;
+	margin: 0 0 4px 0;
+}
+
+.som-card-header p {
+	font-size: 0.95rem;
+	color: #64748b;
+	margin: 0;
+}
+
 .som-dashboard-header {
 	display: flex;
 	flex-direction: column;
@@ -274,6 +287,119 @@
 	box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
+/* File Upload Component Styling */
+.som-file-uploader {
+	position: relative;
+	display: block;
+	width: 100%;
+}
+
+.som-file-input {
+	position: absolute !important;
+	left: -9999px !important;
+	opacity: 0 !important;
+	width: 0.1px !important;
+	height: 0.1px !important;
+	overflow: hidden !important;
+}
+
+.som-file-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	width: 100%;
+	padding: 12px 18px;
+	background: #f1f5f9;
+	border: 1.5px dashed #94a3b8;
+	border-radius: 8px;
+	color: #334155;
+	font-weight: 600;
+	font-size: 0.95rem;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	text-align: center;
+	min-height: 48px;
+}
+
+.som-file-btn:hover {
+	background: #e2e8f0;
+	border-color: #2563eb;
+	color: #2563eb;
+}
+
+/* GPS Component Styling */
+.som-gps-box {
+	background: #f8fafc;
+	border: 1px solid #e2e8f0;
+	border-radius: 10px;
+	padding: 16px;
+	margin-bottom: 20px;
+}
+
+.som-gps-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 12px;
+}
+
+.som-gps-header .som-label {
+	margin-bottom: 0;
+}
+
+.som-gps-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 16px;
+	background: #2563eb;
+	color: #ffffff;
+	border: none;
+	border-radius: 6px;
+	font-size: 0.875rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background-color 0.2s;
+	min-height: 36px;
+}
+
+.som-gps-btn:hover {
+	background: #1d4ed8;
+}
+
+.som-gps-status {
+	font-size: 0.85rem;
+	margin-bottom: 10px;
+	font-weight: 500;
+}
+
+.som-photo-preview {
+	margin-top: 12px;
+	position: relative;
+	display: inline-block;
+}
+
+.som-photo-preview img {
+	max-width: 100%;
+	max-height: 180px;
+	border-radius: 8px;
+	border: 1px solid #cbd5e1;
+	display: block;
+}
+
+.som-remove-btn {
+	margin-top: 8px;
+	padding: 6px 12px;
+	background: #fee2e2;
+	color: #b91c1c;
+	border: 1px solid #fca5a5;
+	border-radius: 6px;
+	font-size: 0.8rem;
+	font-weight: 600;
+	cursor: pointer;
+}
+
 .som-checkbox-label {
 	display: flex;
 	align-items: center;
@@ -317,74 +443,6 @@
 
 .som-submit-btn.som-btn-outline:hover {
 	background: #f1f5f9;
-}
-
-.som-cr-history {
-	margin-top: 20px;
-	border-top: 1px solid #e2e8f0;
-	padding-top: 16px;
-}
-
-.som-cr-item {
-	background: #ffffff;
-	border: 1px solid #e2e8f0;
-	border-radius: 8px;
-	padding: 12px;
-	margin-bottom: 10px;
-}
-
-.som-cr-head {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	margin-bottom: 4px;
-}
-
-.som-cr-status {
-	font-size: 0.75rem;
-	font-weight: 700;
-	padding: 2px 8px;
-	border-radius: 4px;
-	background: #fef3c7;
-	color: #b45309;
-}
-
-.som-merchant-info {
-	background: #f8fafc;
-	border: 1px solid #e2e8f0;
-	border-radius: 8px;
-	padding: 16px;
-	margin-bottom: 20px;
-}
-
-.som-info-row {
-	display: flex;
-	justify-content: space-between;
-	padding: 8px 0;
-	border-bottom: 1px dashed #e2e8f0;
-	font-size: 0.95rem;
-}
-
-.som-info-row:last-child {
-	border-bottom: none;
-}
-
-.som-btn-logout {
-	display: inline-block;
-	width: 100%;
-	text-align: center;
-	padding: 12px;
-	background: #ef4444;
-	color: #ffffff;
-	text-decoration: none;
-	border-radius: 8px;
-	font-weight: 600;
-	transition: background-color 0.2s;
-}
-
-.som-btn-logout:hover {
-	background: #dc2626;
-	color: #ffffff;
 }
 
 .som-response-msg {
