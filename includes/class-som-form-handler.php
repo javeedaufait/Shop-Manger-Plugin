@@ -264,8 +264,12 @@ class SOM_Form_Handler {
 	 */
 	public static function render_shortcode() {
 		if ( ! is_user_logged_in() || ! current_user_can( 'edit_posts' ) ) {
-			return '<div class="som-form-alert som-alert-error">' .
-				esc_html__( 'Access restricted. Please log in with a field team account to access the shop onboarding form.', 'shop-onboarding-manager' ) .
+			return '<div class="som-onboarding-card" style="text-align:center; padding: 40px 20px;">' .
+				'<h2 style="margin-top:0; color:#0f172a;">🔒 ' . esc_html__( 'Internal Field Team Page', 'shop-onboarding-manager' ) . '</h2>' .
+				'<p style="color:#64748b; margin-bottom:24px;">' . esc_html__( 'Access to this registration form is restricted to authorized NearMart onboarding staff and administrators.', 'shop-onboarding-manager' ) . '</p>' .
+				'<div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">' .
+				'<a href="' . esc_url( home_url( '/join-nearmart/' ) ) . '" class="som-submit-btn som-btn-secondary" style="text-decoration:none; width:auto; padding:12px 24px;">' . esc_html__( 'Are you a shop owner? Learn how to join NearMart →', 'shop-onboarding-manager' ) . '</a>' .
+				'</div>' .
 				'</div>';
 		}
 
@@ -307,7 +311,7 @@ class SOM_Form_Handler {
 			<!-- Duplicate Warning Banner -->
 			<div id="som_duplicate_warning" class="som-duplicate-banner" style="display: none;">
 				<div class="som-duplicate-header">
-					<span class="som-icon-warning">⚠️</span>
+					<span class="som-icon-warning">âš ï¸</span>
 					<strong><?php esc_html_e( 'Possible Duplicate Detected', 'shop-onboarding-manager' ); ?></strong>
 				</div>
 				<div id="som_duplicate_list" class="som-duplicate-list"></div>
@@ -365,11 +369,11 @@ class SOM_Form_Handler {
 					<div class="som-file-uploader">
 						<input type="file" id="som_f_shop_photo" name="shop_photo" accept="image/*" capture="environment" class="som-file-input" />
 						<label for="som_f_shop_photo" class="som-file-btn">
-							📷 <?php esc_html_e( 'Take / Upload Photo', 'shop-onboarding-manager' ); ?>
+							ðŸ“· <?php esc_html_e( 'Take / Upload Photo', 'shop-onboarding-manager' ); ?>
 						</label>
 						<div id="som_photo_preview_container" class="som-photo-preview" style="display: none;">
 							<img id="som_photo_img" src="" alt="Preview" />
-							<button type="button" id="som_remove_photo" class="som-remove-btn">✕ Remove</button>
+							<button type="button" id="som_remove_photo" class="som-remove-btn">âœ• Remove</button>
 						</div>
 					</div>
 				</div>
@@ -379,7 +383,7 @@ class SOM_Form_Handler {
 					<div class="som-gps-header">
 						<label class="som-label"><?php esc_html_e( 'GPS Location', 'shop-onboarding-manager' ); ?></label>
 						<button type="button" id="som_btn_get_location" class="som-gps-btn">
-							📍 <?php esc_html_e( 'Capture GPS', 'shop-onboarding-manager' ); ?>
+							ðŸ“ <?php esc_html_e( 'Capture GPS', 'shop-onboarding-manager' ); ?>
 						</button>
 					</div>
 					<div id="som_gps_status_msg" class="som-gps-status"></div>
@@ -452,7 +456,7 @@ class SOM_Form_Handler {
 				<!-- Submit Button -->
 				<div class="som-form-actions">
 					<button type="submit" id="som_btn_submit" class="som-submit-btn">
-						🚀 <?php esc_html_e( 'Register Shop', 'shop-onboarding-manager' ); ?>
+						ðŸš€ <?php esc_html_e( 'Register Shop', 'shop-onboarding-manager' ); ?>
 					</button>
 				</div>
 

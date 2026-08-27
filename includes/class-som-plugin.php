@@ -72,6 +72,7 @@ class SOM_Plugin {
 		self::create_onboarding_page();
 		self::create_merchant_login_page();
 		self::create_merchant_dashboard_page();
+		self::create_join_nearmart_page();
 
 		// Flush rewrite rules.
 		flush_rewrite_rules();
@@ -126,6 +127,25 @@ class SOM_Plugin {
 					'post_title'     => 'Merchant Dashboard',
 					'post_name'      => 'merchant-dashboard',
 					'post_content'   => '[som_merchant_dashboard]',
+					'post_status'    => 'publish',
+					'post_type'      => 'page',
+					'comment_status' => 'closed',
+				)
+			);
+		}
+	}
+
+	/**
+	 * Ensure the /join-nearmart/ page exists with [som_join_nearmart_page] shortcode.
+	 */
+	public static function create_join_nearmart_page() {
+		$page = get_page_by_path( 'join-nearmart' );
+		if ( ! $page ) {
+			wp_insert_post(
+				array(
+					'post_title'     => 'Join NearMart as a Partner Shop',
+					'post_name'      => 'join-nearmart',
+					'post_content'   => '[som_join_nearmart_page]',
 					'post_status'    => 'publish',
 					'post_type'      => 'page',
 					'comment_status' => 'closed',

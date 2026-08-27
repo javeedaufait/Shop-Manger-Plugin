@@ -19,6 +19,7 @@ class SOM_Merchant_Manager {
 	 */
 	public static function init() {
 		add_shortcode( 'som_merchant_login', array( __CLASS__, 'render_login_shortcode' ) );
+		add_shortcode( 'som_join_nearmart_page', array( __CLASS__, 'render_join_shortcode' ) );
 
 		// AJAX endpoints for login & account creation.
 		add_action( 'wp_ajax_nopriv_som_merchant_login', array( __CLASS__, 'ajax_merchant_login' ) );
@@ -224,6 +225,71 @@ class SOM_Merchant_Manager {
 				'user_id' => $result,
 			)
 		);
+	}
+
+	/**
+	 * Render [som_join_nearmart_page] public shopkeeper info shortcode.
+	 *
+	 * @return string HTML content.
+	 */
+	public static function render_join_shortcode() {
+		ob_start();
+		?>
+		<div class="nm-join-page-wrap" style="max-width: 840px; margin: 20px auto; font-family: var(--font-main, sans-serif);">
+			<div class="nm-join-hero-card" style="background: linear-gradient(135deg, #15803D 0%, #16A34A 100%); color: #ffffff; padding: 40px 24px; border-radius: 16px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.08);">
+				<span style="background: rgba(255,255,255,0.2); color:#ffffff; padding: 4px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display:inline-block; margin-bottom:12px;">
+					<?php esc_html_e( 'For Shop Owners', 'shop-onboarding-manager' ); ?>
+				</span>
+				<h1 style="color: #ffffff; font-size: 2.4rem; font-weight: 800; margin: 0 0 14px 0; line-height: 1.2;">
+					<?php esc_html_e( 'Join NearMart as a Partner Shop', 'shop-onboarding-manager' ); ?>
+				</h1>
+				<p style="color: rgba(255,255,255,0.92); font-size: 1.15rem; max-width: 640px; margin: 0 auto; line-height: 1.6;">
+					<?php esc_html_e( 'NearMart connects local supermarkets and grocery stores directly with nearby neighborhood customers for convenient, queue-free pickup.', 'shop-onboarding-manager' ); ?>
+				</p>
+			</div>
+
+			<div class="nm-join-benefits-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin: 36px 0;">
+				<div style="background: #ffffff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
+					<div style="font-size: 2.2rem; margin-bottom: 12px;">👥</div>
+					<h3 style="font-size: 1.15rem; margin: 0 0 6px 0; color: #172033;"><?php esc_html_e( 'Reach Nearby Customers', 'shop-onboarding-manager' ); ?></h3>
+					<p style="font-size: 0.95rem; color: #64748B; margin: 0; line-height: 1.5;"><?php esc_html_e( 'Get discovered by local shoppers living right in your neighborhood.', 'shop-onboarding-manager' ); ?></p>
+				</div>
+
+				<div style="background: #ffffff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
+					<div style="font-size: 2.2rem; margin-bottom: 12px;">📲</div>
+					<h3 style="font-size: 1.15rem; margin: 0 0 6px 0; color: #172033;"><?php esc_html_e( 'Get Orders Through NearMart', 'shop-onboarding-manager' ); ?></h3>
+					<p style="font-size: 0.95rem; color: #64748B; margin: 0; line-height: 1.5;"><?php esc_html_e( 'Receive advance grocery orders so you can pack items ahead of time.', 'shop-onboarding-manager' ); ?></p>
+				</div>
+
+				<div style="background: #ffffff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
+					<div style="font-size: 2.2rem; margin-bottom: 12px;">🚀</div>
+					<h3 style="font-size: 1.15rem; margin: 0 0 6px 0; color: #172033;"><?php esc_html_e( 'No Setup Fee', 'shop-onboarding-manager' ); ?></h3>
+					<p style="font-size: 0.95rem; color: #64748B; margin: 0; line-height: 1.5;"><?php esc_html_e( 'Free to join during our initial launch for early partner stores.', 'shop-onboarding-manager' ); ?></p>
+				</div>
+
+				<div style="background: #ffffff; border: 1px solid #E2E8F0; border-radius: 12px; padding: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
+					<div style="font-size: 2.2rem; margin-bottom: 12px;">💻</div>
+					<h3 style="font-size: 1.15rem; margin: 0 0 6px 0; color: #172033;"><?php esc_html_e( 'Easy Merchant Portal', 'shop-onboarding-manager' ); ?></h3>
+					<p style="font-size: 0.95rem; color: #64748B; margin: 0; line-height: 1.5;"><?php esc_html_e( 'Simple mobile-friendly dashboard to confirm details and agreements.', 'shop-onboarding-manager' ); ?></p>
+				</div>
+			</div>
+
+			<div class="nm-join-contact-card" style="background: #ffffff; border: 2px solid #16A34A; border-radius: 16px; padding: 36px 24px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+				<h2 style="font-size: 1.8rem; font-weight: 800; margin: 0 0 10px 0; color: #172033;"><?php esc_html_e( 'Interested? Contact Our Team', 'shop-onboarding-manager' ); ?></h2>
+				<p style="font-size: 1.05rem; color: #64748B; margin: 0 0 24px 0;"><?php esc_html_e( 'Our field team will visit your shop to set up your partner account.', 'shop-onboarding-manager' ); ?></p>
+
+				<div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
+					<a href="https://wa.me/919123456789?text=Hello%20NearMart%20Team%2C%20I%20am%20a%20shopkeeper%20interested%20in%20joining%20NearMart." target="_blank" style="background: #25D366; color: #ffffff; text-decoration: none; padding: 14px 24px; border-radius: 10px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; font-size: 1rem;">
+						💬 <?php esc_html_e( 'Chat on WhatsApp (+91 91234 56789)', 'shop-onboarding-manager' ); ?>
+					</a>
+					<a href="mailto:support@nearmart.local" style="background: #2563EB; color: #ffffff; text-decoration: none; padding: 14px 24px; border-radius: 10px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; font-size: 1rem;">
+						✉️ <?php esc_html_e( 'Email Support (support@nearmart.local)', 'shop-onboarding-manager' ); ?>
+					</a>
+				</div>
+			</div>
+		</div>
+		<?php
+		return ob_get_clean();
 	}
 
 	/**
