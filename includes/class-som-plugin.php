@@ -1,0 +1,143 @@
+<?php
+/**
+ * Core Plugin Initialization Class.
+ *
+ * @package Shop_Onboarding_Manager
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * Class SOM_Plugin
+ */
+class SOM_Plugin {
+
+	/**
+	 * Single instance of the class.
+	 *
+	 * @var SOM_Plugin|null
+	 */
+	private static $instance = null;
+
+	/**
+	 * Get single instance of the class.
+	 *
+	 * @return SOM_Plugin
+	 */
+	public static function instance() {
+		if ( is_null( self::$instance ) ) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
+
+	/**
+	 * Constructor.
+	 */
+	private function __construct() {
+		$this->init_hooks();
+	}
+
+	/**
+	 * Register actions and hooks.
+	 */
+	private function init_hooks() {
+		SOM_Post_Types::init();
+		SOM_Taxonomies::init();
+		SOM_Roles::init();
+		SOM_Shop_Meta::init();
+		SOM_Merchant_Manager::init();
+		SOM_Merchant_Dashboard::init();
+		SOM_Form_Handler::init();
+		SOM_Admin_Manager::init();
+	}
+
+	/**
+	 * Plugin activation logic.
+	 */
+	public static function activate() {
+		// Register CPT and Taxonomies so rewrites and terms work immediately.
+		SOM_Post_Types::register_post_types();
+		SOM_Taxonomies::register_taxonomies();
+
+		// Seed default taxonomy terms.
+		SOM_Taxonomies::seed_default_statuses();
+
+		// Add merchant custom role.
+		SOM_Roles::register_roles();
+
+		// Auto-create pages if they do not exist.
+		self::create_onboarding_page();
+		self::create_merchant_login_page();
+		self::create_merchant_dashboard_page();
+
+		// Flush rewrite rules.
+		flush_rewrite_rules();
+	}
+
+	/**
+	 * Ensure the /onboard-shop/ page exists with [som_onboarding_form] shortcode.
+	 */
+	public static function create_onboarding_page() {
+		$page = get_page_by_path( 'onboard-shop' );
+		if ( ! $page ) {
+			wp_insert_post(
+				array(
+					'post_title'     => 'Onboard Shop',
+					'post_name'      => 'onboard-shop',
+					'post_content'   => '[som_onboarding_form]',
+					'post_status'    => 'publish',
+					'post_type'      => 'page',
+					'comment_status' => 'closed',
+				)
+			);
+		}
+	}
+
+	/**
+	 * Ensure the /merchant-login/ page exists with [som_merchant_login] shortcode.
+	 */
+	public static function create_merchant_login_page() {
+		$page = get_page_by_path( 'merchant-login' );
+		if ( ! $page ) {
+			wp_insert_post(
+				array(
+					'post_title'     => 'Merchant Login',
+					'post_name'      => 'merchant-login',
+					'post_content'   => '[som_merchant_login]',
+					'post_status'    => 'publish',
+					'post_type'      => 'page',
+					'comment_status' => 'closed',
+				)
+			);
+		}
+	}
+
+	/**
+	 * Ensure the /merchant-dashboard/ page exists with [som_merchant_dashboard] shortcode.
+	 */
+	public static function create_merchant_dashboard_page() {
+		$page = get_page_by_path( 'merchant-dashboard' );
+		if ( ! $page ) {
+			wp_insert_post(
+				array(
+					'post_title'     => 'Merchant Dashboard',
+					'post_name'      => 'merchant-dashboard',
+					'post_content'   => '[som_merchant_dashboard]',
+					'post_status'    => 'publish',
+					'post_type'      => 'page',
+					'comment_status' => 'closed',
+				)
+			);
+		}
+	}
+
+	/**
+	 * Plugin deactivation logic.
+	 */
+	public static function deactivate() {
+		flush_rewrite_rules();
+	}
+}
