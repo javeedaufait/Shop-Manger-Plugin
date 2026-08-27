@@ -11,18 +11,17 @@
 		var $msg = $('#som_form_message');
 		var debounceTimer = null;
 
-		// Check if protocol is HTTP on custom domain
 		var isSecure = window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
 		// 1. GPS Geolocation Handler
 		$('#som_btn_get_location').on('click', function(e) {
 			e.preventDefault();
 			if (!navigator.geolocation) {
-				showGpsStatus(somConfig.i18n.locationError, 'error');
+				showGpsStatus('⚠️ ' + somConfig.i18n.locationError, 'error');
 				return;
 			}
 
-			showGpsStatus(somConfig.i18n.locationFetching, 'info');
+			showGpsStatus('🔄 ' + somConfig.i18n.locationFetching, 'info');
 
 			navigator.geolocation.getCurrentPosition(
 				function(position) {
@@ -34,14 +33,14 @@
 					$('#som_f_longitude').val(lng.toFixed(6));
 					$('#som_f_gps_accuracy').val(acc.toFixed(1));
 
-					showGpsStatus(somConfig.i18n.locationSuccess + ' (' + acc.toFixed(1) + 'm)', 'success');
+					showGpsStatus('✅ ' + somConfig.i18n.locationSuccess + ' (' + acc.toFixed(1) + 'm)', 'success');
 				},
 				function(err) {
 					var errMsg = err.message || '';
 					if (errMsg.indexOf('secure origins') !== -1 || !isSecure) {
 						showGpsStatus('⚠️ Browser GPS auto-capture requires HTTPS or localhost on domain "nearmart.local". You can type or paste Latitude & Longitude directly into the fields below.', 'info');
 					} else {
-						showGpsStatus(somConfig.i18n.locationError + ' (' + errMsg + ')', 'error');
+						showGpsStatus('⚠️ ' + somConfig.i18n.locationError + ' (' + errMsg + ')', 'error');
 					}
 				},
 				{
@@ -107,10 +106,10 @@
 						var html = '';
 						$.each(response.data.matches, function(idx, match) {
 							html += '<div class="som-duplicate-item">';
-							html += '<strong>' + escapeHtml(match.title) + '</strong> ';
-							if (match.owner) html += ' - Owner: ' + escapeHtml(match.owner);
-							if (match.phone) html += ' - Phone: ' + escapeHtml(match.phone);
-							html += ' <em>(' + escapeHtml(match.reason) + ')</em>';
+							html += '<strong>🏪 ' + escapeHtml(match.title) + '</strong>';
+							if (match.owner) html += ' &bull; Owner: <strong>' + escapeHtml(match.owner) + '</strong>';
+							if (match.phone) html += ' &bull; Phone: <strong>' + escapeHtml(match.phone) + '</strong>';
+							html += ' <em class="som-dup-reason">(' + escapeHtml(match.reason) + ')</em>';
 							html += '</div>';
 						});
 						$dupList.html(html);

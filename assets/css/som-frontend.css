@@ -223,6 +223,7 @@
 	margin-top: 14px;
 }
 
+/* Form Controls */
 .som-form-group {
 	margin-bottom: 18px;
 }
@@ -287,6 +288,61 @@
 	box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
+/* Duplicate Warning Banner Styling */
+.som-duplicate-banner {
+	background: #fffbe6;
+	border: 1.5px solid #fde047;
+	border-left: 5px solid #f59e0b;
+	border-radius: 10px;
+	padding: 16px 20px;
+	margin-bottom: 24px;
+	box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.08);
+}
+
+.som-duplicate-header {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 1rem;
+	font-weight: 700;
+	color: #92400e;
+	margin-bottom: 10px;
+}
+
+.som-duplicate-list {
+	margin-bottom: 10px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.som-duplicate-item {
+	background: #ffffff;
+	border: 1px solid #fef08a;
+	border-radius: 8px;
+	padding: 10px 14px;
+	font-size: 0.9rem;
+	color: #78350f;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.som-duplicate-item strong {
+	color: #451a03;
+}
+
+.som-duplicate-item em {
+	color: #d97706;
+	font-style: italic;
+	font-size: 0.85rem;
+}
+
+.som-duplicate-note {
+	font-size: 0.85rem;
+	color: #b45309;
+	margin: 0;
+	font-style: italic;
+}
+
 /* File Upload Component Styling */
 .som-file-uploader {
 	position: relative;
@@ -328,7 +384,7 @@
 	color: #2563eb;
 }
 
-/* GPS Component Styling */
+/* GPS Component & Status Alert Styling */
 .som-gps-box {
 	background: #f8fafc;
 	border: 1px solid #e2e8f0;
@@ -369,9 +425,34 @@
 }
 
 .som-gps-status {
-	font-size: 0.85rem;
-	margin-bottom: 10px;
+	font-size: 0.9rem;
 	font-weight: 500;
+	padding: 12px 16px;
+	border-radius: 8px;
+	margin-bottom: 14px;
+	line-height: 1.5;
+	display: none;
+}
+
+.som-gps-status.info {
+	background: #eff6ff;
+	border: 1px solid #bfdbfe;
+	border-left: 4px solid #2563eb;
+	color: #1e40af;
+}
+
+.som-gps-status.error {
+	background: #fef2f2;
+	border: 1px solid #fecaca;
+	border-left: 4px solid #ef4444;
+	color: #991b1b;
+}
+
+.som-gps-status.success {
+	background: #ecfdf5;
+	border: 1px solid #a7f3d0;
+	border-left: 4px solid #10b981;
+	color: #065f46;
 }
 
 .som-photo-preview {
