@@ -53,6 +53,7 @@ class SOM_Plugin {
 		SOM_Merchant_Catalog::init();
 		SOM_Form_Handler::init();
 		SOM_Admin_Manager::init();
+		SOM_Admin_Catalog::init();
 		SOM_Catalog_Repository::init();
 		SOM_Master_Product::init();
 		SOM_Catalog_Permissions::init();
