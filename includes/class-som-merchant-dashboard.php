@@ -30,7 +30,7 @@ class SOM_Merchant_Dashboard {
 		add_action( 'wp_ajax_som_merchant_accept_agreement', array( __CLASS__, 'ajax_accept_agreement' ) );
 		add_action( 'wp_ajax_som_merchant_request_change', array( __CLASS__, 'ajax_request_change' ) );
 
-		// AJAX endpoints for catalog management.
+		// AJAX endpoints for catalog management (shared APIs).
 		add_action( 'wp_ajax_som_merchant_get_catalog', array( __CLASS__, 'ajax_get_catalog' ) );
 		add_action( 'wp_ajax_som_merchant_search_master_products', array( __CLASS__, 'ajax_search_master_products' ) );
 		add_action( 'wp_ajax_som_merchant_add_catalog_product', array( __CLASS__, 'ajax_add_catalog_product' ) );
@@ -470,6 +470,10 @@ class SOM_Merchant_Dashboard {
 		$agreement_accepted = (bool) get_post_meta( $shop_id, 'som_agreement_accepted', true );
 		$agreement_at       = get_post_meta( $shop_id, 'som_agreement_accepted_at', true );
 
+		// Catalog Summary Metrics.
+		$catalog_summary = nearmart_get_shop_catalog_summary( $shop_id );
+		$catalog_url     = home_url( '/merchant-catalog/' );
+
 		$change_requests = get_post_meta( $shop_id, 'som_change_requests', true );
 		if ( ! is_array( $change_requests ) ) {
 			$change_requests = array();
@@ -480,8 +484,15 @@ class SOM_Merchant_Dashboard {
 		ob_start();
 		?>
 		<div class="som-merchant-dashboard-wrap">
+			<!-- Portal Navigation Header -->
+			<?php
+			if ( class_exists( 'SOM_Merchant_Catalog' ) ) {
+				echo SOM_Merchant_Catalog::render_portal_nav( 'dashboard' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			}
+			?>
+
 			<!-- Dashboard Header -->
-			<div class="som-dashboard-header">
+			<div class="som-dashboard-header" style="margin-top: 16px;">
 				<div class="som-header-title">
 					<h2>&#127978; <?php echo esc_html( $shop_name ); ?></h2>
 					<p><?php esc_html_e( 'Merchant Management Portal', 'shop-onboarding-manager' ); ?></p>
@@ -598,67 +609,42 @@ class SOM_Merchant_Dashboard {
 					</div>
 				</div>
 
-				<!-- Card 3: Full Width - My Catalog Section -->
+				<!-- Card 3: Full Width - Compact My Shop Catalog Summary Widget -->
 				<div class="som-dash-card full-width" style="grid-column: 1 / -1;">
-					<div class="som-catalog-header">
+					<div class="som-catalog-header" style="border-bottom: 1px solid #e2e8f0; padding-bottom: 14px; margin-bottom: 20px;">
 						<div>
-							<h3 style="border:none; margin:0; padding:0;">&#128722; <?php esc_html_e( 'My Shop Catalog', 'shop-onboarding-manager' ); ?></h3>
-							<p style="font-size: 0.9rem; color: #64748b; margin: 4px 0 0 0;"><?php esc_html_e( 'Manage prices, stock availability, and items listed for your store.', 'shop-onboarding-manager' ); ?></p>
+							<h3 style="border:none; margin:0; padding:0;">&#128722; <?php esc_html_e( 'My Shop Catalog Summary', 'shop-onboarding-manager' ); ?></h3>
+							<p style="font-size: 0.9rem; color: #64748b; margin: 4px 0 0 0;"><?php esc_html_e( 'Quick overview of items, active listings, and stock availability.', 'shop-onboarding-manager' ); ?></p>
 						</div>
-						<button type="button" id="som_btn_open_add_modal" class="som-submit-btn" style="width: auto; padding: 10px 18px; min-height: 40px;">
-							&#10133; <?php esc_html_e( 'Add Product to Catalog', 'shop-onboarding-manager' ); ?>
-						</button>
+						<a href="<?php echo esc_url( $catalog_url ); ?>" class="som-submit-btn" style="width: auto; padding: 10px 20px; min-height: 42px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+							<?php esc_html_e( 'Manage Catalog &rarr;', 'shop-onboarding-manager' ); ?>
+						</a>
 					</div>
 
-					<!-- Search & Filter Bar -->
-					<div class="som-catalog-bar">
-						<div class="som-catalog-search-wrap">
-							<input type="text" id="som_cat_search" class="som-input" placeholder="Search catalog items by name or SKU..." />
+					<!-- Summary Stat Grid (3 Metric Cards) -->
+					<div class="som-cat-summary-grid">
+						<div class="som-summary-card">
+							<div class="som-summary-icon">&#128230;</div>
+							<div class="som-summary-info">
+								<span class="som-summary-val"><?php echo esc_html( $catalog_summary['total'] ); ?></span>
+								<span class="som-summary-lbl"><?php esc_html_e( 'Total Products', 'shop-onboarding-manager' ); ?></span>
+							</div>
 						</div>
-						<div class="som-catalog-filters">
-							<select id="som_cat_status_filter" class="som-select" style="min-height: 44px;">
-								<option value="all"><?php esc_html_e( 'All Statuses', 'shop-onboarding-manager' ); ?></option>
-								<option value="active"><?php esc_html_e( 'Active', 'shop-onboarding-manager' ); ?></option>
-								<option value="inactive"><?php esc_html_e( 'Inactive', 'shop-onboarding-manager' ); ?></option>
-							</select>
-							<select id="som_cat_stock_filter" class="som-select" style="min-height: 44px;">
-								<option value="all"><?php esc_html_e( 'All Stock', 'shop-onboarding-manager' ); ?></option>
-								<option value="instock"><?php esc_html_e( 'In Stock', 'shop-onboarding-manager' ); ?></option>
-								<option value="outofstock"><?php esc_html_e( 'Out of Stock', 'shop-onboarding-manager' ); ?></option>
-							</select>
+
+						<div class="som-summary-card success">
+							<div class="som-summary-icon">&#10003;</div>
+							<div class="som-summary-info">
+								<span class="som-summary-val"><?php echo esc_html( $catalog_summary['active'] ); ?></span>
+								<span class="som-summary-lbl"><?php esc_html_e( 'Active Listings', 'shop-onboarding-manager' ); ?></span>
+							</div>
 						</div>
-					</div>
 
-					<!-- Catalog Table -->
-					<div class="som-catalog-table-wrap">
-						<table class="som-catalog-table">
-							<thead>
-								<tr>
-									<th style="width: 60px;"><?php esc_html_e( 'Image', 'shop-onboarding-manager' ); ?></th>
-									<th><?php esc_html_e( 'Product Name & Specs', 'shop-onboarding-manager' ); ?></th>
-									<th><?php esc_html_e( 'Category', 'shop-onboarding-manager' ); ?></th>
-									<th><?php esc_html_e( 'Shop Price', 'shop-onboarding-manager' ); ?></th>
-									<th><?php esc_html_e( 'Stock Status', 'shop-onboarding-manager' ); ?></th>
-									<th><?php esc_html_e( 'Status', 'shop-onboarding-manager' ); ?></th>
-									<th style="width: 120px; text-align: right;"><?php esc_html_e( 'Actions', 'shop-onboarding-manager' ); ?></th>
-								</tr>
-							</thead>
-							<tbody id="som_catalog_tbody">
-								<tr>
-									<td colspan="7" style="text-align: center; padding: 24px; color: #64748b;">
-										&#128259; <?php esc_html_e( 'Loading catalog items...', 'shop-onboarding-manager' ); ?>
-									</td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
-
-					<!-- Pagination Bar -->
-					<div class="som-catalog-pagination">
-						<span id="som_catalog_info">Showing 0 items</span>
-						<div class="som-pagination-btns">
-							<button type="button" id="som_cat_prev_btn" class="som-btn-icon" disabled>&larr; Previous</button>
-							<button type="button" id="som_cat_next_btn" class="som-btn-icon" disabled>Next &rarr;</button>
+						<div class="som-summary-card warning">
+							<div class="som-summary-icon">&#9888;</div>
+							<div class="som-summary-info">
+								<span class="som-summary-val"><?php echo esc_html( $catalog_summary['outofstock'] ); ?></span>
+								<span class="som-summary-lbl"><?php esc_html_e( 'Out of Stock', 'shop-onboarding-manager' ); ?></span>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -668,128 +654,12 @@ class SOM_Merchant_Dashboard {
 			<div id="som_dash_msg" class="som-response-msg"></div>
 		</div>
 
-		<!-- MODAL 1: Add Product Modal -->
-		<div id="som_add_product_modal" class="som-modal-overlay" style="display: none;">
-			<div class="som-modal-content">
-				<div class="som-modal-header">
-					<h3>&#10133; <?php esc_html_e( 'Add Master Product to Catalog', 'shop-onboarding-manager' ); ?></h3>
-					<button type="button" class="som-modal-close" onclick="document.getElementById('som_add_product_modal').style.display='none';">&times;</button>
-				</div>
-
-				<div class="som-form-group">
-					<label for="som_master_search" class="som-label"><?php esc_html_e( '1. Search Master Product', 'shop-onboarding-manager' ); ?></label>
-					<input type="text" id="som_master_search" class="som-input" placeholder="<?php esc_attr_e( 'Type product name (e.g. Milk, Rice, Sugar)...', 'shop-onboarding-manager' ); ?>" />
-					<div id="som_master_results" class="som-master-search-results"></div>
-				</div>
-
-				<form id="som_form_add_catalog_product" style="display: none; border-top: 1px solid #e2e8f0; padding-top: 16px;">
-					<input type="hidden" id="som_add_product_id" name="product_id" value="" />
-					<p style="font-weight: 700; color: #16a34a; margin-bottom: 12px;" id="som_add_selected_title"></p>
-
-					<div class="som-form-row">
-						<div class="som-form-group">
-							<label for="som_add_price" class="som-label required"><?php esc_html_e( 'Shop Price (₹)', 'shop-onboarding-manager' ); ?></label>
-							<input type="number" step="0.01" id="som_add_price" name="price" class="som-input" required placeholder="0.00" />
-						</div>
-						<div class="som-form-group">
-							<label for="som_add_sale_price" class="som-label"><?php esc_html_e( 'Sale Price (₹)', 'shop-onboarding-manager' ); ?></label>
-							<input type="number" step="0.01" id="som_add_sale_price" name="sale_price" class="som-input" placeholder="Optional" />
-						</div>
-					</div>
-
-					<div class="som-form-row">
-						<div class="som-form-group">
-							<label for="som_add_stock_status" class="som-label"><?php esc_html_e( 'Stock Status', 'shop-onboarding-manager' ); ?></label>
-							<select id="som_add_stock_status" name="stock_status" class="som-select">
-								<option value="instock"><?php esc_html_e( 'In Stock', 'shop-onboarding-manager' ); ?></option>
-								<option value="outofstock"><?php esc_html_e( 'Out of Stock', 'shop-onboarding-manager' ); ?></option>
-							</select>
-						</div>
-						<div class="som-form-group">
-							<label for="som_add_stock_quantity" class="som-label"><?php esc_html_e( 'Stock Qty', 'shop-onboarding-manager' ); ?></label>
-							<input type="number" id="som_add_stock_quantity" name="stock_quantity" class="som-input" placeholder="Optional" />
-						</div>
-					</div>
-
-					<div class="som-form-group">
-						<label for="som_add_status" class="som-label"><?php esc_html_e( 'Listing Status', 'shop-onboarding-manager' ); ?></label>
-						<select id="som_add_status" name="status" class="som-select">
-							<option value="active"><?php esc_html_e( 'Active (Visible to customers)', 'shop-onboarding-manager' ); ?></option>
-							<option value="inactive"><?php esc_html_e( 'Inactive (Hidden)', 'shop-onboarding-manager' ); ?></option>
-						</select>
-					</div>
-
-					<button type="submit" id="som_btn_save_add" class="som-submit-btn">
-						&#128190; <?php esc_html_e( 'Save to My Catalog', 'shop-onboarding-manager' ); ?>
-					</button>
-				</form>
-			</div>
-		</div>
-
-		<!-- MODAL 2: Edit Catalog Product Modal -->
-		<div id="som_edit_product_modal" class="som-modal-overlay" style="display: none;">
-			<div class="som-modal-content">
-				<div class="som-modal-header">
-					<h3>&#9998; <?php esc_html_e( 'Edit Catalog Product', 'shop-onboarding-manager' ); ?></h3>
-					<button type="button" class="som-modal-close" onclick="document.getElementById('som_edit_product_modal').style.display='none';">&times;</button>
-				</div>
-
-				<form id="som_form_edit_catalog_product">
-					<input type="hidden" id="som_edit_product_id" name="product_id" value="" />
-					<p style="font-weight: 700; color: #0f172a; margin-bottom: 14px; font-size: 1.05rem;" id="som_edit_selected_title"></p>
-
-					<div class="som-form-row">
-						<div class="som-form-group">
-							<label for="som_edit_price" class="som-label required"><?php esc_html_e( 'Shop Price (₹)', 'shop-onboarding-manager' ); ?></label>
-							<input type="number" step="0.01" id="som_edit_price" name="price" class="som-input" required />
-						</div>
-						<div class="som-form-group">
-							<label for="som_edit_sale_price" class="som-label"><?php esc_html_e( 'Sale Price (₹)', 'shop-onboarding-manager' ); ?></label>
-							<input type="number" step="0.01" id="som_edit_sale_price" name="sale_price" class="som-input" placeholder="Optional" />
-						</div>
-					</div>
-
-					<div class="som-form-row">
-						<div class="som-form-group">
-							<label for="som_edit_stock_status" class="som-label"><?php esc_html_e( 'Stock Status', 'shop-onboarding-manager' ); ?></label>
-							<select id="som_edit_stock_status" name="stock_status" class="som-select">
-								<option value="instock"><?php esc_html_e( 'In Stock', 'shop-onboarding-manager' ); ?></option>
-								<option value="outofstock"><?php esc_html_e( 'Out of Stock', 'shop-onboarding-manager' ); ?></option>
-							</select>
-						</div>
-						<div class="som-form-group">
-							<label for="som_edit_stock_quantity" class="som-label"><?php esc_html_e( 'Stock Qty', 'shop-onboarding-manager' ); ?></label>
-							<input type="number" id="som_edit_stock_quantity" name="stock_quantity" class="som-input" placeholder="Optional" />
-						</div>
-					</div>
-
-					<div class="som-form-group">
-						<label for="som_edit_status" class="som-label"><?php esc_html_e( 'Listing Status', 'shop-onboarding-manager' ); ?></label>
-						<select id="som_edit_status" name="status" class="som-select">
-							<option value="active"><?php esc_html_e( 'Active', 'shop-onboarding-manager' ); ?></option>
-							<option value="inactive"><?php esc_html_e( 'Inactive', 'shop-onboarding-manager' ); ?></option>
-						</select>
-					</div>
-
-					<button type="submit" id="som_btn_save_edit" class="som-submit-btn">
-						&#128190; <?php esc_html_e( 'Update Product', 'shop-onboarding-manager' ); ?>
-					</button>
-				</form>
-			</div>
-		</div>
-
 		<!-- Dashboard Inline JavaScript Handler -->
 		<script>
 		if (typeof jQuery !== 'undefined') {
 			jQuery(document).ready(function($) {
 				var nonce = '<?php echo esc_js( $nonce ); ?>';
 				var ajaxUrl = '<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>';
-				var currentPage = 1;
-
-				// Helper escape function
-				function escapeHtml(str) {
-					return str ? $('<div>').text(str).html() : '';
-				}
 
 				// 1. Confirm Details Button
 				$('#som_btn_confirm_details').on('click', function() {
@@ -854,271 +724,6 @@ class SOM_Merchant_Dashboard {
 								$('#som_form_change_request')[0].reset();
 							} else {
 								alert(res.data.message);
-							}
-						}
-					});
-				});
-
-				// 4. Catalog Management Logic
-				function loadCatalog(page) {
-					currentPage = page || 1;
-					var $tbody = $('#som_catalog_tbody');
-					$tbody.html('<tr><td colspan="7" style="text-align:center; padding: 20px; color:#64748b;">&#128259; Loading catalog...</td></tr>');
-
-					$.ajax({
-						url: ajaxUrl,
-						type: 'POST',
-						data: {
-							action: 'som_merchant_get_catalog',
-							nonce: nonce,
-							search: $('#som_cat_search').val(),
-							status: $('#som_cat_status_filter').val(),
-							stock_status: $('#som_cat_stock_filter').val(),
-							page: currentPage
-						},
-						success: function(res) {
-							if (res.success) {
-								var items = res.data.items;
-								if (!items || items.length === 0) {
-									$tbody.html('<tr><td colspan="7" style="text-align:center; padding: 24px; color:#64748b;">No products in your catalog yet. Click <strong>"Add Product to Catalog"</strong> to add items!</td></tr>');
-									$('#som_catalog_info').text('Showing 0 items');
-									$('#som_cat_prev_btn, #som_cat_next_btn').prop('disabled', true);
-									return;
-								}
-
-								var html = '';
-								$.each(items, function(i, item) {
-									html += '<tr data-product-id="' + item.product_id + '">';
-									html += '<td><div class="som-cat-thumb-box">';
-									if (item.thumb_url) {
-										html += '<img src="' + item.thumb_url + '" alt="' + escapeHtml(item.title) + '" />';
-									} else {
-										html += '<span class="som-cat-placeholder">&#128230;</span>';
-									}
-									html += '</div></td>';
-
-									html += '<td class="som-cat-product-info">';
-									html += '<strong>' + escapeHtml(item.title) + '</strong>';
-									var metaStr = '';
-									if (item.brand) metaStr += 'Brand: ' + escapeHtml(item.brand) + ' &bull; ';
-									if (item.unit) metaStr += 'Unit: ' + escapeHtml(item.unit);
-									if (metaStr) html += '<span class="som-cat-meta-tag">' + metaStr + '</span>';
-									html += '</td>';
-
-									html += '<td><span class="som-cat-meta-tag">' + escapeHtml(item.category) + '</span></td>';
-
-									html += '<td><span class="som-cat-price">';
-									if (item.sale_price) {
-										html += '<del>₹' + item.price + '</del> ₹' + item.sale_price;
-									} else {
-										html += '₹' + item.price;
-									}
-									html += '</span></td>';
-
-									html += '<td><span class="som-cat-badge ' + item.stock_status + '">' + (item.stock_status === 'instock' ? 'In Stock' : 'Out of Stock') + '</span></td>';
-									html += '<td><span class="som-cat-badge ' + item.status + '">' + item.status + '</span></td>';
-
-									html += '<td><div class="som-cat-actions">';
-									html += '<button type="button" class="som-btn-icon som-btn-edit-item" data-item=\'' + JSON.stringify(item) + '\'>&#9998; Edit</button>';
-									html += '<button type="button" class="som-btn-icon danger som-btn-remove-item" data-id="' + item.product_id + '">&#128465;</button>';
-									html += '</div></td>';
-									html += '</tr>';
-								});
-
-								$tbody.html(html);
-
-								$('#som_catalog_info').text('Page ' + res.data.current_page + ' of ' + res.data.total_pages + ' (' + res.data.total_count + ' items)');
-								$('#som_cat_prev_btn').prop('disabled', res.data.current_page <= 1);
-								$('#som_cat_next_btn').prop('disabled', res.data.current_page >= res.data.total_pages);
-							} else {
-								$tbody.html('<tr><td colspan="7" style="text-align:center; color:#ef4444;">' + (res.data.message || 'Error loading catalog') + '</td></tr>');
-							}
-						}
-					});
-				}
-
-				// Initial Load & Filters
-				loadCatalog(1);
-
-				var searchTimer = null;
-				$('#som_cat_search').on('keyup input', function() {
-					clearTimeout(searchTimer);
-					searchTimer = setTimeout(function() { loadCatalog(1); }, 400);
-				});
-
-				$('#som_cat_status_filter, #som_cat_stock_filter').on('change', function() {
-					loadCatalog(1);
-				});
-
-				$('#som_cat_prev_btn').on('click', function() { if (currentPage > 1) loadCatalog(currentPage - 1); });
-				$('#som_cat_next_btn').on('click', function() { loadCatalog(currentPage + 1); });
-
-				// Master Products Search Function for Modal
-				function performMasterSearch(queryStr) {
-					$('#som_master_results').html('<p style="padding:12px; color:#64748b; margin:0; text-align:center;">&#128259; Searching master products...</p>');
-					$.ajax({
-						url: ajaxUrl,
-						type: 'POST',
-						data: { action: 'som_merchant_search_master_products', nonce: nonce, q: queryStr },
-						success: function(res) {
-							if (res.success && res.data.results && res.data.results.length > 0) {
-								var html = '';
-								$.each(res.data.results, function(i, m) {
-									html += '<div class="som-master-item" data-master=\'' + JSON.stringify(m) + '\'>';
-									html += '<div class="som-master-item-info">';
-									if (m.thumb_url) {
-										html += '<img src="' + m.thumb_url + '" style="width:36px; height:36px; border-radius:4px; object-fit:cover;" />';
-									} else {
-										html += '<span style="font-size:1.2rem;">&#128230;</span>';
-									}
-									html += '<div><strong>' + escapeHtml(m.title) + '</strong><br /><span style="font-size:0.75rem; color:#64748b;">Category: ' + escapeHtml(m.category) + ' &bull; Unit: ' + escapeHtml(m.unit || 'Standard') + '</span></div>';
-									html += '</div>';
-									if (m.in_catalog) {
-										html += '<span style="font-size:0.8rem; color:#16a34a; font-weight:700;">&#10003; In Catalog</span>';
-									} else {
-										html += '<button type="button" class="som-btn-icon">Select</button>';
-									}
-									html += '</div>';
-								});
-								$('#som_master_results').html(html);
-							} else {
-								$('#som_master_results').html('<p style="padding:12px; color:#64748b; margin:0; text-align:center;">No master products found matching your search.</p>');
-							}
-						},
-						error: function() {
-							$('#som_master_results').html('<p style="padding:12px; color:#ef4444; margin:0; text-align:center;">Failed to search products. Please try again.</p>');
-						}
-					});
-				}
-
-				// Open Add Modal & Fetch Products Immediately
-				$('#som_btn_open_add_modal').on('click', function() {
-					$('#som_add_product_modal').show();
-					$('#som_master_search').val('').focus();
-					$('#som_form_add_catalog_product').hide();
-					performMasterSearch('');
-				});
-
-				// Type-ahead Master Search in Modal
-				var masterTimer = null;
-				$('#som_master_search').on('keyup input', function() {
-					clearTimeout(masterTimer);
-					var q = $(this).val().trim();
-					masterTimer = setTimeout(function() {
-						performMasterSearch(q);
-					}, 300);
-				});
-
-				// Select Master Product from search results
-				$(document).on('click', '.som-master-item', function() {
-					var m = $(this).data('master');
-					if (!m) return;
-
-					if (m.in_catalog) {
-						alert('This product is already in your catalog!');
-						return;
-					}
-
-					$('.som-master-item').removeClass('selected');
-					$(this).addClass('selected');
-
-					$('#som_add_product_id').val(m.product_id);
-					$('#som_add_selected_title').html('&#10003; Selected Product: ' + escapeHtml(m.title) + (m.unit ? ' (' + escapeHtml(m.unit) + ')' : ''));
-					$('#som_form_add_catalog_product').slideDown();
-				});
-
-				// Save Added Product
-				$('#som_form_add_catalog_product').on('submit', function(e) {
-					e.preventDefault();
-					var $btn = $('#som_btn_save_add');
-					$btn.prop('disabled', true).text('Saving...');
-
-					$.ajax({
-						url: ajaxUrl,
-						type: 'POST',
-						data: {
-							action: 'som_merchant_add_catalog_product',
-							nonce: nonce,
-							product_id: $('#som_add_product_id').val(),
-							price: $('#som_add_price').val(),
-							sale_price: $('#som_add_sale_price').val(),
-							stock_status: $('#som_add_stock_status').val(),
-							stock_quantity: $('#som_add_stock_quantity').val(),
-							status: $('#som_add_status').val()
-						},
-						success: function(res) {
-							$btn.prop('disabled', false).html('&#128190; Save to My Catalog');
-							if (res.success) {
-								$('#som_add_product_modal').hide();
-								loadCatalog(1);
-							} else {
-								alert(res.data.message || 'Error adding product.');
-							}
-						}
-					});
-				});
-
-				// Open Edit Modal
-				$(document).on('click', '.som-btn-edit-item', function() {
-					var item = $(this).data('item');
-					if (!item) return;
-
-					$('#som_edit_product_id').val(item.product_id);
-					$('#som_edit_selected_title').text('Editing: ' + item.title);
-					$('#som_edit_price').val(item.price);
-					$('#som_edit_sale_price').val(item.sale_price);
-					$('#som_edit_stock_status').val(item.stock_status);
-					$('#som_edit_stock_quantity').val(item.stock_quantity);
-					$('#som_edit_status').val(item.status);
-
-					$('#som_edit_product_modal').show();
-				});
-
-				// Save Edited Product
-				$('#som_form_edit_catalog_product').on('submit', function(e) {
-					e.preventDefault();
-					var $btn = $('#som_btn_save_edit');
-					$btn.prop('disabled', true).text('Updating...');
-
-					$.ajax({
-						url: ajaxUrl,
-						type: 'POST',
-						data: {
-							action: 'som_merchant_update_catalog_product',
-							nonce: nonce,
-							product_id: $('#som_edit_product_id').val(),
-							price: $('#som_edit_price').val(),
-							sale_price: $('#som_edit_sale_price').val(),
-							stock_status: $('#som_edit_stock_status').val(),
-							stock_quantity: $('#som_edit_stock_quantity').val(),
-							status: $('#som_edit_status').val()
-						},
-						success: function(res) {
-							$btn.prop('disabled', false).html('&#128190; Update Product');
-							if (res.success) {
-								$('#som_edit_product_modal').hide();
-								loadCatalog(currentPage);
-							} else {
-								alert(res.data.message || 'Error updating product.');
-							}
-						}
-					});
-				});
-
-				// Remove Product
-				$(document).on('click', '.som-btn-remove-item', function() {
-					var pid = $(this).data('id');
-					if (!confirm('Are you sure you want to remove this product from your shop catalog?')) return;
-
-					$.ajax({
-						url: ajaxUrl,
-						type: 'POST',
-						data: { action: 'som_merchant_remove_catalog_product', nonce: nonce, product_id: pid },
-						success: function(res) {
-							if (res.success) {
-								loadCatalog(currentPage);
-							} else {
-								alert(res.data.message || 'Error removing product.');
 							}
 						}
 					});

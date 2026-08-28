@@ -50,11 +50,21 @@ class SOM_Plugin {
 		SOM_Shop_Meta::init();
 		SOM_Merchant_Manager::init();
 		SOM_Merchant_Dashboard::init();
+		SOM_Merchant_Catalog::init();
 		SOM_Form_Handler::init();
 		SOM_Admin_Manager::init();
 		SOM_Catalog_Repository::init();
 		SOM_Master_Product::init();
 		SOM_Catalog_Permissions::init();
+
+		add_action( 'init', array( __CLASS__, 'register_catalog_rewrites' ) );
+	}
+
+	/**
+	 * Register rewrite alias for /merchant/catalog/ -> merchant-catalog page.
+	 */
+	public static function register_catalog_rewrites() {
+		add_rewrite_rule( '^merchant/catalog/?$', 'index.php?pagename=merchant-catalog', 'top' );
 	}
 
 	/**
@@ -81,7 +91,10 @@ class SOM_Plugin {
 		self::create_onboarding_page();
 		self::create_merchant_login_page();
 		self::create_merchant_dashboard_page();
+		self::create_merchant_catalog_page();
 		self::create_join_nearmart_page();
+
+		self::register_catalog_rewrites();
 
 		// Flush rewrite rules.
 		flush_rewrite_rules();
@@ -136,6 +149,25 @@ class SOM_Plugin {
 					'post_title'     => 'Merchant Dashboard',
 					'post_name'      => 'merchant-dashboard',
 					'post_content'   => '[som_merchant_dashboard]',
+					'post_status'    => 'publish',
+					'post_type'      => 'page',
+					'comment_status' => 'closed',
+				)
+			);
+		}
+	}
+
+	/**
+	 * Ensure the /merchant-catalog/ page exists with [som_merchant_catalog] shortcode.
+	 */
+	public static function create_merchant_catalog_page() {
+		$page = get_page_by_path( 'merchant-catalog' );
+		if ( ! $page ) {
+			wp_insert_post(
+				array(
+					'post_title'     => 'My Catalog',
+					'post_name'      => 'merchant-catalog',
+					'post_content'   => '[som_merchant_catalog]',
 					'post_status'    => 'publish',
 					'post_type'      => 'page',
 					'comment_status' => 'closed',

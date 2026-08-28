@@ -352,6 +352,42 @@ class SOM_Catalog_Repository {
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		return $wpdb->get_results( $wpdb->prepare( $sql, $values ) );
 	}
+
+	/**
+	 * Get summary metrics for a shop catalog (Total, Active, Out-of-Stock).
+	 *
+	 * @param int $shop_id Shop CPT Post ID.
+	 * @return array
+	 */
+	public static function get_shop_catalog_summary( $shop_id ) {
+		global $wpdb;
+
+		$shop_id = absint( $shop_id );
+		if ( ! $shop_id ) {
+			return array(
+				'total'      => 0,
+				'active'     => 0,
+				'outofstock' => 0,
+			);
+		}
+
+		$table_name = self::get_table_name();
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$total = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table_name} WHERE shop_id = %d", $shop_id ) );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$active = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table_name} WHERE shop_id = %d AND status = 'active'", $shop_id ) );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$outofstock = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table_name} WHERE shop_id = %d AND stock_status = 'outofstock'", $shop_id ) );
+
+		return array(
+			'total'      => $total,
+			'active'     => $active,
+			'outofstock' => $outofstock,
+		);
+	}
 }
 
 /* ==========================================================================
@@ -409,5 +445,14 @@ if ( ! function_exists( 'nearmart_get_shop_products' ) ) {
 	 */
 	function nearmart_get_shop_products( $shop_id, $args = array() ) {
 		return SOM_Catalog_Repository::get_shop_products( $shop_id, $args );
+	}
+}
+
+if ( ! function_exists( 'nearmart_get_shop_catalog_summary' ) ) {
+	/**
+	 * Get shop catalog summary helper.
+	 */
+	function nearmart_get_shop_catalog_summary( $shop_id ) {
+		return SOM_Catalog_Repository::get_shop_catalog_summary( $shop_id );
 	}
 }
