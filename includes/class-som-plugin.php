@@ -54,6 +54,8 @@ class SOM_Plugin {
 		SOM_Form_Handler::init();
 		SOM_Admin_Manager::init();
 		SOM_Admin_Catalog::init();
+		SOM_Product_Request_Repository::init();
+		SOM_Admin_Product_Requests::init();
 		SOM_Catalog_Repository::init();
 		SOM_Master_Product::init();
 		SOM_Catalog_Permissions::init();
@@ -87,6 +89,7 @@ class SOM_Plugin {
 
 		// Create/Upgrade custom database table for shop catalogs.
 		SOM_Catalog_Repository::create_table();
+		SOM_Product_Request_Repository::create_table();
 
 		// Auto-create pages if they do not exist.
 		self::create_onboarding_page();

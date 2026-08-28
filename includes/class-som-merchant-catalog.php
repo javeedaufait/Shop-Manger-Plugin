@@ -1,6 +1,6 @@
 <?php
 /**
- * Dedicated Merchant Catalog Module (Phase 6 Edit, Availability & Remove).
+ * Dedicated Merchant Catalog Module (Phase 8 Request New Product).
  *
  * @package Shop_Onboarding_Manager
  */
@@ -19,6 +19,102 @@ class SOM_Merchant_Catalog {
 	 */
 	public static function init() {
 		add_shortcode( 'som_merchant_catalog', array( __CLASS__, 'render_catalog_shortcode' ) );
+
+		// AJAX Endpoints for Product Requests
+		add_action( 'wp_ajax_som_merchant_request_new_product', array( __CLASS__, 'ajax_request_new_product' ) );
+		add_action( 'wp_ajax_som_merchant_get_product_requests', array( __CLASS__, 'ajax_get_merchant_product_requests' ) );
+	}
+
+	/**
+	 * AJAX endpoint: Merchant Submit Request for New Product (Phase 8).
+	 */
+	public static function ajax_request_new_product() {
+		check_ajax_referer( 'som_merchant_dashboard_nonce', 'nonce' );
+
+		$user_id = get_current_user_id();
+		$shop_id = nearmart_get_current_merchant_shop_id( $user_id );
+
+		if ( ! $shop_id || ! nearmart_user_can_manage_shop( $user_id, $shop_id ) ) {
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
+		}
+
+		$product_name = isset( $_POST['product_name'] ) ? sanitize_text_field( wp_unslash( $_POST['product_name'] ) ) : '';
+		$brand        = isset( $_POST['brand'] ) ? sanitize_text_field( wp_unslash( $_POST['brand'] ) ) : '';
+		$category     = isset( $_POST['category'] ) ? sanitize_text_field( wp_unslash( $_POST['category'] ) ) : '';
+		$unit         = isset( $_POST['unit'] ) ? sanitize_text_field( wp_unslash( $_POST['unit'] ) ) : '';
+		$barcode      = isset( $_POST['barcode'] ) ? sanitize_text_field( wp_unslash( $_POST['barcode'] ) ) : '';
+		$notes        = isset( $_POST['notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['notes'] ) ) : '';
+
+		if ( empty( $product_name ) ) {
+			wp_send_json_error( array( 'message' => __( 'Product name is required.', 'shop-onboarding-manager' ) ) );
+		}
+
+		if ( nearmart_has_pending_product_request( $shop_id, $product_name ) ) {
+			wp_send_json_error( array( 'message' => sprintf( __( 'A product request for "%s" is already pending review.', 'shop-onboarding-manager' ), esc_html( $product_name ) ) ) );
+		}
+
+		$insert_id = nearmart_create_product_request(
+			$user_id,
+			$shop_id,
+			array(
+				'product_name' => $product_name,
+				'brand'        => $brand,
+				'category'     => $category,
+				'unit'         => $unit,
+				'barcode'      => $barcode,
+				'notes'        => $notes,
+			)
+		);
+
+		if ( ! $insert_id ) {
+			wp_send_json_error( array( 'message' => __( 'Failed to submit product request. Please try again.', 'shop-onboarding-manager' ) ) );
+		}
+
+		wp_send_json_success( array( 'message' => __( 'Your product request has been submitted successfully! Admin will review it shortly.', 'shop-onboarding-manager' ) ) );
+	}
+
+	/**
+	 * AJAX endpoint: Get Submitted Product Requests for Logged-In Merchant.
+	 */
+	public static function ajax_get_merchant_product_requests() {
+		check_ajax_referer( 'som_merchant_dashboard_nonce', 'nonce' );
+
+		$user_id = get_current_user_id();
+		$shop_id = nearmart_get_current_merchant_shop_id( $user_id );
+
+		if ( ! $shop_id || ! nearmart_user_can_manage_shop( $user_id, $shop_id ) ) {
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
+		}
+
+		$requests  = nearmart_get_merchant_product_requests( $shop_id, $user_id );
+		$formatted = array();
+
+		foreach ( $requests as $r ) {
+			$master_title = '';
+			if ( $r->master_product_id ) {
+				$mp = get_post( $r->master_product_id );
+				if ( $mp ) {
+					$master_title = $mp->post_title;
+				}
+			}
+
+			$formatted[] = array(
+				'id'                => $r->id,
+				'product_name'      => $r->product_name,
+				'brand'             => $r->brand ? $r->brand : '',
+				'category'          => $r->category ? $r->category : '',
+				'unit'              => $r->unit ? $r->unit : '',
+				'barcode'           => $r->barcode ? $r->barcode : '',
+				'notes'             => $r->notes ? $r->notes : '',
+				'status'            => $r->status,
+				'master_product_id' => $r->master_product_id,
+				'master_title'      => $master_title,
+				'admin_notes'       => $r->admin_notes ? $r->admin_notes : '',
+				'created_at'        => date_i18n( 'M j, Y g:i a', strtotime( $r->created_at ) ),
+			);
+		}
+
+		wp_send_json_success( array( 'requests' => $formatted ) );
 	}
 
 	/**
@@ -47,6 +143,9 @@ class SOM_Merchant_Catalog {
 				</a>
 				<a href="<?php echo esc_url( $catalog_url ); ?>" class="som-nav-link<?php echo esc_attr( $cat_active ); ?>">
 					&#128722; <?php esc_html_e( 'My Catalog', 'shop-onboarding-manager' ); ?>
+				</a>
+				<a href="#" id="som_btn_open_my_requests" class="som-nav-link">
+					&#128221; <?php esc_html_e( 'My Product Requests', 'shop-onboarding-manager' ); ?>
 				</a>
 				<a href="<?php echo esc_url( $logout_url ); ?>" class="som-nav-link logout">
 					&#128682; <?php esc_html_e( 'Log Out', 'shop-onboarding-manager' ); ?>
@@ -95,7 +194,7 @@ class SOM_Merchant_Catalog {
 					<h2>&#128722; <?php printf( esc_html__( 'My Shop Catalog — %s', 'shop-onboarding-manager' ), esc_html( $shop_name ) ); ?></h2>
 					<p><?php esc_html_e( 'Manage prices, stock availability, and items listed for your store catalog.', 'shop-onboarding-manager' ); ?></p>
 				</div>
-				<div>
+				<div style="display: flex; gap: 10px; flex-wrap: wrap;">
 					<button type="button" id="som_btn_open_add_modal" class="som-submit-btn" style="width: auto; padding: 12px 20px; min-height: 44px;">
 						&#10133; <?php esc_html_e( 'Add Product to Catalog', 'shop-onboarding-manager' ); ?>
 					</button>
@@ -225,7 +324,7 @@ class SOM_Merchant_Catalog {
 			</div>
 		</div>
 
-		<!-- MODAL 2: Edit Catalog Product Modal (Phase 6) -->
+		<!-- MODAL 2: Edit Catalog Product Modal -->
 		<div id="som_edit_product_modal" class="som-modal-overlay" style="display: none;">
 			<div class="som-modal-content">
 				<div class="som-modal-header">
@@ -233,7 +332,7 @@ class SOM_Merchant_Catalog {
 					<button type="button" class="som-modal-close" onclick="document.getElementById('som_edit_product_modal').style.display='none';">&times;</button>
 				</div>
 
-				<!-- Read-Only Master Product Specifications Box -->
+				<!-- Read-Only Master Product Specs Box -->
 				<div id="som_edit_master_specs_box" class="som-master-specs-box" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px 14px; margin-bottom:16px;">
 					<div style="display:flex; gap:12px; align-items:center;">
 						<div id="som_edit_thumb_wrap">
@@ -249,7 +348,6 @@ class SOM_Merchant_Catalog {
 					</p>
 				</div>
 
-				<!-- Editable Shop-Specific Form -->
 				<form id="som_form_edit_catalog_product">
 					<input type="hidden" id="som_edit_product_id" name="product_id" value="" />
 
@@ -296,6 +394,72 @@ class SOM_Merchant_Catalog {
 						&#128190; <?php esc_html_e( 'Update Product', 'shop-onboarding-manager' ); ?>
 					</button>
 				</form>
+			</div>
+		</div>
+
+		<!-- MODAL 3: Merchant Request New Product Modal (Phase 8) -->
+		<div id="som_request_product_modal" class="som-modal-overlay" style="display: none;">
+			<div class="som-modal-content">
+				<div class="som-modal-header">
+					<h3>&#10133; <?php esc_html_e( 'Request New Product', 'shop-onboarding-manager' ); ?></h3>
+					<button type="button" class="som-modal-close" onclick="document.getElementById('som_request_product_modal').style.display='none';">&times;</button>
+				</div>
+
+				<p style="font-size: 0.88rem; color: #64748b; margin-bottom: 16px;">
+					<?php esc_html_e( 'Can\'t find a product in our master catalog? Submit a request below. Admin will review and add the master product to the platform.', 'shop-onboarding-manager' ); ?>
+				</p>
+
+				<form id="som_form_request_new_product">
+					<div class="som-form-group">
+						<label for="som_req_product_name" class="som-label required"><?php esc_html_e( 'Product Name', 'shop-onboarding-manager' ); ?></label>
+						<input type="text" id="som_req_product_name" name="product_name" class="som-input" required placeholder="e.g. Organic Multigrain Atta 5kg" />
+					</div>
+
+					<div class="som-form-row">
+						<div class="som-form-group">
+							<label for="som_req_brand" class="som-label"><?php esc_html_e( 'Brand (Optional)', 'shop-onboarding-manager' ); ?></label>
+							<input type="text" id="som_req_brand" name="brand" class="som-input" placeholder="e.g. Aashirvaad" />
+						</div>
+						<div class="som-form-group">
+							<label for="som_req_category" class="som-label"><?php esc_html_e( 'Category (Optional)', 'shop-onboarding-manager' ); ?></label>
+							<input type="text" id="som_req_category" name="category" class="som-input" placeholder="e.g. Groceries" />
+						</div>
+					</div>
+
+					<div class="som-form-row">
+						<div class="som-form-group">
+							<label for="som_req_unit" class="som-label"><?php esc_html_e( 'Approximate Unit/Size (Optional)', 'shop-onboarding-manager' ); ?></label>
+							<input type="text" id="som_req_unit" name="unit" class="som-input" placeholder="e.g. 5kg, 500ml, 10 pcs" />
+						</div>
+						<div class="som-form-group">
+							<label for="som_req_barcode" class="som-label"><?php esc_html_e( 'Barcode / SKU (Optional)', 'shop-onboarding-manager' ); ?></label>
+							<input type="text" id="som_req_barcode" name="barcode" class="som-input" placeholder="e.g. 890123456789" />
+						</div>
+					</div>
+
+					<div class="som-form-group">
+						<label for="som_req_notes" class="som-label"><?php esc_html_e( 'Additional Notes / Description (Optional)', 'shop-onboarding-manager' ); ?></label>
+						<textarea id="som_req_notes" name="notes" class="som-input" rows="3" placeholder="Provide any additional details to help admin identify the product..."></textarea>
+					</div>
+
+					<button type="submit" id="som_btn_submit_req" class="som-submit-btn">
+						&#128238; <?php esc_html_e( 'Submit Product Request', 'shop-onboarding-manager' ); ?>
+					</button>
+				</form>
+			</div>
+		</div>
+
+		<!-- MODAL 4: Merchant View My Product Requests Modal (Phase 8) -->
+		<div id="som_my_requests_modal" class="som-modal-overlay" style="display: none;">
+			<div class="som-modal-content" style="max-width: 720px;">
+				<div class="som-modal-header">
+					<h3>&#128221; <?php esc_html_e( 'My Product Requests', 'shop-onboarding-manager' ); ?></h3>
+					<button type="button" class="som-modal-close" onclick="document.getElementById('som_my_requests_modal').style.display='none';">&times;</button>
+				</div>
+
+				<div id="som_my_requests_list_wrap" style="max-height: 400px; overflow-y: auto;">
+					<p style="padding:20px; text-align:center; color:#64748b;">&#128259; Loading your requests...</p>
+				</div>
 			</div>
 		</div>
 
@@ -412,10 +576,24 @@ class SOM_Merchant_Catalog {
 					$('#som_add_product_modal').show();
 					$('#som_master_search').val('').focus();
 					$('#som_form_add_catalog_product').hide();
-					$('#som_master_results').html('<p style="padding:14px; text-align:center; color:#64748b; margin:0;">Type at least 2 characters to search master products by name, SKU, or barcode...</p>');
+					renderMasterSearchPrompt();
 				});
 
-				// Type-ahead Master Search in Modal (min 2 chars)
+				function renderMasterSearchPrompt() {
+					var html = '<p style="padding:14px; text-align:center; color:#64748b; margin:0;">Type at least 2 characters to search master products...</p>';
+					html += '<div style="text-align:center; padding-bottom:14px;"><button type="button" class="som-submit-btn som-btn-secondary som-btn-trigger-req" style="width:auto; padding:8px 16px; font-size:0.88rem;">&#10133; Request New Product</button></div>';
+					$('#som_master_results').html(html);
+				}
+
+				// Open Request Product Modal
+				$(document).on('click', '.som-btn-trigger-req', function() {
+					$('#som_add_product_modal').hide();
+					var searchVal = $('#som_master_search').val().trim();
+					$('#som_req_product_name').val(searchVal);
+					$('#som_request_product_modal').show();
+				});
+
+				// Type-ahead Master Search in Modal
 				var masterTimer = null;
 				$('#som_master_search').on('keyup input', function() {
 					clearTimeout(masterTimer);
@@ -423,7 +601,7 @@ class SOM_Merchant_Catalog {
 
 					if (q.length < 2) {
 						$('#som_form_add_catalog_product').slideUp();
-						$('#som_master_results').html('<p style="padding:14px; text-align:center; color:#64748b; margin:0;">Type at least 2 characters to search master products by name, SKU, or barcode...</p>');
+						renderMasterSearchPrompt();
 						return;
 					}
 
@@ -472,9 +650,13 @@ class SOM_Merchant_Catalog {
 									}
 									html += '</div>';
 								});
+
+								html += '<div style="text-align:center; padding: 12px 0 4px 0; border-top:1px solid #f1f5f9;"><span style="font-size:0.82rem; color:#64748b;">Can\'t find what you need? </span><button type="button" class="som-btn-trigger-req" style="background:none; border:none; color:#2563eb; font-weight:700; text-decoration:underline; cursor:pointer;">Request New Product</button></div>';
 								$('#som_master_results').html(html);
 							} else {
-								$('#som_master_results').html('<p style="padding:14px; color:#64748b; margin:0; text-align:center;">No master products found matching your search.</p>');
+								var html = '<p style="padding:14px; color:#64748b; margin:0; text-align:center;">No master products found matching your search.</p>';
+								html += '<div style="text-align:center; padding-bottom:14px;"><button type="button" class="som-submit-btn som-btn-secondary som-btn-trigger-req" style="width:auto; padding:8px 16px; font-size:0.88rem;">&#10133; Request New Product</button></div>';
+								$('#som_master_results').html(html);
 							}
 						},
 						error: function() {
@@ -510,6 +692,103 @@ class SOM_Merchant_Catalog {
 
 					$('#som_form_add_catalog_product').slideDown();
 				});
+
+				// Submit Request New Product Form (Phase 8)
+				$('#som_form_request_new_product').on('submit', function(e) {
+					e.preventDefault();
+					var $btn = $('#som_btn_submit_req');
+					$btn.prop('disabled', true).text('Submitting...');
+
+					$.ajax({
+						url: ajaxUrl,
+						type: 'POST',
+						data: {
+							action: 'som_merchant_request_new_product',
+							nonce: nonce,
+							product_name: $('#som_req_product_name').val(),
+							brand: $('#som_req_brand').val(),
+							category: $('#som_req_category').val(),
+							unit: $('#som_req_unit').val(),
+							barcode: $('#som_req_barcode').val(),
+							notes: $('#som_req_notes').val()
+						},
+						success: function(res) {
+							$btn.prop('disabled', false).html('&#128238; Submit Product Request');
+							if (res.success) {
+								alert(res.data.message || 'Request submitted successfully!');
+								$('#som_request_product_modal').hide();
+								$('#som_form_request_new_product')[0].reset();
+								loadMyProductRequests();
+								$('#som_my_requests_modal').show();
+							} else {
+								alert(res.data.message || 'Error submitting request.');
+							}
+						},
+						error: function() {
+							$btn.prop('disabled', false).html('&#128238; Submit Product Request');
+							alert('Server error submitting request. Please try again.');
+						}
+					});
+				});
+
+				// Open My Product Requests Modal
+				$('#som_btn_open_my_requests').on('click', function(e) {
+					e.preventDefault();
+					loadMyProductRequests();
+					$('#som_my_requests_modal').show();
+				});
+
+				function loadMyProductRequests() {
+					var $wrap = $('#som_my_requests_list_wrap');
+					$wrap.html('<p style="padding:20px; text-align:center; color:#64748b;">&#128259; Loading your requests...</p>');
+
+					$.ajax({
+						url: ajaxUrl,
+						type: 'POST',
+						data: { action: 'som_merchant_get_product_requests', nonce: nonce },
+						success: function(res) {
+							if (res.success) {
+								var list = res.data.requests;
+								if (!list || list.length === 0) {
+									$wrap.html('<p style="padding:24px; text-align:center; color:#64748b;">You have not submitted any product requests yet.</p>');
+									return;
+								}
+
+								var html = '<table class="som-catalog-table"><thead><tr><th>Product Name</th><th>Details</th><th>Date</th><th>Status</th></tr></thead><tbody>';
+								$.each(list, function(i, r) {
+									html += '<tr>';
+									html += '<td><strong>' + escapeHtml(r.product_name) + '</strong></td>';
+
+									var meta = [];
+									if (r.brand) meta.push('Brand: ' + escapeHtml(r.brand));
+									if (r.unit) meta.push('Unit: ' + escapeHtml(r.unit));
+									if (r.barcode) meta.push('Barcode: ' + escapeHtml(r.barcode));
+									html += '<td><span style="font-size:0.78rem; color:#64748b;">' + meta.join(' &bull; ') + '</span>';
+									if (r.admin_notes) {
+										html += '<br /><span style="font-size:0.75rem; color:#2563eb;">Admin Note: ' + escapeHtml(r.admin_notes) + '</span>';
+									}
+									html += '</td>';
+
+									html += '<td><span style="font-size:0.8rem; color:#64748b;">' + r.created_at + '</span></td>';
+
+									var badgeClass = r.status;
+									if (r.status === 'pending') badgeClass = 'inactive';
+									if (r.status === 'reviewed') badgeClass = 'active';
+									if (r.status === 'completed') badgeClass = 'instock';
+									if (r.status === 'rejected') badgeClass = 'outofstock';
+
+									html += '<td><span class="som-cat-badge ' + badgeClass + '">' + r.status.toUpperCase() + '</span></td>';
+									html += '</tr>';
+								});
+								html += '</tbody></table>';
+
+								$wrap.html(html);
+							} else {
+								$wrap.html('<p style="padding:20px; text-align:center; color:#ef4444;">' + (res.data.message || 'Error loading requests') + '</p>');
+							}
+						}
+					});
+				}
 
 				// Save Added Product
 				$('#som_form_add_catalog_product').on('submit', function(e) {
@@ -550,14 +829,12 @@ class SOM_Merchant_Catalog {
 					});
 				});
 
-				// Open Edit Product Modal (Phase 6 with Read-Only Master Product Panel)
+				// Open Edit Product Modal
 				$(document).on('click', '.som-btn-edit-item', function() {
 					var item = $(this).data('item');
 					if (!item) return;
 
 					$('#som_edit_product_id').val(item.product_id);
-
-					// Render read-only master product specs box
 					$('#som_edit_master_title').text(item.title);
 
 					var masterMeta = [];
@@ -574,7 +851,6 @@ class SOM_Merchant_Catalog {
 						$('#som_edit_thumb_wrap').html('<span style="font-size:1.5rem;">&#128230;</span>');
 					}
 
-					// Pre-fill editable shop fields
 					$('#som_edit_price').val(item.price);
 					$('#som_edit_sale_price').val(item.sale_price);
 					$('#som_edit_stock_status').val(item.stock_status);
@@ -585,7 +861,7 @@ class SOM_Merchant_Catalog {
 					$('#som_edit_product_modal').show();
 				});
 
-				// Save Edit Product Form (Phase 6)
+				// Save Edit Form
 				$('#som_form_edit_catalog_product').on('submit', function(e) {
 					e.preventDefault();
 					var $btn = $('#som_btn_save_edit');
@@ -622,7 +898,7 @@ class SOM_Merchant_Catalog {
 					});
 				});
 
-				// Remove Product Confirmation & Action (Phase 6)
+				// Remove Product Action
 				$(document).on('click', '.som-btn-remove-item', function() {
 					var pid = $(this).data('id');
 					var title = $(this).data('title') || 'this product';
