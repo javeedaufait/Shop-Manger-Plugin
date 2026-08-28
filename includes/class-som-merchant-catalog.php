@@ -1,6 +1,6 @@
 <?php
 /**
- * Dedicated Merchant Catalog Module (Phase 5 Workflow).
+ * Dedicated Merchant Catalog Module (Phase 6 Edit, Availability & Remove).
  *
  * @package Shop_Onboarding_Manager
  */
@@ -116,9 +116,9 @@ class SOM_Merchant_Catalog {
 							<option value="inactive"><?php esc_html_e( 'Inactive', 'shop-onboarding-manager' ); ?></option>
 						</select>
 						<select id="som_cat_stock_filter" class="som-select" style="min-height: 44px;">
-							<option value="all"><?php esc_html_e( 'All Stock', 'shop-onboarding-manager' ); ?></option>
-							<option value="instock"><?php esc_html_e( 'In Stock', 'shop-onboarding-manager' ); ?></option>
-							<option value="outofstock"><?php esc_html_e( 'Out of Stock', 'shop-onboarding-manager' ); ?></option>
+							<option value="all"><?php esc_html_e( 'All Availability', 'shop-onboarding-manager' ); ?></option>
+							<option value="instock"><?php esc_html_e( 'Available', 'shop-onboarding-manager' ); ?></option>
+							<option value="outofstock"><?php esc_html_e( 'Unavailable', 'shop-onboarding-manager' ); ?></option>
 						</select>
 					</div>
 				</div>
@@ -132,7 +132,7 @@ class SOM_Merchant_Catalog {
 								<th><?php esc_html_e( 'Product Name & Specs', 'shop-onboarding-manager' ); ?></th>
 								<th><?php esc_html_e( 'Category', 'shop-onboarding-manager' ); ?></th>
 								<th><?php esc_html_e( 'Shop Price', 'shop-onboarding-manager' ); ?></th>
-								<th><?php esc_html_e( 'Stock Status', 'shop-onboarding-manager' ); ?></th>
+								<th><?php esc_html_e( 'Availability', 'shop-onboarding-manager' ); ?></th>
 								<th><?php esc_html_e( 'Status', 'shop-onboarding-manager' ); ?></th>
 								<th style="width: 120px; text-align: right;"><?php esc_html_e( 'Actions', 'shop-onboarding-manager' ); ?></th>
 							</tr>
@@ -192,10 +192,10 @@ class SOM_Merchant_Catalog {
 
 					<div class="som-form-row">
 						<div class="som-form-group">
-							<label for="som_add_stock_status" class="som-label"><?php esc_html_e( 'Stock Status', 'shop-onboarding-manager' ); ?></label>
+							<label for="som_add_stock_status" class="som-label"><?php esc_html_e( 'Availability', 'shop-onboarding-manager' ); ?></label>
 							<select id="som_add_stock_status" name="stock_status" class="som-select">
-								<option value="instock"><?php esc_html_e( 'In Stock', 'shop-onboarding-manager' ); ?></option>
-								<option value="outofstock"><?php esc_html_e( 'Out of Stock', 'shop-onboarding-manager' ); ?></option>
+								<option value="instock"><?php esc_html_e( 'Available', 'shop-onboarding-manager' ); ?></option>
+								<option value="outofstock"><?php esc_html_e( 'Unavailable', 'shop-onboarding-manager' ); ?></option>
 							</select>
 						</div>
 						<div class="som-form-group">
@@ -225,7 +225,7 @@ class SOM_Merchant_Catalog {
 			</div>
 		</div>
 
-		<!-- MODAL 2: Edit Catalog Product Modal -->
+		<!-- MODAL 2: Edit Catalog Product Modal (Phase 6) -->
 		<div id="som_edit_product_modal" class="som-modal-overlay" style="display: none;">
 			<div class="som-modal-content">
 				<div class="som-modal-header">
@@ -233,9 +233,25 @@ class SOM_Merchant_Catalog {
 					<button type="button" class="som-modal-close" onclick="document.getElementById('som_edit_product_modal').style.display='none';">&times;</button>
 				</div>
 
+				<!-- Read-Only Master Product Specifications Box -->
+				<div id="som_edit_master_specs_box" class="som-master-specs-box" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px 14px; margin-bottom:16px;">
+					<div style="display:flex; gap:12px; align-items:center;">
+						<div id="som_edit_thumb_wrap">
+							<span style="font-size:1.5rem;">&#128230;</span>
+						</div>
+						<div>
+							<strong id="som_edit_master_title" style="font-size:1.05rem; color:#0f172a; display:block;"></strong>
+							<div id="som_edit_master_meta" style="font-size:0.8rem; color:#64748b; margin-top:2px;"></div>
+						</div>
+					</div>
+					<p style="font-size:0.75rem; color:#94a3b8; margin:8px 0 0 0; font-style:italic;">
+						&#8505; <?php esc_html_e( 'Master product specifications (Name, Category, Image, Barcode) are managed by platform admins and cannot be changed here.', 'shop-onboarding-manager' ); ?>
+					</p>
+				</div>
+
+				<!-- Editable Shop-Specific Form -->
 				<form id="som_form_edit_catalog_product">
 					<input type="hidden" id="som_edit_product_id" name="product_id" value="" />
-					<p style="font-weight: 700; color: #0f172a; margin-bottom: 14px; font-size: 1.05rem;" id="som_edit_selected_title"></p>
 
 					<div class="som-form-row">
 						<div class="som-form-group">
@@ -250,10 +266,10 @@ class SOM_Merchant_Catalog {
 
 					<div class="som-form-row">
 						<div class="som-form-group">
-							<label for="som_edit_stock_status" class="som-label"><?php esc_html_e( 'Stock Status', 'shop-onboarding-manager' ); ?></label>
+							<label for="som_edit_stock_status" class="som-label"><?php esc_html_e( 'Availability', 'shop-onboarding-manager' ); ?></label>
 							<select id="som_edit_stock_status" name="stock_status" class="som-select">
-								<option value="instock"><?php esc_html_e( 'In Stock', 'shop-onboarding-manager' ); ?></option>
-								<option value="outofstock"><?php esc_html_e( 'Out of Stock', 'shop-onboarding-manager' ); ?></option>
+								<option value="instock"><?php esc_html_e( 'Available', 'shop-onboarding-manager' ); ?></option>
+								<option value="outofstock"><?php esc_html_e( 'Unavailable', 'shop-onboarding-manager' ); ?></option>
 							</select>
 						</div>
 						<div class="som-form-group">
@@ -353,12 +369,13 @@ class SOM_Merchant_Catalog {
 									}
 									html += '</span></td>';
 
-									html += '<td><span class="som-cat-badge ' + item.stock_status + '">' + (item.stock_status === 'instock' ? 'In Stock' : 'Out of Stock') + '</span></td>';
+									var availLabel = item.stock_status === 'instock' ? 'Available' : 'Unavailable';
+									html += '<td><span class="som-cat-badge ' + item.stock_status + '">' + availLabel + '</span></td>';
 									html += '<td><span class="som-cat-badge ' + item.status + '">' + item.status + '</span></td>';
 
 									html += '<td><div class="som-cat-actions">';
 									html += '<button type="button" class="som-btn-icon som-btn-edit-item" data-item=\'' + JSON.stringify(item) + '\'>&#9998; Edit</button>';
-									html += '<button type="button" class="som-btn-icon danger som-btn-remove-item" data-id="' + item.product_id + '">&#128465;</button>';
+									html += '<button type="button" class="som-btn-icon danger som-btn-remove-item" data-id="' + item.product_id + '" data-title="' + escapeHtml(item.title) + '">&#128465;</button>';
 									html += '</div></td>';
 									html += '</tr>';
 								});
@@ -533,13 +550,31 @@ class SOM_Merchant_Catalog {
 					});
 				});
 
-				// Edit Product Logic
+				// Open Edit Product Modal (Phase 6 with Read-Only Master Product Panel)
 				$(document).on('click', '.som-btn-edit-item', function() {
 					var item = $(this).data('item');
 					if (!item) return;
 
 					$('#som_edit_product_id').val(item.product_id);
-					$('#som_edit_selected_title').text('Editing: ' + item.title);
+
+					// Render read-only master product specs box
+					$('#som_edit_master_title').text(item.title);
+
+					var masterMeta = [];
+					if (item.category) masterMeta.push('Cat: ' + escapeHtml(item.category));
+					if (item.brand) masterMeta.push('Brand: ' + escapeHtml(item.brand));
+					if (item.unit) masterMeta.push('Unit: ' + escapeHtml(item.unit));
+					if (item.barcode) masterMeta.push('Barcode: ' + escapeHtml(item.barcode));
+					if (item.master_sku) masterMeta.push('Master SKU: ' + escapeHtml(item.master_sku));
+					$('#som_edit_master_meta').html(masterMeta.join(' &bull; '));
+
+					if (item.thumb_url) {
+						$('#som_edit_thumb_wrap').html('<img src="' + item.thumb_url + '" style="width:44px; height:44px; border-radius:6px; object-fit:cover;" />');
+					} else {
+						$('#som_edit_thumb_wrap').html('<span style="font-size:1.5rem;">&#128230;</span>');
+					}
+
+					// Pre-fill editable shop fields
 					$('#som_edit_price').val(item.price);
 					$('#som_edit_sale_price').val(item.sale_price);
 					$('#som_edit_stock_status').val(item.stock_status);
@@ -550,6 +585,7 @@ class SOM_Merchant_Catalog {
 					$('#som_edit_product_modal').show();
 				});
 
+				// Save Edit Product Form (Phase 6)
 				$('#som_form_edit_catalog_product').on('submit', function(e) {
 					e.preventDefault();
 					var $btn = $('#som_btn_save_edit');
@@ -572,6 +608,7 @@ class SOM_Merchant_Catalog {
 						success: function(res) {
 							$btn.prop('disabled', false).html('&#128190; Update Product');
 							if (res.success) {
+								alert(res.data.message || 'Product updated successfully!');
 								$('#som_edit_product_modal').hide();
 								loadCatalog(currentPage);
 							} else {
@@ -585,10 +622,15 @@ class SOM_Merchant_Catalog {
 					});
 				});
 
-				// Remove Product Logic
+				// Remove Product Confirmation & Action (Phase 6)
 				$(document).on('click', '.som-btn-remove-item', function() {
 					var pid = $(this).data('id');
-					if (!confirm('Are you sure you want to remove this product from your shop catalog?')) return;
+					var title = $(this).data('title') || 'this product';
+
+					var msg = 'Are you sure you want to remove "' + title + '" from your shop catalog?\n\n' +
+						'This will only remove the item from your store. The master product will not be deleted.';
+
+					if (!confirm(msg)) return;
 
 					$.ajax({
 						url: ajaxUrl,
@@ -596,10 +638,14 @@ class SOM_Merchant_Catalog {
 						data: { action: 'som_merchant_remove_catalog_product', nonce: nonce, product_id: pid },
 						success: function(res) {
 							if (res.success) {
+								alert(res.data.message || 'Product removed from your shop catalog.');
 								loadCatalog(currentPage);
 							} else {
 								alert(res.data.message || 'Error removing product.');
 							}
+						},
+						error: function() {
+							alert('Server error removing product. Please try again.');
 						}
 					});
 				});
