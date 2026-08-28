@@ -56,6 +56,7 @@ class SOM_Plugin {
 		SOM_Admin_Catalog::init();
 		SOM_Product_Request_Repository::init();
 		SOM_Admin_Product_Requests::init();
+		SOM_REST_API::init();
 		SOM_Catalog_Repository::init();
 		SOM_Master_Product::init();
 		SOM_Catalog_Permissions::init();
