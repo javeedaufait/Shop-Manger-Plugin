@@ -259,7 +259,7 @@ class SOM_Merchant_Dashboard {
 	}
 
 	/**
-	 * AJAX endpoint: Search WooCommerce Master Products to add.
+	 * AJAX endpoint: Search WooCommerce Master Products to add (Phase 5).
 	 */
 	public static function ajax_search_master_products() {
 		check_ajax_referer( 'som_merchant_dashboard_nonce', 'nonce' );
@@ -273,51 +273,64 @@ class SOM_Merchant_Dashboard {
 
 		$query = isset( $_POST['q'] ) ? sanitize_text_field( wp_unslash( $_POST['q'] ) ) : '';
 
-		$args = array(
-			'post_type'      => 'product',
-			'post_status'    => 'publish',
-			'posts_per_page' => 20,
-			'orderby'        => 'title',
-			'order'          => 'ASC',
-		);
-
-		if ( ! empty( $query ) ) {
-			$args['s'] = $query;
+		if ( mb_strlen( $query ) < 2 ) {
+			wp_send_json_success( array( 'results' => array() ) );
 		}
 
-		$search_query = new WP_Query( $args );
-		$results      = array();
+		global $wpdb;
+		$search_like = '%' . $wpdb->esc_like( $query ) . '%';
 
-		if ( $search_query->have_posts() ) {
-			while ( $search_query->have_posts() ) {
-				$search_query->the_post();
-				$pid = get_the_ID();
+		$sql = "SELECT DISTINCT p.ID FROM {$wpdb->posts} p
+			LEFT JOIN {$wpdb->postmeta} pm_sku ON (p.ID = pm_sku.post_id AND pm_sku.meta_key = '_sku')
+			LEFT JOIN {$wpdb->postmeta} pm_barcode ON (p.ID = pm_barcode.post_id AND pm_barcode.meta_key = '_nearmart_barcode')
+			WHERE p.post_type = 'product'
+			AND p.post_status = 'publish'
+			AND (
+				p.post_title LIKE %s
+				OR pm_sku.meta_value LIKE %s
+				OR pm_barcode.meta_value LIKE %s
+			)
+			ORDER BY p.post_title ASC
+			LIMIT 20";
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$product_ids = $wpdb->get_col( $wpdb->prepare( $sql, $search_like, $search_like, $search_like ) );
+		$results     = array();
+
+		if ( ! empty( $product_ids ) ) {
+			foreach ( $product_ids as $pid ) {
+				$pid = absint( $pid );
 				$already_in_catalog = nearmart_has_shop_product( $shop_id, $pid );
 				$specs              = nearmart_get_master_product_specs( $pid );
 				$cats               = wp_get_post_terms( $pid, 'product_cat', array( 'fields' => 'names' ) );
 				$thumb_url          = get_the_post_thumbnail_url( $pid, 'thumbnail' );
 
+				$reg_price = get_post_meta( $pid, '_regular_price', true );
+				if ( '' === $reg_price || null === $reg_price ) {
+					$reg_price = get_post_meta( $pid, '_price', true );
+				}
+				$sug_price = ( '' !== $reg_price && null !== $reg_price && is_numeric( $reg_price ) ) ? number_format( (float) $reg_price, 2, '.', '' ) : '';
+
 				$results[] = array(
-					'product_id' => $pid,
-					'title'      => get_the_title(),
-					'category'   => ! empty( $cats ) ? $cats[0] : __( 'Uncategorized', 'shop-onboarding-manager' ),
-					'brand'      => $specs['brand_name'],
-					'unit'       => $specs['unit'],
-					'barcode'    => $specs['barcode'],
-					'sku'        => $specs['sku'],
-					'thumb_url'  => $thumb_url ? $thumb_url : '',
-					'in_catalog' => $already_in_catalog,
+					'product_id'      => $pid,
+					'title'           => get_the_title( $pid ),
+					'category'        => ! empty( $cats ) ? $cats[0] : __( 'Uncategorized', 'shop-onboarding-manager' ),
+					'brand'           => $specs['brand_name'],
+					'unit'            => $specs['unit'],
+					'barcode'         => $specs['barcode'],
+					'sku'             => $specs['sku'],
+					'suggested_price' => $sug_price,
+					'thumb_url'       => $thumb_url ? $thumb_url : '',
+					'in_catalog'      => $already_in_catalog,
 				);
 			}
-			wp_reset_postdata();
 		}
 
 		wp_send_json_success( array( 'results' => $results ) );
 	}
 
 	/**
-	 * AJAX endpoint: Add Master Product to Merchant Shop Catalog.
+	 * AJAX endpoint: Add Master Product to Merchant Shop Catalog (Phase 5).
 	 */
 	public static function ajax_add_catalog_product() {
 		check_ajax_referer( 'som_merchant_dashboard_nonce', 'nonce' );
@@ -335,9 +348,14 @@ class SOM_Merchant_Dashboard {
 		$stock_quantity = ( isset( $_POST['stock_quantity'] ) && '' !== $_POST['stock_quantity'] ) ? intval( $_POST['stock_quantity'] ) : null;
 		$stock_status   = isset( $_POST['stock_status'] ) ? sanitize_key( $_POST['stock_status'] ) : 'instock';
 		$status         = isset( $_POST['status'] ) ? sanitize_key( $_POST['status'] ) : 'active';
+		$shop_sku       = isset( $_POST['shop_sku'] ) ? sanitize_text_field( wp_unslash( $_POST['shop_sku'] ) ) : null;
 
-		if ( ! $product_id || get_post_type( $product_id ) !== 'product' ) {
-			wp_send_json_error( array( 'message' => __( 'Invalid master product selected.', 'shop-onboarding-manager' ) ) );
+		if ( ! $product_id || get_post_type( $product_id ) !== 'product' || get_post_status( $product_id ) !== 'publish' ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid or inactive master product selected.', 'shop-onboarding-manager' ) ) );
+		}
+
+		if ( nearmart_has_shop_product( $shop_id, $product_id ) ) {
+			wp_send_json_error( array( 'message' => __( 'This product is already in your shop catalog.', 'shop-onboarding-manager' ) ) );
 		}
 
 		$result = nearmart_add_shop_product(
@@ -349,6 +367,7 @@ class SOM_Merchant_Dashboard {
 				'stock_quantity' => $stock_quantity,
 				'stock_status'   => $stock_status,
 				'status'         => $status,
+				'shop_sku'       => $shop_sku,
 			)
 		);
 
@@ -378,6 +397,7 @@ class SOM_Merchant_Dashboard {
 		$stock_quantity = ( isset( $_POST['stock_quantity'] ) && '' !== $_POST['stock_quantity'] ) ? intval( $_POST['stock_quantity'] ) : null;
 		$stock_status   = isset( $_POST['stock_status'] ) ? sanitize_key( $_POST['stock_status'] ) : 'instock';
 		$status         = isset( $_POST['status'] ) ? sanitize_key( $_POST['status'] ) : 'active';
+		$shop_sku       = isset( $_POST['shop_sku'] ) ? sanitize_text_field( wp_unslash( $_POST['shop_sku'] ) ) : null;
 
 		if ( ! $product_id || ! nearmart_has_shop_product( $shop_id, $product_id ) ) {
 			wp_send_json_error( array( 'message' => __( 'Product not found in your shop catalog.', 'shop-onboarding-manager' ) ) );
@@ -392,6 +412,7 @@ class SOM_Merchant_Dashboard {
 				'stock_quantity' => $stock_quantity,
 				'stock_status'   => $stock_status,
 				'status'         => $status,
+				'shop_sku'       => $shop_sku,
 			)
 		);
 
