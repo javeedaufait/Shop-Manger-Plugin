@@ -284,14 +284,17 @@ class SOM_REST_API {
 			return self::format_error_response( 'shop_not_found', __( 'Shop not found or unavailable.', 'shop-onboarding-manager' ), 404 );
 		}
 
-		// Query active products from repository
+		$offset = ( $page - 1 ) * $limit;
+		$has_filter = ! empty( $search ) || ! empty( $category );
+
+		// Query active products from repository with SQL pagination if no in-memory filter needed
 		$raw_products = nearmart_get_shop_products(
 			$shop_id,
 			array(
 				'status'       => 'active',
 				'stock_status' => 'all',
-				'limit'        => 500,
-				'offset'       => 0,
+				'limit'        => $has_filter ? 500 : $limit,
+				'offset'       => $has_filter ? 0 : $offset,
 				'orderby'      => 'created_at',
 				'order'        => 'DESC',
 			)
@@ -347,9 +350,14 @@ class SOM_REST_API {
 			);
 		}
 
-		$total_count = count( $products );
-		$offset      = ( $page - 1 ) * $limit;
-		$paged       = array_slice( $products, $offset, $limit );
+		if ( $has_filter ) {
+			$total_count = count( $products );
+			$paged       = array_slice( $products, $offset, $limit );
+		} else {
+			$summary     = nearmart_get_shop_catalog_summary( $shop_id );
+			$total_count = $summary['active'];
+			$paged       = $products;
+		}
 		$total_pages = max( 1, ceil( $total_count / $limit ) );
 
 		return new WP_REST_Response(
