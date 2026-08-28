@@ -547,3 +547,262 @@
 	color: #b91c1c;
 	border: 1px solid #fca5a5;
 }
+
+/* ==========================================================================
+   8. MERCHANT MY CATALOG UI & MODALS
+   ========================================================================== */
+.som-catalog-header {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	margin-bottom: 20px;
+}
+
+@media (min-width: 600px) {
+	.som-catalog-header {
+		flex-direction: row;
+		justify-content: space-between;
+		align-items: center;
+	}
+}
+
+.som-catalog-bar {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	margin-bottom: 20px;
+}
+
+@media (min-width: 600px) {
+	.som-catalog-bar {
+		flex-direction: row;
+		align-items: center;
+	}
+}
+
+.som-catalog-search-wrap {
+	flex: 1;
+}
+
+.som-catalog-filters {
+	display: flex;
+	gap: 10px;
+}
+
+.som-catalog-table-wrap {
+	overflow-x: auto;
+	margin-bottom: 16px;
+}
+
+.som-catalog-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.95rem;
+}
+
+.som-catalog-table th {
+	background: #f1f5f9;
+	color: #334155;
+	font-weight: 700;
+	text-align: left;
+	padding: 12px 14px;
+	border-bottom: 2px solid #e2e8f0;
+}
+
+.som-catalog-table td {
+	padding: 12px 14px;
+	border-bottom: 1px solid #e2e8f0;
+	vertical-align: middle;
+}
+
+.som-catalog-table tr:hover td {
+	background: #f8fafc;
+}
+
+.som-cat-thumb-box {
+	width: 48px;
+	height: 48px;
+	border-radius: 6px;
+	overflow: hidden;
+	background: #f1f5f9;
+	border: 1px solid #cbd5e1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.som-cat-thumb-box img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.som-cat-placeholder {
+	font-size: 1.5rem;
+}
+
+.som-cat-product-info strong {
+	display: block;
+	font-size: 0.95rem;
+	color: #0f172a;
+}
+
+.som-cat-meta-tag {
+	font-size: 0.8rem;
+	color: #64748b;
+}
+
+.som-cat-price {
+	font-weight: 700;
+	color: #16a34a;
+}
+
+.som-cat-price del {
+	color: #94a3b8;
+	font-weight: 400;
+	font-size: 0.85rem;
+	margin-right: 4px;
+}
+
+.som-cat-badge {
+	display: inline-block;
+	font-size: 0.75rem;
+	font-weight: 700;
+	padding: 3px 8px;
+	border-radius: 12px;
+	text-transform: uppercase;
+}
+
+.som-cat-badge.instock { background: #dcfce7; color: #15803d; }
+.som-cat-badge.outofstock { background: #fee2e2; color: #b91c1c; }
+.som-cat-badge.active { background: #dbeafe; color: #1e40af; }
+.som-cat-badge.inactive { background: #f1f5f9; color: #64748b; }
+
+.som-cat-actions {
+	display: flex;
+	gap: 6px;
+}
+
+.som-btn-icon {
+	padding: 6px 10px;
+	font-size: 0.85rem;
+	font-weight: 600;
+	border-radius: 6px;
+	border: 1px solid #cbd5e1;
+	background: #ffffff;
+	cursor: pointer;
+	transition: all 0.2s;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.som-btn-icon:hover {
+	background: #f1f5f9;
+	border-color: #94a3b8;
+}
+
+.som-btn-icon.danger {
+	color: #ef4444;
+	border-color: #fca5a5;
+}
+
+.som-btn-icon.danger:hover {
+	background: #fee2e2;
+}
+
+/* Modals */
+.som-modal-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(15, 23, 42, 0.6);
+	backdrop-filter: blur(4px);
+	z-index: 9999;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 20px;
+}
+
+.som-modal-content {
+	background: #ffffff;
+	border-radius: 12px;
+	width: 100%;
+	max-width: 580px;
+	max-height: 90vh;
+	overflow-y: auto;
+	box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+	padding: 24px;
+	position: relative;
+}
+
+.som-modal-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	border-bottom: 1px solid #e2e8f0;
+	padding-bottom: 14px;
+	margin-bottom: 18px;
+}
+
+.som-modal-header h3 {
+	margin: 0;
+	font-size: 1.25rem;
+	color: #0f172a;
+}
+
+.som-modal-close {
+	background: transparent;
+	border: none;
+	font-size: 1.4rem;
+	cursor: pointer;
+	color: #64748b;
+	padding: 4px;
+}
+
+.som-master-search-results {
+	max-height: 200px;
+	overflow-y: auto;
+	border: 1px solid #e2e8f0;
+	border-radius: 8px;
+	margin-top: 8px;
+	margin-bottom: 16px;
+}
+
+.som-master-item {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 10px 14px;
+	border-bottom: 1px solid #f1f5f9;
+	cursor: pointer;
+	transition: background 0.2s;
+}
+
+.som-master-item:hover, .som-master-item.selected {
+	background: #eff6ff;
+}
+
+.som-master-item-info {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.som-catalog-pagination {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding-top: 14px;
+	border-top: 1px solid #e2e8f0;
+	font-size: 0.9rem;
+	color: #64748b;
+}
+
+.som-pagination-btns {
+	display: flex;
+	gap: 8px;
+}

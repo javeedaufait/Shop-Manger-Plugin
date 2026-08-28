@@ -3,7 +3,7 @@
  * Plugin Name: Shop Onboarding Manager
  * Plugin URI:  https://example.com/shop-onboarding-manager
  * Description: MVP foundation for onboarding supermarkets and grocery shops.
- * Version:     1.0.0
+ * Version:     1.3.0
  * Author:      Nearmart
  * Text Domain: shop-onboarding-manager
  * Domain Path: /languages
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants.
-define( 'SOM_VERSION', '1.0.0' );
+define( 'SOM_VERSION', '1.3.0' );
 define( 'SOM_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SOM_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'SOM_PLUGIN_FILE', __FILE__ );
@@ -30,6 +30,9 @@ require_once SOM_PLUGIN_DIR . 'includes/class-som-merchant-manager.php';
 require_once SOM_PLUGIN_DIR . 'includes/class-som-merchant-dashboard.php';
 require_once SOM_PLUGIN_DIR . 'includes/class-som-form-handler.php';
 require_once SOM_PLUGIN_DIR . 'includes/class-som-admin-manager.php';
+require_once SOM_PLUGIN_DIR . 'includes/class-som-catalog-repository.php';
+require_once SOM_PLUGIN_DIR . 'includes/class-som-master-product.php';
+require_once SOM_PLUGIN_DIR . 'includes/class-som-catalog-permissions.php';
 require_once SOM_PLUGIN_DIR . 'includes/class-som-plugin.php';
 
 /**

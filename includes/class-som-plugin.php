@@ -52,6 +52,9 @@ class SOM_Plugin {
 		SOM_Merchant_Dashboard::init();
 		SOM_Form_Handler::init();
 		SOM_Admin_Manager::init();
+		SOM_Catalog_Repository::init();
+		SOM_Master_Product::init();
+		SOM_Catalog_Permissions::init();
 	}
 
 	/**
@@ -65,8 +68,14 @@ class SOM_Plugin {
 		// Seed default taxonomy terms.
 		SOM_Taxonomies::seed_default_statuses();
 
-		// Add merchant custom role.
+		// Add merchant & field agent custom roles.
 		SOM_Roles::register_roles();
+
+		// Register Brand taxonomy for WooCommerce products.
+		SOM_Master_Product::register_brand_taxonomy();
+
+		// Create/Upgrade custom database table for shop catalogs.
+		SOM_Catalog_Repository::create_table();
 
 		// Auto-create pages if they do not exist.
 		self::create_onboarding_page();
