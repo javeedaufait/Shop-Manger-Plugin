@@ -140,6 +140,9 @@ class SOM_Merchant_Dashboard {
 		$categories = array();
 
 		foreach ( $raw_products as $p ) {
+			if ( isset( $p->status ) && in_array( $p->status, array( 'pending_setup', 'deleted' ), true ) ) {
+				continue;
+			}
 			$item = nearmart_format_catalog_item( $p );
 			if ( ! $item ) {
 				continue;

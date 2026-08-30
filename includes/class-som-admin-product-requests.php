@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin Product Requests Management Module (Enhanced Master Creation & Linking).
+ * Admin Product Requests Management Module (Approved – Ready to Add Workflow).
  *
  * @package Shop_Onboarding_Manager
  */
@@ -111,6 +111,34 @@ class SOM_Admin_Product_Requests {
 	}
 
 	/**
+	 * Ensure shop product relationship exists with status 'pending_setup'.
+	 *
+	 * @param int $shop_id           Shop Post ID.
+	 * @param int $master_product_id WooCommerce Master Product ID.
+	 */
+	private static function ensure_pending_shop_product( $shop_id, $master_product_id ) {
+		$shop_id           = absint( $shop_id );
+		$master_product_id = absint( $master_product_id );
+
+		if ( ! $shop_id || ! $master_product_id ) {
+			return;
+		}
+
+		$existing = nearmart_get_shop_product( $shop_id, $master_product_id );
+		if ( ! $existing ) {
+			nearmart_add_shop_product(
+				$shop_id,
+				$master_product_id,
+				array(
+					'price'        => 0.00,
+					'stock_status' => 'instock',
+					'status'       => 'pending_setup',
+				)
+			);
+		}
+	}
+
+	/**
 	 * AJAX endpoint: Create New WooCommerce Master Product from Merchant Request.
 	 */
 	public static function ajax_create_master_from_request() {
@@ -131,6 +159,11 @@ class SOM_Admin_Product_Requests {
 
 		if ( ! $request_id || empty( $title ) ) {
 			wp_send_json_error( array( 'message' => __( 'Request ID and Master Product Title are required.', 'shop-onboarding-manager' ) ) );
+		}
+
+		$req = SOM_Product_Request_Repository::get_request_by_id( $request_id );
+		if ( ! $req ) {
+			wp_send_json_error( array( 'message' => __( 'Product request not found.', 'shop-onboarding-manager' ) ) );
 		}
 
 		// Create WooCommerce Master Product Post
@@ -163,18 +196,21 @@ class SOM_Admin_Product_Requests {
 			wp_set_object_terms( $post_id, $category, 'product_cat', true );
 		}
 
-		// Link product & set status to completed
-		$updated = SOM_Product_Request_Repository::update_request_status( $request_id, 'completed', $admin_notes, $post_id );
+		// Ensure shop product exists with pending_setup status
+		self::ensure_pending_shop_product( $req->shop_id, $post_id );
+
+		// Set request status to 'approved' (Approved – Ready to Add)
+		$updated = SOM_Product_Request_Repository::update_request_status( $request_id, 'approved', $admin_notes, $post_id );
 
 		if ( ! $updated ) {
-			wp_send_json_error( array( 'message' => __( 'Master product created, but failed to link request status.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Master product created, but failed to update request status.', 'shop-onboarding-manager' ) ) );
 		}
 
 		$edit_url = admin_url( 'post.php?post=' . $post_id . '&action=edit' );
 
 		wp_send_json_success(
 			array(
-				'message'      => __( 'WooCommerce master product created successfully and linked to request!', 'shop-onboarding-manager' ),
+				'message'      => __( 'Master product created! Request approved and ready for merchant setup.', 'shop-onboarding-manager' ),
 				'product_id'   => $post_id,
 				'product_name' => $title,
 				'edit_url'     => $edit_url,
@@ -201,9 +237,14 @@ class SOM_Admin_Product_Requests {
 			wp_send_json_error( array( 'message' => __( 'Invalid request ID.', 'shop-onboarding-manager' ) ) );
 		}
 
-		// Validation Rule: Cannot set status to completed without a linked master product
-		if ( 'completed' === $status && empty( $master_product_id ) ) {
-			wp_send_json_error( array( 'message' => __( 'A master product must be created or linked before marking a request as Completed.', 'shop-onboarding-manager' ) ) );
+		$req = SOM_Product_Request_Repository::get_request_by_id( $request_id );
+		if ( ! $req ) {
+			wp_send_json_error( array( 'message' => __( 'Product request not found.', 'shop-onboarding-manager' ) ) );
+		}
+
+		// Validation Rule: Cannot set status to approved or completed without a linked master product
+		if ( in_array( $status, array( 'approved', 'completed' ), true ) && empty( $master_product_id ) ) {
+			wp_send_json_error( array( 'message' => __( 'A master product must be created or linked before approving or completing a request.', 'shop-onboarding-manager' ) ) );
 		}
 
 		if ( $master_product_id ) {
@@ -211,6 +252,7 @@ class SOM_Admin_Product_Requests {
 			if ( ! $p || 'product' !== $p->post_type ) {
 				wp_send_json_error( array( 'message' => __( 'Invalid WooCommerce master product ID.', 'shop-onboarding-manager' ) ) );
 			}
+			self::ensure_pending_shop_product( $req->shop_id, $master_product_id );
 		}
 
 		$updated = SOM_Product_Request_Repository::update_request_status( $request_id, $status, $admin_notes, $master_product_id );
@@ -241,7 +283,7 @@ class SOM_Admin_Product_Requests {
 				&#128221; <?php esc_html_e( 'Merchant Product Requests', 'shop-onboarding-manager' ); ?>
 			</h1>
 			<p style="color: #64748b; font-size: 0.95rem; margin-top: 4px; margin-bottom: 24px;">
-				<?php esc_html_e( 'Review new product requests submitted by merchants. Create a new master product or link an existing one before marking a request as Completed.', 'shop-onboarding-manager' ); ?>
+				<?php esc_html_e( 'Review merchant product requests. Create or link a master product to approve requests. Merchants will then configure price & stock in their catalog.', 'shop-onboarding-manager' ); ?>
 			</p>
 
 			<!-- Filter Bar -->
@@ -253,9 +295,10 @@ class SOM_Admin_Product_Requests {
 					<div style="display: flex; gap: 10px;">
 						<select id="som_req_status_filter" class="postform" style="height: 40px; border-radius: 6px;">
 							<option value="all"><?php esc_html_e( 'All Statuses', 'shop-onboarding-manager' ); ?></option>
-							<option value="pending"><?php esc_html_e( 'Pending', 'shop-onboarding-manager' ); ?></option>
-							<option value="reviewed"><?php esc_html_e( 'Reviewed', 'shop-onboarding-manager' ); ?></option>
-							<option value="completed"><?php esc_html_e( 'Completed', 'shop-onboarding-manager' ); ?></option>
+							<option value="pending"><?php esc_html_e( 'Pending Review', 'shop-onboarding-manager' ); ?></option>
+							<option value="reviewed"><?php esc_html_e( 'Under Review', 'shop-onboarding-manager' ); ?></option>
+							<option value="approved"><?php esc_html_e( 'Approved – Ready to Add', 'shop-onboarding-manager' ); ?></option>
+							<option value="completed"><?php esc_html_e( 'Added to Catalog', 'shop-onboarding-manager' ); ?></option>
 							<option value="rejected"><?php esc_html_e( 'Rejected', 'shop-onboarding-manager' ); ?></option>
 						</select>
 					</div>
@@ -349,11 +392,11 @@ class SOM_Admin_Product_Requests {
 
 					<div class="som-form-group" style="margin-bottom: 16px;">
 						<label for="som_create_admin_notes" class="som-label"><?php esc_html_e( 'Admin Note to Merchant (Optional)', 'shop-onboarding-manager' ); ?></label>
-						<input type="text" id="som_create_admin_notes" class="som-input" placeholder="e.g. Master product created and added to platform." />
+						<input type="text" id="som_create_admin_notes" class="som-input" placeholder="e.g. Approved – Ready to add to your catalog." />
 					</div>
 
 					<button type="submit" id="som_btn_create_master" class="button button-primary button-large" style="width: 100%;">
-						&#10133; <?php esc_html_e( 'Create Master Product & Mark Completed', 'shop-onboarding-manager' ); ?>
+						&#10133; <?php esc_html_e( 'Create Master Product & Approve Request', 'shop-onboarding-manager' ); ?>
 					</button>
 				</form>
 
@@ -369,9 +412,10 @@ class SOM_Admin_Product_Requests {
 					<div class="som-form-group" style="margin-bottom: 14px;">
 						<label for="som_req_status" class="som-label required"><?php esc_html_e( 'Request Status', 'shop-onboarding-manager' ); ?></label>
 						<select id="som_req_status" name="status" class="som-select" required>
-							<option value="pending"><?php esc_html_e( 'Pending (Awaiting Review)', 'shop-onboarding-manager' ); ?></option>
-							<option value="reviewed"><?php esc_html_e( 'Reviewed (In Progress)', 'shop-onboarding-manager' ); ?></option>
-							<option value="completed"><?php esc_html_e( 'Completed (Requires Linked Master)', 'shop-onboarding-manager' ); ?></option>
+							<option value="pending"><?php esc_html_e( 'Pending Review', 'shop-onboarding-manager' ); ?></option>
+							<option value="reviewed"><?php esc_html_e( 'Under Review', 'shop-onboarding-manager' ); ?></option>
+							<option value="approved"><?php esc_html_e( 'Approved – Ready to Add', 'shop-onboarding-manager' ); ?></option>
+							<option value="completed"><?php esc_html_e( 'Added to Catalog', 'shop-onboarding-manager' ); ?></option>
 							<option value="rejected"><?php esc_html_e( 'Rejected', 'shop-onboarding-manager' ); ?></option>
 						</select>
 					</div>
@@ -401,6 +445,30 @@ class SOM_Admin_Product_Requests {
 
 				function escapeHtml(str) {
 					return str ? $('<div>').text(str).html() : '';
+				}
+
+				function getStatusBadge(status) {
+					var label = status.toUpperCase();
+					var style = 'background:#f1f5f9; color:#475569;';
+
+					if (status === 'pending') {
+						label = 'Pending Review';
+						style = 'background:#fef3c7; color:#92400e;';
+					} else if (status === 'reviewed') {
+						label = 'Under Review';
+						style = 'background:#e0f2fe; color:#075985;';
+					} else if (status === 'approved') {
+						label = 'Approved – Ready to Add';
+						style = 'background:#dcfce7; color:#15803d; font-weight:700;';
+					} else if (status === 'completed') {
+						label = 'Added to Catalog';
+						style = 'background:#d1fae5; color:#065f46;';
+					} else if (status === 'rejected') {
+						label = 'Rejected';
+						style = 'background:#fee2e2; color:#991b1b;';
+					}
+
+					return '<span style="font-size:0.75rem; padding:3px 8px; border-radius:10px; font-weight:600; ' + style + '">' + label + '</span>';
 				}
 
 				function loadRequests() {
@@ -448,15 +516,7 @@ class SOM_Admin_Product_Requests {
 
 									html += '<td><span class="som-cat-meta-tag">' + (req.category ? escapeHtml(req.category) : '—') + '</span></td>';
 									html += '<td><span style="font-size:0.8rem; color:#64748b;">' + req.created_at + '</span></td>';
-
-									var badgeClass = req.status;
-									if (req.status === 'pending') badgeClass = 'inactive';
-									if (req.status === 'reviewed') badgeClass = 'active';
-									if (req.status === 'completed') badgeClass = 'instock';
-									if (req.status === 'rejected') badgeClass = 'outofstock';
-
-									html += '<td><span class="som-cat-badge ' + badgeClass + '">' + req.status.toUpperCase() + '</span></td>';
-
+									html += '<td>' + getStatusBadge(req.status) + '</td>';
 									html += '<td style="text-align:right;"><button type="button" class="button button-small som-btn-review-req" data-req=\'' + JSON.stringify(req) + '\'>Review</button></td>';
 									html += '</tr>';
 								});
@@ -507,7 +567,7 @@ class SOM_Admin_Product_Requests {
 					$('#som_create_unit').val(req.unit || '');
 					$('#som_create_barcode').val(req.barcode || '');
 					$('#som_create_desc').val(req.notes || '');
-					$('#som_create_admin_notes').val(req.admin_notes || 'Master product created and linked.');
+					$('#som_create_admin_notes').val(req.admin_notes || 'Approved – Ready to add to your catalog.');
 
 					// Populate Link/Update Form
 					$('#som_req_id').val(req.id);
@@ -576,7 +636,7 @@ class SOM_Admin_Product_Requests {
 							admin_notes: $('#som_create_admin_notes').val()
 						},
 						success: function(res) {
-							$btn.prop('disabled', false).html('&#10133; Create Master Product & Mark Completed');
+							$btn.prop('disabled', false).html('&#10133; Create Master Product & Approve Request');
 							if (res.success) {
 								alert(res.data.message || 'Master product created successfully!');
 								$('#som_admin_request_modal').hide();
@@ -586,7 +646,7 @@ class SOM_Admin_Product_Requests {
 							}
 						},
 						error: function() {
-							$btn.prop('disabled', false).html('&#10133; Create Master Product & Mark Completed');
+							$btn.prop('disabled', false).html('&#10133; Create Master Product & Approve Request');
 							alert('Server error creating master product.');
 						}
 					});

@@ -504,6 +504,8 @@ class SOM_Catalog_Repository {
 		if ( 'all' !== $parsed['status'] && ! empty( $parsed['status'] ) ) {
 			$where[]  = 'status = %s';
 			$values[] = sanitize_key( $parsed['status'] );
+		} else {
+			$where[]  = "status != 'pending_setup' AND status != 'deleted'";
 		}
 
 		if ( 'all' !== $parsed['stock_status'] && ! empty( $parsed['stock_status'] ) ) {

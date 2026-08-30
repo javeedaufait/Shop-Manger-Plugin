@@ -232,7 +232,7 @@ class SOM_Product_Request_Repository {
 		$status            = sanitize_key( $status );
 		$master_product_id = $master_product_id ? absint( $master_product_id ) : null;
 
-		if ( ! $request_id || ! in_array( $status, array( 'pending', 'reviewed', 'completed', 'rejected' ), true ) ) {
+		if ( ! $request_id || ! in_array( $status, array( 'pending', 'reviewed', 'approved', 'completed', 'rejected' ), true ) ) {
 			return false;
 		}
 
@@ -251,6 +251,16 @@ class SOM_Product_Request_Repository {
 		);
 
 		return false !== $updated;
+	}
+	public static function get_request_by_id( $request_id ) {
+		global $wpdb;
+		$request_id = absint( $request_id );
+		if ( ! $request_id ) {
+			return false;
+		}
+		$table_name = self::get_table_name();
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		return $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table_name} WHERE id = %d", $request_id ) );
 	}
 }
 
@@ -271,5 +281,10 @@ if ( ! function_exists( 'nearmart_has_pending_product_request' ) ) {
 if ( ! function_exists( 'nearmart_get_merchant_product_requests' ) ) {
 	function nearmart_get_merchant_product_requests( $shop_id, $merchant_id ) {
 		return SOM_Product_Request_Repository::get_merchant_requests( $shop_id, $merchant_id );
+	}
+}
+if ( ! function_exists( 'nearmart_get_product_request' ) ) {
+	function nearmart_get_product_request( $request_id ) {
+		return SOM_Product_Request_Repository::get_request_by_id( $request_id );
 	}
 }

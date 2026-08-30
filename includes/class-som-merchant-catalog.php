@@ -1,6 +1,6 @@
 <?php
 /**
- * Dedicated Merchant Catalog Module (Compact Scalable UI Upgrade).
+ * Dedicated Merchant Catalog Module (Exclusion & Auto-Sync Bugfixes).
  *
  * @package Shop_Onboarding_Manager
  */
@@ -23,6 +23,7 @@ class SOM_Merchant_Catalog {
 		// AJAX Endpoints for Product Requests
 		add_action( 'wp_ajax_som_merchant_request_new_product', array( __CLASS__, 'ajax_request_new_product' ) );
 		add_action( 'wp_ajax_som_merchant_get_product_requests', array( __CLASS__, 'ajax_get_merchant_product_requests' ) );
+		add_action( 'wp_ajax_som_merchant_fulfill_approved_request', array( __CLASS__, 'ajax_fulfill_approved_request' ) );
 	}
 
 	/**
@@ -90,11 +91,24 @@ class SOM_Merchant_Catalog {
 		$formatted = array();
 
 		foreach ( $requests as $r ) {
-			$master_title = '';
+			$master_title  = '';
+			$is_in_catalog = false;
+
 			if ( $r->master_product_id ) {
 				$mp = get_post( $r->master_product_id );
 				if ( $mp ) {
 					$master_title = $mp->post_title;
+				}
+
+				// Check if merchant ALREADY has this product active in their catalog
+				$sp = nearmart_get_shop_product( $shop_id, $r->master_product_id );
+				if ( $sp && 'active' === $sp->status ) {
+					$is_in_catalog = true;
+					// Auto-sync request status to completed if product is already active
+					if ( 'completed' !== $r->status ) {
+						SOM_Product_Request_Repository::update_request_status( $r->id, 'completed', $r->admin_notes, $r->master_product_id );
+						$r->status = 'completed';
+					}
 				}
 			}
 
@@ -107,6 +121,7 @@ class SOM_Merchant_Catalog {
 				'barcode'           => $r->barcode ? $r->barcode : '',
 				'notes'             => $r->notes ? $r->notes : '',
 				'status'            => $r->status,
+				'is_in_catalog'     => $is_in_catalog,
 				'master_product_id' => $r->master_product_id,
 				'master_title'      => $master_title,
 				'admin_notes'       => $r->admin_notes ? $r->admin_notes : '',
@@ -115,6 +130,78 @@ class SOM_Merchant_Catalog {
 		}
 
 		wp_send_json_success( array( 'requests' => $formatted ) );
+	}
+
+	/**
+	 * AJAX endpoint: Merchant Fulfill Approved Product Request (Add to Catalog).
+	 */
+	public static function ajax_fulfill_approved_request() {
+		check_ajax_referer( 'som_merchant_dashboard_nonce', 'nonce' );
+
+		$user_id = get_current_user_id();
+		$shop_id = nearmart_get_current_merchant_shop_id( $user_id );
+
+		if ( ! $shop_id || ! nearmart_user_can_manage_shop( $user_id, $shop_id ) ) {
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
+		}
+
+		$request_id     = isset( $_POST['request_id'] ) ? absint( $_POST['request_id'] ) : 0;
+		$price          = isset( $_POST['price'] ) ? floatval( $_POST['price'] ) : 0.00;
+		$sale_price     = ( isset( $_POST['sale_price'] ) && '' !== $_POST['sale_price'] ) ? floatval( $_POST['sale_price'] ) : null;
+		$stock_status   = isset( $_POST['stock_status'] ) ? sanitize_key( $_POST['stock_status'] ) : 'instock';
+		$stock_quantity = ( isset( $_POST['stock_quantity'] ) && '' !== $_POST['stock_quantity'] ) ? intval( $_POST['stock_quantity'] ) : null;
+		$shop_sku       = isset( $_POST['shop_sku'] ) ? sanitize_text_field( wp_unslash( $_POST['shop_sku'] ) ) : null;
+
+		if ( ! $request_id ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid product request ID.', 'shop-onboarding-manager' ) ) );
+		}
+
+		$req = SOM_Product_Request_Repository::get_request_by_id( $request_id );
+
+		if ( ! $req || (int) $req->shop_id !== (int) $shop_id ) {
+			wp_send_json_error( array( 'message' => __( 'Product request not found for your shop.', 'shop-onboarding-manager' ) ) );
+		}
+
+		if ( 'approved' !== $req->status || ! $req->master_product_id ) {
+			wp_send_json_error( array( 'message' => __( 'This product request is not in Approved – Ready to Add status.', 'shop-onboarding-manager' ) ) );
+		}
+
+		$master_product_id = absint( $req->master_product_id );
+
+		// Reuse existing shop product relationship if already created
+		$existing = nearmart_get_shop_product( $shop_id, $master_product_id );
+
+		if ( $existing ) {
+			nearmart_update_shop_product_by_id(
+				$existing->id,
+				array(
+					'price'          => $price,
+					'sale_price'     => $sale_price,
+					'stock_status'   => $stock_status,
+					'stock_quantity' => $stock_quantity,
+					'shop_sku'       => $shop_sku,
+					'status'         => 'active',
+				)
+			);
+		} else {
+			nearmart_add_shop_product(
+				$shop_id,
+				$master_product_id,
+				array(
+					'price'          => $price,
+					'sale_price'     => $sale_price,
+					'stock_status'   => $stock_status,
+					'stock_quantity' => $stock_quantity,
+					'shop_sku'       => $shop_sku,
+					'status'         => 'active',
+				)
+			);
+		}
+
+		// Update product request status to completed (Added to Catalog)
+		SOM_Product_Request_Repository::update_request_status( $request_id, 'completed', $req->admin_notes, $master_product_id );
+
+		wp_send_json_success( array( 'message' => __( 'Product added to your shop catalog successfully!', 'shop-onboarding-manager' ) ) );
 	}
 
 	/**
@@ -601,15 +688,68 @@ class SOM_Merchant_Catalog {
 
 		<!-- MODAL 4: Merchant View My Product Requests Modal -->
 		<div id="som_my_requests_modal" class="som-modal-overlay" style="display: none;">
-			<div class="som-modal-content" style="max-width: 720px;">
+			<div class="som-modal-content" style="max-width: 760px;">
 				<div class="som-modal-header">
 					<h3>&#128221; <?php esc_html_e( 'My Product Requests', 'shop-onboarding-manager' ); ?></h3>
 					<button type="button" class="som-modal-close" onclick="document.getElementById('som_my_requests_modal').style.display='none';">&times;</button>
 				</div>
 
-				<div id="som_my_requests_list_wrap" style="max-height: 400px; overflow-y: auto;">
+				<div id="som_my_requests_list_wrap" style="max-height: 440px; overflow-y: auto;">
 					<p style="padding:20px; text-align:center; color:#64748b;">&#128259; Loading your requests...</p>
 				</div>
+			</div>
+		</div>
+
+		<!-- MODAL 5: Fulfill Approved Product Request (Add to My Catalog) -->
+		<div id="som_fulfill_request_modal" class="som-modal-overlay" style="display: none;">
+			<div class="som-modal-content" style="max-width: 600px;">
+				<div class="som-modal-header">
+					<h3>&#10133; <?php esc_html_e( 'Add Approved Product to My Catalog', 'shop-onboarding-manager' ); ?></h3>
+					<button type="button" class="som-modal-close" onclick="document.getElementById('som_fulfill_request_modal').style.display='none';">&times;</button>
+				</div>
+
+				<form id="som_form_fulfill_approved_request">
+					<input type="hidden" id="som_fulfill_req_id" name="request_id" value="" />
+
+					<div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+						<strong id="som_fulfill_title" style="font-size: 1.05rem; color: #166534; display: block;"></strong>
+						<div id="som_fulfill_meta" style="font-size: 0.82rem; color: #15803d; margin-top: 4px;"></div>
+					</div>
+
+					<div class="som-form-row">
+						<div class="som-form-group">
+							<label for="som_fulfill_price" class="som-label required"><?php esc_html_e( 'Shop Price (₹)', 'shop-onboarding-manager' ); ?></label>
+							<input type="number" step="0.01" id="som_fulfill_price" name="price" class="som-input" required placeholder="0.00" />
+						</div>
+						<div class="som-form-group">
+							<label for="som_fulfill_sale_price" class="som-label"><?php esc_html_e( 'Sale Price (₹)', 'shop-onboarding-manager' ); ?></label>
+							<input type="number" step="0.01" id="som_fulfill_sale_price" name="sale_price" class="som-input" placeholder="Optional" />
+						</div>
+					</div>
+
+					<div class="som-form-row">
+						<div class="som-form-group">
+							<label for="som_fulfill_stock_status" class="som-label"><?php esc_html_e( 'Availability', 'shop-onboarding-manager' ); ?></label>
+							<select id="som_fulfill_stock_status" name="stock_status" class="som-select">
+								<option value="instock"><?php esc_html_e( 'Available', 'shop-onboarding-manager' ); ?></option>
+								<option value="outofstock"><?php esc_html_e( 'Unavailable', 'shop-onboarding-manager' ); ?></option>
+							</select>
+						</div>
+						<div class="som-form-group">
+							<label for="som_fulfill_stock_quantity" class="som-label"><?php esc_html_e( 'Stock Qty', 'shop-onboarding-manager' ); ?></label>
+							<input type="number" id="som_fulfill_stock_quantity" name="stock_quantity" class="som-input" placeholder="Optional" />
+						</div>
+					</div>
+
+					<div class="som-form-group" style="margin-bottom: 16px;">
+						<label for="som_fulfill_shop_sku" class="som-label"><?php esc_html_e( 'Shop SKU (Optional)', 'shop-onboarding-manager' ); ?></label>
+						<input type="text" id="som_fulfill_shop_sku" name="shop_sku" class="som-input" placeholder="e.g. STORE-ITEM-01" />
+					</div>
+
+					<button type="submit" id="som_btn_save_fulfill" class="som-submit-btn">
+						&#128190; <?php esc_html_e( 'Add Product to My Catalog', 'shop-onboarding-manager' ); ?>
+					</button>
+				</form>
 			</div>
 		</div>
 
@@ -1203,6 +1343,35 @@ class SOM_Merchant_Catalog {
 					$('#som_my_requests_modal').show();
 				});
 
+				function getMerchantStatusBadge(status, isInCatalog) {
+					var label = status.toUpperCase();
+					var style = 'background:#f1f5f9; color:#475569;';
+
+					if (status === 'pending') {
+						label = 'Pending Review';
+						style = 'background:#fef3c7; color:#92400e;';
+					} else if (status === 'reviewed') {
+						label = 'Under Review';
+						style = 'background:#e0f2fe; color:#075985;';
+					} else if (status === 'approved') {
+						if (isInCatalog) {
+							label = 'Added to Catalog';
+							style = 'background:#d1fae5; color:#065f46; font-weight:700;';
+						} else {
+							label = 'Approved – Ready to Add';
+							style = 'background:#dcfce7; color:#15803d; font-weight:700;';
+						}
+					} else if (status === 'completed') {
+						label = 'Added to Catalog';
+						style = 'background:#d1fae5; color:#065f46;';
+					} else if (status === 'rejected') {
+						label = 'Rejected';
+						style = 'background:#fee2e2; color:#991b1b;';
+					}
+
+					return '<span class="som-cat-badge" style="font-size:0.75rem; padding:4px 8px; border-radius:10px; font-weight:600; ' + style + '">' + label + '</span>';
+				}
+
 				function loadMyProductRequests() {
 					var $wrap = $('#som_my_requests_list_wrap');
 					$wrap.html('<p style="padding:20px; text-align:center; color:#64748b;">&#128259; Loading your requests...</p>');
@@ -1219,7 +1388,7 @@ class SOM_Merchant_Catalog {
 									return;
 								}
 
-								var html = '<table class="som-catalog-table"><thead><tr><th>Product Name</th><th>Details</th><th>Date</th><th>Status</th></tr></thead><tbody>';
+								var html = '<table class="som-catalog-table" style="width:100%;"><thead><tr><th>Product Name</th><th>Details</th><th>Status</th><th style="text-align:right;">Action</th></tr></thead><tbody>';
 								$.each(list, function(i, r) {
 									html += '<tr>';
 									html += '<td><strong>' + escapeHtml(r.product_name) + '</strong></td>';
@@ -1234,15 +1403,17 @@ class SOM_Merchant_Catalog {
 									}
 									html += '</td>';
 
-									html += '<td><span style="font-size:0.8rem; color:#64748b;">' + r.created_at + '</span></td>';
+									html += '<td>' + getMerchantStatusBadge(r.status, r.is_in_catalog) + '</td>';
 
-									var badgeClass = r.status;
-									if (r.status === 'pending') badgeClass = 'inactive';
-									if (r.status === 'reviewed') badgeClass = 'active';
-									if (r.status === 'completed') badgeClass = 'instock';
-									if (r.status === 'rejected') badgeClass = 'outofstock';
-
-									html += '<td><span class="som-cat-badge ' + badgeClass + '">' + r.status.toUpperCase() + '</span></td>';
+									html += '<td style="text-align:right;">';
+									if (r.status === 'approved' && !r.is_in_catalog) {
+										html += '<button type="button" class="som-submit-btn som-btn-open-fulfill" data-req=\'' + JSON.stringify(r) + '\' style="width:auto; padding:6px 12px; font-size:0.8rem; font-weight:700; background:#16a34a;">&#10133; Add to My Catalog</button>';
+									} else if (r.status === 'completed' || r.is_in_catalog) {
+										html += '<span style="font-size:0.8rem; color:#16a34a; font-weight:600;">&#10003; Added to Catalog</span>';
+									} else {
+										html += '<span style="font-size:0.8rem; color:#94a3b8;">' + r.created_at + '</span>';
+									}
+									html += '</td>';
 									html += '</tr>';
 								});
 								html += '</tbody></table>';
@@ -1254,6 +1425,67 @@ class SOM_Merchant_Catalog {
 						}
 					});
 				}
+
+				// Open Fulfill Approved Request Modal
+				$(document).on('click', '.som-btn-open-fulfill', function() {
+					var req = $(this).data('req');
+					if (!req) return;
+
+					$('#som_fulfill_req_id').val(req.id);
+					var title = req.master_title ? req.master_title : req.product_name;
+					$('#som_fulfill_title').text('Selected Product: ' + title);
+
+					var meta = [];
+					if (req.brand) meta.push('Brand: ' + escapeHtml(req.brand));
+					if (req.category) meta.push('Category: ' + escapeHtml(req.category));
+					if (req.unit) meta.push('Unit: ' + escapeHtml(req.unit));
+					$('#som_fulfill_meta').html(meta.join(' &bull; '));
+
+					$('#som_fulfill_price').val('');
+					$('#som_fulfill_sale_price').val('');
+					$('#som_fulfill_stock_quantity').val('');
+					$('#som_fulfill_shop_sku').val('');
+
+					$('#som_my_requests_modal').hide();
+					$('#som_fulfill_request_modal').show();
+					$('#som_fulfill_price').focus();
+				});
+
+				// Submit Fulfill Form
+				$('#som_form_fulfill_approved_request').on('submit', function(e) {
+					e.preventDefault();
+					var $btn = $('#som_btn_save_fulfill');
+					$btn.prop('disabled', true).text('Saving to Catalog...');
+
+					$.ajax({
+						url: ajaxUrl,
+						type: 'POST',
+						data: {
+							action: 'som_merchant_fulfill_approved_request',
+							nonce: nonce,
+							request_id: $('#som_fulfill_req_id').val(),
+							price: $('#som_fulfill_price').val(),
+							sale_price: $('#som_fulfill_sale_price').val(),
+							stock_status: $('#som_fulfill_stock_status').val(),
+							stock_quantity: $('#som_fulfill_stock_quantity').val(),
+							shop_sku: $('#som_fulfill_shop_sku').val()
+						},
+						success: function(res) {
+							$btn.prop('disabled', false).html('&#128190; Add Product to My Catalog');
+							if (res.success) {
+								alert(res.data.message || 'Product added to your shop catalog successfully!');
+								$('#som_fulfill_request_modal').hide();
+								loadCatalog(1);
+							} else {
+								alert(res.data.message || 'Error adding product.');
+							}
+						},
+						error: function() {
+							$btn.prop('disabled', false).html('&#128190; Add Product to My Catalog');
+							alert('Server error adding product. Please try again.');
+						}
+					});
+				});
 			});
 		}
 		</script>
