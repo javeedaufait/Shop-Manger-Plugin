@@ -1,6 +1,6 @@
 <?php
 /**
- * Frontend Merchant Dashboard Module.
+ * Merchant Dashboard Core Module (Phase 2 HYBRID Catalog Backend).
  *
  * @package Shop_Onboarding_Manager
  */
@@ -15,45 +15,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 class SOM_Merchant_Dashboard {
 
 	/**
-	 * Agreement Version constant.
-	 */
-	const AGREEMENT_VERSION = 'v1.0';
-
-	/**
 	 * Initialize hooks.
 	 */
 	public static function init() {
 		add_shortcode( 'som_merchant_dashboard', array( __CLASS__, 'render_dashboard_shortcode' ) );
 
-		// AJAX endpoints for dashboard actions.
+		// AJAX Endpoints
 		add_action( 'wp_ajax_som_merchant_confirm_details', array( __CLASS__, 'ajax_confirm_details' ) );
 		add_action( 'wp_ajax_som_merchant_accept_agreement', array( __CLASS__, 'ajax_accept_agreement' ) );
 		add_action( 'wp_ajax_som_merchant_request_change', array( __CLASS__, 'ajax_request_change' ) );
 
-		// AJAX endpoints for catalog management (shared APIs).
+		// Catalog AJAX Endpoints (Phase 2 HYBRID Catalog)
 		add_action( 'wp_ajax_som_merchant_get_catalog', array( __CLASS__, 'ajax_get_catalog' ) );
 		add_action( 'wp_ajax_som_merchant_search_master_products', array( __CLASS__, 'ajax_search_master_products' ) );
 		add_action( 'wp_ajax_som_merchant_add_catalog_product', array( __CLASS__, 'ajax_add_catalog_product' ) );
+		add_action( 'wp_ajax_som_merchant_add_standalone_product', array( __CLASS__, 'ajax_add_standalone_product' ) );
+		add_action( 'wp_ajax_som_merchant_check_similar_master_products', array( __CLASS__, 'ajax_check_similar_master_products' ) );
 		add_action( 'wp_ajax_som_merchant_update_catalog_product', array( __CLASS__, 'ajax_update_catalog_product' ) );
 		add_action( 'wp_ajax_som_merchant_remove_catalog_product', array( __CLASS__, 'ajax_remove_catalog_product' ) );
-	}
-
-	/**
-	 * Evaluate and update shop status to 'committed' if conditions are met.
-	 *
-	 * @param int $shop_id Shop Post ID.
-	 * @return bool
-	 */
-	public static function evaluate_commitment_status( $shop_id ) {
-		$agreement_accepted = (bool) get_post_meta( $shop_id, 'som_agreement_accepted', true );
-		$is_verified        = has_term( 'verified', 'shop_status', $shop_id );
-
-		if ( $is_verified && $agreement_accepted ) {
-			wp_set_object_terms( $shop_id, 'committed', 'shop_status' );
-			return true;
-		}
-
-		return false;
 	}
 
 	/**
@@ -63,26 +42,17 @@ class SOM_Merchant_Dashboard {
 		check_ajax_referer( 'som_merchant_dashboard_nonce', 'nonce' );
 
 		$user_id = get_current_user_id();
-		if ( ! $user_id || ! nearmart_user_can_manage_shop_catalog( $user_id ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ) );
-		}
-
 		$shop_id = nearmart_get_current_merchant_shop_id( $user_id );
-		if ( ! $shop_id ) {
-			wp_send_json_error( array( 'message' => __( 'No shop linked to your account.', 'shop-onboarding-manager' ) ) );
+
+		if ( ! $shop_id || ! nearmart_user_can_manage_shop( $user_id, $shop_id ) ) {
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
 		}
 
-		$now = current_time( 'mysql' );
-		update_post_meta( $shop_id, 'som_details_confirmed', 1 );
-		update_post_meta( $shop_id, 'som_details_confirmed_at', $now );
+		update_post_meta( $shop_id, 'som_details_confirmed', true );
+		update_post_meta( $shop_id, 'som_details_confirmed_at', current_time( 'mysql' ) );
 		update_post_meta( $shop_id, 'som_details_confirmed_by', $user_id );
 
-		wp_send_json_success(
-			array(
-				'message'      => __( 'Shop details successfully confirmed.', 'shop-onboarding-manager' ),
-				'confirmed_at' => $now,
-			)
-		);
+		wp_send_json_success( array( 'message' => __( 'Shop details confirmed successfully!', 'shop-onboarding-manager' ) ) );
 	}
 
 	/**
@@ -92,82 +62,50 @@ class SOM_Merchant_Dashboard {
 		check_ajax_referer( 'som_merchant_dashboard_nonce', 'nonce' );
 
 		$user_id = get_current_user_id();
-		if ( ! $user_id || ! nearmart_user_can_manage_shop_catalog( $user_id ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ) );
-		}
-
 		$shop_id = nearmart_get_current_merchant_shop_id( $user_id );
-		if ( ! $shop_id ) {
-			wp_send_json_error( array( 'message' => __( 'No shop linked to your account.', 'shop-onboarding-manager' ) ) );
+
+		if ( ! $shop_id || ! nearmart_user_can_manage_shop( $user_id, $shop_id ) ) {
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
 		}
 
-		$now = current_time( 'mysql' );
-		update_post_meta( $shop_id, 'som_agreement_accepted', 1 );
-		update_post_meta( $shop_id, 'som_agreement_accepted_at', $now );
+		update_post_meta( $shop_id, 'som_agreement_accepted', true );
+		update_post_meta( $shop_id, 'som_agreement_version', '1.0' );
+		update_post_meta( $shop_id, 'som_agreement_accepted_at', current_time( 'mysql' ) );
 		update_post_meta( $shop_id, 'som_agreement_accepted_by', $user_id );
-		update_post_meta( $shop_id, 'som_agreement_version', self::AGREEMENT_VERSION );
 
-		self::evaluate_commitment_status( $shop_id );
-
-		wp_send_json_success(
-			array(
-				'message'     => __( 'Participation agreement accepted successfully.', 'shop-onboarding-manager' ),
-				'accepted_at' => $now,
-				'version'     => self::AGREEMENT_VERSION,
-			)
-		);
+		wp_send_json_success( array( 'message' => __( 'Participation agreement accepted successfully!', 'shop-onboarding-manager' ) ) );
 	}
 
 	/**
-	 * AJAX endpoint: Request Data Correction.
+	 * AJAX endpoint: Request Change / Update Notes.
 	 */
 	public static function ajax_request_change() {
 		check_ajax_referer( 'som_merchant_dashboard_nonce', 'nonce' );
 
 		$user_id = get_current_user_id();
-		if ( ! $user_id || ! nearmart_user_can_manage_shop_catalog( $user_id ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ) );
-		}
-
 		$shop_id = nearmart_get_current_merchant_shop_id( $user_id );
-		if ( ! $shop_id ) {
-			wp_send_json_error( array( 'message' => __( 'No shop linked to your account.', 'shop-onboarding-manager' ) ) );
+
+		if ( ! $shop_id || ! nearmart_user_can_manage_shop( $user_id, $shop_id ) ) {
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
 		}
 
-		$field_name    = isset( $_POST['field_name'] ) ? sanitize_text_field( wp_unslash( $_POST['field_name'] ) ) : '';
-		$requested_val = isset( $_POST['requested_value'] ) ? sanitize_textarea_field( wp_unslash( $_POST['requested_value'] ) ) : '';
-
-		if ( empty( $field_name ) || empty( $requested_val ) ) {
-			wp_send_json_error( array( 'message' => __( 'Field name and requested value are required.', 'shop-onboarding-manager' ) ) );
+		$notes = isset( $_POST['notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['notes'] ) ) : '';
+		if ( empty( $notes ) ) {
+			wp_send_json_error( array( 'message' => __( 'Please enter details for your change request.', 'shop-onboarding-manager' ) ) );
 		}
 
-		$requests = get_post_meta( $shop_id, 'som_change_requests', true );
-		if ( ! is_array( $requests ) ) {
-			$requests = array();
-		}
+		$existing_concerns = get_post_meta( $shop_id, 'som_concerns', true );
+		$timestamp         = date_i18n( 'M j, Y g:i a' );
+		$new_entry         = "[$timestamp] $notes";
+		$updated_concerns  = ! empty( $existing_concerns ) ? $existing_concerns . "\n\n" . $new_entry : $new_entry;
 
-		$new_request = array(
-			'id'              => uniqid( 'req_' ),
-			'field_name'      => $field_name,
-			'requested_value' => $requested_val,
-			'requested_by'    => $user_id,
-			'requested_at'    => current_time( 'mysql' ),
-			'status'          => 'pending',
-		);
+		update_post_meta( $shop_id, 'som_concerns', $updated_concerns );
 
-		$requests[] = $new_request;
-		update_post_meta( $shop_id, 'som_change_requests', $requests );
-
-		wp_send_json_success(
-			array(
-				'message' => __( 'Change request submitted for admin review.', 'shop-onboarding-manager' ),
-				'request' => $new_request,
-			)
-		);
+		wp_send_json_success( array( 'message' => __( 'Your change request has been submitted to admin.', 'shop-onboarding-manager' ) ) );
 	}
 
 	/**
-	 * AJAX endpoint: Get Merchant Catalog List.
+	 * AJAX endpoint: Get Merchant Shop Catalog with Search, Filter & Pagination (HYBRID model).
 	 */
 	public static function ajax_get_catalog() {
 		check_ajax_referer( 'som_merchant_dashboard_nonce', 'nonce' );
@@ -176,15 +114,15 @@ class SOM_Merchant_Dashboard {
 		$shop_id = nearmart_get_current_merchant_shop_id( $user_id );
 
 		if ( ! $shop_id || ! nearmart_user_can_manage_shop( $user_id, $shop_id ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized catalog access.', 'shop-onboarding-manager' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
 		}
 
 		$search       = isset( $_POST['search'] ) ? sanitize_text_field( wp_unslash( $_POST['search'] ) ) : '';
-		$status       = isset( $_POST['status'] ) ? sanitize_key( wp_unslash( $_POST['status'] ) ) : 'all';
-		$stock_status = isset( $_POST['stock_status'] ) ? sanitize_key( wp_unslash( $_POST['stock_status'] ) ) : 'all';
-		$page         = isset( $_POST['page'] ) ? absint( $_POST['page'] ) : 1;
-		$limit        = 10;
-		$offset       = ( max( 1, $page ) - 1 ) * $limit;
+		$status       = isset( $_POST['status'] ) ? sanitize_key( $_POST['status'] ) : 'all';
+		$stock_status = isset( $_POST['stock_status'] ) ? sanitize_key( $_POST['stock_status'] ) : 'all';
+		$page         = isset( $_POST['page'] ) ? max( 1, absint( $_POST['page'] ) ) : 1;
+		$limit        = 20;
+		$offset       = ( $page - 1 ) * $limit;
 
 		$raw_products = nearmart_get_shop_products(
 			$shop_id,
@@ -200,48 +138,23 @@ class SOM_Merchant_Dashboard {
 
 		$items = array();
 		foreach ( $raw_products as $p ) {
-			$product_id  = $p->product_id;
-			$master_post = get_post( $product_id );
-
-			if ( ! $master_post || 'product' !== $master_post->post_type ) {
+			$item = nearmart_format_catalog_item( $p );
+			if ( ! $item ) {
 				continue;
 			}
 
-			$title = $master_post->post_title;
-			$sku   = get_post_meta( $product_id, '_sku', true );
-
 			if ( ! empty( $search ) ) {
-				$match_title = false !== stripos( $title, $search );
-				$match_sku   = false !== stripos( $sku, $search );
-				$match_ssku  = false !== stripos( (string) $p->shop_sku, $search );
+				$match_title = false !== stripos( $item['title'], $search );
+				$match_brand = false !== stripos( $item['brand'], $search );
+				$match_sku   = false !== stripos( (string) $item['master_sku'], $search );
+				$match_ssku  = false !== stripos( (string) $item['shop_sku'], $search );
 
-				if ( ! $match_title && ! $match_sku && ! $match_ssku ) {
+				if ( ! $match_title && ! $match_brand && ! $match_sku && ! $match_ssku ) {
 					continue;
 				}
 			}
 
-			$cat_terms = wp_get_post_terms( $product_id, 'product_cat', array( 'fields' => 'names' ) );
-			$cat_name  = ! empty( $cat_terms ) ? $cat_terms[0] : __( 'Uncategorized', 'shop-onboarding-manager' );
-			$specs     = nearmart_get_master_product_specs( $product_id );
-			$thumb_url = get_the_post_thumbnail_url( $product_id, 'thumbnail' );
-
-			$items[] = array(
-				'id'             => $p->id,
-				'product_id'     => $p->product_id,
-				'title'          => $title,
-				'category'       => $cat_name,
-				'brand'          => $specs['brand_name'],
-				'unit'           => $specs['unit'],
-				'barcode'        => $specs['barcode'],
-				'master_sku'     => $sku,
-				'shop_sku'       => $p->shop_sku,
-				'price'          => number_format( (float) $p->price, 2, '.', '' ),
-				'sale_price'     => null !== $p->sale_price && '' !== $p->sale_price ? number_format( (float) $p->sale_price, 2, '.', '' ) : '',
-				'stock_quantity' => $p->stock_quantity,
-				'stock_status'   => $p->stock_status,
-				'status'         => $p->status,
-				'thumb_url'      => $thumb_url ? $thumb_url : '',
-			);
+			$items[] = $item;
 		}
 
 		$total_count = count( $items );
@@ -259,7 +172,7 @@ class SOM_Merchant_Dashboard {
 	}
 
 	/**
-	 * AJAX endpoint: Search WooCommerce Master Products to add (Phase 5).
+	 * AJAX endpoint: Search WooCommerce Master Products to add.
 	 */
 	public static function ajax_search_master_products() {
 		check_ajax_referer( 'som_merchant_dashboard_nonce', 'nonce' );
@@ -330,7 +243,7 @@ class SOM_Merchant_Dashboard {
 	}
 
 	/**
-	 * AJAX endpoint: Add Master Product to Merchant Shop Catalog (Phase 5).
+	 * AJAX endpoint: Add Master Product to Merchant Shop Catalog.
 	 */
 	public static function ajax_add_catalog_product() {
 		check_ajax_referer( 'som_merchant_dashboard_nonce', 'nonce' );
@@ -375,11 +288,131 @@ class SOM_Merchant_Dashboard {
 			wp_send_json_error( array( 'message' => __( 'Failed to add product to catalog.', 'shop-onboarding-manager' ) ) );
 		}
 
-		wp_send_json_success( array( 'message' => __( 'Product added to your shop catalog successfully!', 'shop-onboarding-manager' ) ) );
+		wp_send_json_success( array( 'message' => __( 'Master product added to your shop catalog successfully!', 'shop-onboarding-manager' ) ) );
 	}
 
 	/**
-	 * AJAX endpoint: Update Shop Product in Catalog.
+	 * AJAX endpoint: Add Standalone Product to Merchant Shop Catalog (product_id = NULL).
+	 */
+	public static function ajax_add_standalone_product() {
+		check_ajax_referer( 'som_merchant_dashboard_nonce', 'nonce' );
+
+		$user_id = get_current_user_id();
+		$shop_id = nearmart_get_current_merchant_shop_id( $user_id );
+
+		if ( ! $shop_id || ! nearmart_user_can_manage_shop( $user_id, $shop_id ) ) {
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
+		}
+
+		$custom_name     = isset( $_POST['custom_name'] ) ? sanitize_text_field( wp_unslash( $_POST['custom_name'] ) ) : '';
+		$custom_category = isset( $_POST['custom_category'] ) ? sanitize_text_field( wp_unslash( $_POST['custom_category'] ) ) : '';
+		$custom_brand    = isset( $_POST['custom_brand'] ) ? sanitize_text_field( wp_unslash( $_POST['custom_brand'] ) ) : '';
+		$custom_unit     = isset( $_POST['custom_unit'] ) ? sanitize_text_field( wp_unslash( $_POST['custom_unit'] ) ) : '';
+		$custom_barcode  = isset( $_POST['custom_barcode'] ) ? sanitize_text_field( wp_unslash( $_POST['custom_barcode'] ) ) : '';
+		$price           = isset( $_POST['price'] ) ? floatval( $_POST['price'] ) : 0.00;
+		$sale_price      = ( isset( $_POST['sale_price'] ) && '' !== $_POST['sale_price'] ) ? floatval( $_POST['sale_price'] ) : null;
+		$stock_quantity  = ( isset( $_POST['stock_quantity'] ) && '' !== $_POST['stock_quantity'] ) ? intval( $_POST['stock_quantity'] ) : null;
+		$stock_status    = isset( $_POST['stock_status'] ) ? sanitize_key( $_POST['stock_status'] ) : 'instock';
+		$status          = isset( $_POST['status'] ) ? sanitize_key( $_POST['status'] ) : 'active';
+		$shop_sku        = isset( $_POST['shop_sku'] ) ? sanitize_text_field( wp_unslash( $_POST['shop_sku'] ) ) : null;
+
+		if ( empty( $custom_name ) ) {
+			wp_send_json_error( array( 'message' => __( 'Product name is required.', 'shop-onboarding-manager' ) ) );
+		}
+
+		// Check duplicate standalone name in shop
+		global $wpdb;
+		$table = SOM_Catalog_Repository::get_table_name();
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$dup = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE shop_id = %d AND LOWER(custom_name) = LOWER(%s) AND status != 'deleted'", $shop_id, $custom_name ) );
+		if ( (int) $dup > 0 ) {
+			wp_send_json_error( array( 'message' => sprintf( __( 'A product named "%s" is already in your shop catalog.', 'shop-onboarding-manager' ), esc_html( $custom_name ) ) ) );
+		}
+
+		$insert_id = nearmart_add_standalone_shop_product(
+			$shop_id,
+			array(
+				'custom_name'     => $custom_name,
+				'custom_category' => $custom_category,
+				'custom_brand'    => $custom_brand,
+				'custom_unit'     => $custom_unit,
+				'custom_barcode'  => $custom_barcode,
+				'price'           => $price,
+				'sale_price'      => $sale_price,
+				'stock_quantity'  => $stock_quantity,
+				'stock_status'    => $stock_status,
+				'status'          => $status,
+				'shop_sku'        => $shop_sku,
+			)
+		);
+
+		if ( ! $insert_id ) {
+			wp_send_json_error( array( 'message' => __( 'Failed to add standalone product to catalog.', 'shop-onboarding-manager' ) ) );
+		}
+
+		wp_send_json_success( array( 'message' => __( 'Standalone product added to your catalog successfully!', 'shop-onboarding-manager' ) ) );
+	}
+
+	/**
+	 * AJAX endpoint: Check for similar master products when typing a standalone product name.
+	 */
+	public static function ajax_check_similar_master_products() {
+		check_ajax_referer( 'som_merchant_dashboard_nonce', 'nonce' );
+
+		$user_id = get_current_user_id();
+		$shop_id = nearmart_get_current_merchant_shop_id( $user_id );
+
+		if ( ! $shop_id || ! nearmart_user_can_manage_shop( $user_id, $shop_id ) ) {
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
+		}
+
+		$name = isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
+
+		if ( mb_strlen( trim( $name ) ) < 2 ) {
+			wp_send_json_success( array( 'suggestions' => array() ) );
+		}
+
+		global $wpdb;
+		$search_like = '%' . $wpdb->esc_like( trim( $name ) ) . '%';
+
+		$sql = "SELECT p.ID, p.post_title FROM {$wpdb->posts} p
+			WHERE p.post_type = 'product'
+			AND p.post_status = 'publish'
+			AND p.post_title LIKE %s
+			ORDER BY p.post_title ASC
+			LIMIT 3";
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$posts       = $wpdb->get_results( $wpdb->prepare( $sql, $search_like ) );
+		$suggestions = array();
+
+		if ( ! empty( $posts ) ) {
+			foreach ( $posts as $p ) {
+				$specs = nearmart_get_master_product_specs( $p->ID );
+				$cats  = wp_get_post_terms( $p->ID, 'product_cat', array( 'fields' => 'names' ) );
+
+				$reg_price = get_post_meta( $p->ID, '_regular_price', true );
+				if ( '' === $reg_price || null === $reg_price ) {
+					$reg_price = get_post_meta( $p->ID, '_price', true );
+				}
+				$sug_price = ( '' !== $reg_price && null !== $reg_price && is_numeric( $reg_price ) ) ? number_format( (float) $reg_price, 2, '.', '' ) : '';
+
+				$suggestions[] = array(
+					'product_id'      => $p->ID,
+					'title'           => $p->post_title,
+					'category'        => ! empty( $cats ) ? $cats[0] : '',
+					'brand'           => $specs['brand_name'],
+					'unit'            => $specs['unit'],
+					'suggested_price' => $sug_price,
+				);
+			}
+		}
+
+		wp_send_json_success( array( 'suggestions' => $suggestions ) );
+	}
+
+	/**
+	 * AJAX endpoint: Update Shop Product in Catalog (HYBRID Model).
 	 */
 	public static function ajax_update_catalog_product() {
 		check_ajax_referer( 'som_merchant_dashboard_nonce', 'nonce' );
@@ -391,6 +424,7 @@ class SOM_Merchant_Dashboard {
 			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
 		}
 
+		$id             = isset( $_POST['id'] ) ? absint( $_POST['id'] ) : 0;
 		$product_id     = isset( $_POST['product_id'] ) ? absint( $_POST['product_id'] ) : 0;
 		$price          = isset( $_POST['price'] ) ? floatval( $_POST['price'] ) : 0.00;
 		$sale_price     = ( isset( $_POST['sale_price'] ) && '' !== $_POST['sale_price'] ) ? floatval( $_POST['sale_price'] ) : null;
@@ -399,22 +433,52 @@ class SOM_Merchant_Dashboard {
 		$status         = isset( $_POST['status'] ) ? sanitize_key( $_POST['status'] ) : 'active';
 		$shop_sku       = isset( $_POST['shop_sku'] ) ? sanitize_text_field( wp_unslash( $_POST['shop_sku'] ) ) : null;
 
-		if ( ! $product_id || ! nearmart_has_shop_product( $shop_id, $product_id ) ) {
+		// Standalone fields
+		$custom_name     = isset( $_POST['custom_name'] ) ? sanitize_text_field( wp_unslash( $_POST['custom_name'] ) ) : null;
+		$custom_category = isset( $_POST['custom_category'] ) ? sanitize_text_field( wp_unslash( $_POST['custom_category'] ) ) : null;
+		$custom_brand    = isset( $_POST['custom_brand'] ) ? sanitize_text_field( wp_unslash( $_POST['custom_brand'] ) ) : null;
+		$custom_unit     = isset( $_POST['custom_unit'] ) ? sanitize_text_field( wp_unslash( $_POST['custom_unit'] ) ) : null;
+		$custom_barcode  = isset( $_POST['custom_barcode'] ) ? sanitize_text_field( wp_unslash( $_POST['custom_barcode'] ) ) : null;
+
+		$row = null;
+		if ( $id ) {
+			$row = nearmart_get_shop_product_by_id( $id );
+		} elseif ( $product_id ) {
+			$row = nearmart_get_shop_product( $shop_id, $product_id );
+		}
+
+		if ( ! $row || (int) $row->shop_id !== (int) $shop_id ) {
 			wp_send_json_error( array( 'message' => __( 'Product not found in your shop catalog.', 'shop-onboarding-manager' ) ) );
 		}
 
-		$result = nearmart_update_shop_product(
-			$shop_id,
-			$product_id,
-			array(
-				'price'          => $price,
-				'sale_price'     => $sale_price,
-				'stock_quantity' => $stock_quantity,
-				'stock_status'   => $stock_status,
-				'status'         => $status,
-				'shop_sku'       => $shop_sku,
-			)
+		$update_data = array(
+			'price'          => $price,
+			'sale_price'     => $sale_price,
+			'stock_quantity' => $stock_quantity,
+			'stock_status'   => $stock_status,
+			'status'         => $status,
+			'shop_sku'       => $shop_sku,
 		);
+
+		if ( empty( $row->product_id ) ) {
+			if ( null !== $custom_name ) {
+				$update_data['custom_name'] = $custom_name;
+			}
+			if ( null !== $custom_category ) {
+				$update_data['custom_category'] = $custom_category;
+			}
+			if ( null !== $custom_brand ) {
+				$update_data['custom_brand'] = $custom_brand;
+			}
+			if ( null !== $custom_unit ) {
+				$update_data['custom_unit'] = $custom_unit;
+			}
+			if ( null !== $custom_barcode ) {
+				$update_data['custom_barcode'] = $custom_barcode;
+			}
+		}
+
+		$result = nearmart_update_shop_product_by_id( $row->id, $update_data );
 
 		if ( false === $result ) {
 			wp_send_json_error( array( 'message' => __( 'Failed to update catalog product.', 'shop-onboarding-manager' ) ) );
@@ -436,19 +500,27 @@ class SOM_Merchant_Dashboard {
 			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
 		}
 
+		$id         = isset( $_POST['id'] ) ? absint( $_POST['id'] ) : 0;
 		$product_id = isset( $_POST['product_id'] ) ? absint( $_POST['product_id'] ) : 0;
 
-		if ( ! $product_id ) {
-			wp_send_json_error( array( 'message' => __( 'Invalid product ID.', 'shop-onboarding-manager' ) ) );
+		$row = null;
+		if ( $id ) {
+			$row = nearmart_get_shop_product_by_id( $id );
+		} elseif ( $product_id ) {
+			$row = nearmart_get_shop_product( $shop_id, $product_id );
 		}
 
-		$result = nearmart_remove_shop_product( $shop_id, $product_id );
+		if ( ! $row || (int) $row->shop_id !== (int) $shop_id ) {
+			wp_send_json_error( array( 'message' => __( 'Invalid product catalog entry.', 'shop-onboarding-manager' ) ) );
+		}
+
+		$result = nearmart_remove_shop_product_by_id( $row->id );
 
 		if ( false === $result ) {
 			wp_send_json_error( array( 'message' => __( 'Failed to remove product from catalog.', 'shop-onboarding-manager' ) ) );
 		}
 
-		wp_send_json_success( array( 'message' => __( 'Product removed from your catalog.', 'shop-onboarding-manager' ) ) );
+		wp_send_json_success( array( 'message' => __( 'Product removed from your shop catalog.', 'shop-onboarding-manager' ) ) );
 	}
 
 	/**
@@ -461,7 +533,7 @@ class SOM_Merchant_Dashboard {
 		$user_id = get_current_user_id();
 		if ( ! $user_id || ! nearmart_user_can_manage_shop_catalog( $user_id ) ) {
 			return '<div class="som-merchant-card"><div class="som-response-msg error" style="display:block;">' .
-				esc_html__( 'Please log in with a merchant or staff account to access your merchant dashboard.', 'shop-onboarding-manager' ) .
+				esc_html__( 'Please log in with a merchant account to access your dashboard.', 'shop-onboarding-manager' ) .
 				' <br /><br /><a href="' . esc_url( home_url( '/merchant-login/' ) ) . '" class="som-submit-btn som-btn-secondary" style="text-decoration:none; display:inline-block; width:auto; padding:10px 20px;">' .
 				esc_html__( 'Go to Merchant Login &rarr;', 'shop-onboarding-manager' ) . '</a></div></div>';
 		}
@@ -474,284 +546,94 @@ class SOM_Merchant_Dashboard {
 				'</p></div>';
 		}
 
-		// Shop Meta Details.
-		$shop_name  = get_the_title( $shop_id );
-		$owner_name = get_post_meta( $shop_id, 'som_owner_name', true );
-		$phone      = get_post_meta( $shop_id, 'som_phone_number', true );
-		$address    = get_post_meta( $shop_id, 'som_address', true );
-		$shop_type  = get_post_meta( $shop_id, 'som_shop_type', true );
-		$photo_id   = get_post_meta( $shop_id, 'som_shop_photo_id', true );
-		$photo_url  = $photo_id ? wp_get_attachment_image_url( $photo_id, 'medium' ) : '';
-
-		// Verification & Agreement Meta.
-		$is_verified        = has_term( 'verified', 'shop_status', $shop_id );
-		$is_committed       = has_term( 'committed', 'shop_status', $shop_id );
-		$details_confirmed  = (bool) get_post_meta( $shop_id, 'som_details_confirmed', true );
-		$confirmed_at       = get_post_meta( $shop_id, 'som_details_confirmed_at', true );
-		$agreement_accepted = (bool) get_post_meta( $shop_id, 'som_agreement_accepted', true );
-		$agreement_at       = get_post_meta( $shop_id, 'som_agreement_accepted_at', true );
-
-		// Catalog Summary Metrics.
+		$shop_name       = get_the_title( $shop_id );
+		$owner_name      = get_post_meta( $shop_id, 'som_owner_name', true );
+		$phone_number    = get_post_meta( $shop_id, 'som_phone_number', true );
+		$address         = get_post_meta( $shop_id, 'som_address', true );
+		$shop_type       = get_post_meta( $shop_id, 'som_shop_type', true );
+		$is_confirmed    = (bool) get_post_meta( $shop_id, 'som_details_confirmed', true );
+		$is_accepted     = (bool) get_post_meta( $shop_id, 'som_agreement_accepted', true );
+		$is_verified     = (bool) get_post_meta( $shop_id, 'som_verified', true );
+		$concerns        = get_post_meta( $shop_id, 'som_concerns', true );
+		$photo_id        = get_post_meta( $shop_id, 'som_shop_photo_id', true );
+		$photo_url       = $photo_id ? wp_get_attachment_url( $photo_id ) : '';
 		$catalog_summary = nearmart_get_shop_catalog_summary( $shop_id );
-		$catalog_url     = home_url( '/merchant-catalog/' );
-
-		$change_requests = get_post_meta( $shop_id, 'som_change_requests', true );
-		if ( ! is_array( $change_requests ) ) {
-			$change_requests = array();
-		}
-
-		$nonce = wp_create_nonce( 'som_merchant_dashboard_nonce' );
+		$nonce           = wp_create_nonce( 'som_merchant_dashboard_nonce' );
 
 		ob_start();
 		?>
 		<div class="som-merchant-dashboard-wrap">
-			<!-- Portal Navigation Header -->
-			<?php
-			if ( class_exists( 'SOM_Merchant_Catalog' ) ) {
-				echo SOM_Merchant_Catalog::render_portal_nav( 'dashboard' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			}
-			?>
+			<?php echo SOM_Merchant_Catalog::render_portal_nav( 'dashboard' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 
-			<!-- Dashboard Header -->
 			<div class="som-dashboard-header" style="margin-top: 16px;">
 				<div class="som-header-title">
-					<h2>&#127978; <?php echo esc_html( $shop_name ); ?></h2>
-					<p><?php esc_html_e( 'Merchant Management Portal', 'shop-onboarding-manager' ); ?></p>
+					<h2>&#127978; <?php printf( esc_html__( 'Welcome, %s', 'shop-onboarding-manager' ), esc_html( $shop_name ) ); ?></h2>
+					<p><?php esc_html_e( 'Manage your store details, catalog items, and account verification.', 'shop-onboarding-manager' ); ?></p>
 				</div>
-				<div class="som-status-badges">
-					<?php if ( $is_committed ) : ?>
-						<span class="som-badge som-badge-verification committed">&#127881; <?php esc_html_e( 'Committed Partner', 'shop-onboarding-manager' ); ?></span>
-					<?php elseif ( $is_verified ) : ?>
-						<span class="som-badge som-badge-verification verified">&#10003; <?php esc_html_e( 'Verified Shop', 'shop-onboarding-manager' ); ?></span>
+				<div class="som-header-status-badge">
+					<?php if ( $is_verified ) : ?>
+						<span class="som-badge verified">&#10004; <?php esc_html_e( 'Verified Shop', 'shop-onboarding-manager' ); ?></span>
 					<?php else : ?>
-						<span class="som-badge som-badge-pending">&#8987; <?php esc_html_e( 'Pending Verification', 'shop-onboarding-manager' ); ?></span>
+						<span class="som-badge pending">&#128336; <?php esc_html_e( 'Verification Pending', 'shop-onboarding-manager' ); ?></span>
 					<?php endif; ?>
 				</div>
 			</div>
 
-			<!-- Main 2-Column Dashboard Grid -->
 			<div class="som-dashboard-grid">
-				<!-- Card 1: Shop Information -->
 				<div class="som-dash-card">
-					<h3>&#128205; <?php esc_html_e( 'Shop Information', 'shop-onboarding-manager' ); ?></h3>
-					<?php if ( $photo_url ) : ?>
-						<div class="som-dash-photo">
-							<img src="<?php echo esc_url( $photo_url ); ?>" alt="<?php echo esc_attr( $shop_name ); ?>" />
+					<div class="som-card-header">
+						<h3>&#128202; <?php esc_html_e( 'Catalog Overview', 'shop-onboarding-manager' ); ?></h3>
+					</div>
+					<div class="som-catalog-stats-grid">
+						<div class="som-stat-box">
+							<span class="som-stat-value"><?php echo esc_html( $catalog_summary['total'] ); ?></span>
+							<span class="som-stat-label"><?php esc_html_e( 'Total Products', 'shop-onboarding-manager' ); ?></span>
 						</div>
-					<?php endif; ?>
-
-					<div class="som-info-list">
-						<div class="som-info-item">
-							<span class="som-info-label"><?php esc_html_e( 'Owner Name:', 'shop-onboarding-manager' ); ?></span>
-							<span class="som-info-val"><?php echo esc_html( $owner_name ? $owner_name : '—' ); ?></span>
+						<div class="som-stat-box green">
+							<span class="som-stat-value"><?php echo esc_html( $catalog_summary['active'] ); ?></span>
+							<span class="som-stat-label"><?php esc_html_e( 'Active Listed', 'shop-onboarding-manager' ); ?></span>
 						</div>
-						<div class="som-info-item">
-							<span class="som-info-label"><?php esc_html_e( 'Phone Number:', 'shop-onboarding-manager' ); ?></span>
-							<span class="som-info-val"><?php echo esc_html( $phone ? $phone : '—' ); ?></span>
-						</div>
-						<div class="som-info-item">
-							<span class="som-info-label"><?php esc_html_e( 'Shop Type:', 'shop-onboarding-manager' ); ?></span>
-							<span class="som-info-val"><?php echo esc_html( $shop_type ? $shop_type : '—' ); ?></span>
-						</div>
-						<div class="som-info-item">
-							<span class="som-info-label"><?php esc_html_e( 'Address:', 'shop-onboarding-manager' ); ?></span>
-							<span class="som-info-val"><?php echo esc_html( $address ? $address : '—' ); ?></span>
+						<div class="som-stat-box orange">
+							<span class="som-stat-value"><?php echo esc_html( $catalog_summary['outofstock'] ); ?></span>
+							<span class="som-stat-label"><?php esc_html_e( 'Unavailable', 'shop-onboarding-manager' ); ?></span>
 						</div>
 					</div>
-
-					<!-- Confirm Details Action -->
-					<div class="som-action-box">
-						<h4><?php esc_html_e( 'Information Confirmation', 'shop-onboarding-manager' ); ?></h4>
-						<?php if ( $details_confirmed ) : ?>
-							<p style="color: #15803d; font-weight: 600; margin: 0; font-size: 0.9rem;">
-								&#10003; <?php printf( esc_html__( 'Confirmed on %s', 'shop-onboarding-manager' ), esc_html( $confirmed_at ) ); ?>
-							</p>
-						<?php else : ?>
-							<button type="button" id="som_btn_confirm_details" class="som-submit-btn som-btn-secondary" style="margin-top: 6px;">
-								&#10003; <?php esc_html_e( 'I confirm my shop details are correct', 'shop-onboarding-manager' ); ?>
-							</button>
-						<?php endif; ?>
-					</div>
-				</div>
-
-				<!-- Card 2: Participation Agreement & Correction Request -->
-				<div class="som-dash-card">
-					<h3>&#128203; <?php esc_html_e( 'Participation Agreement', 'shop-onboarding-manager' ); ?></h3>
-
-					<div class="som-agreement-box">
-						<p class="som-agreement-text">
-							"<?php esc_html_e( 'I agree to participate as a shop partner in the platform and allow my shop to be listed as a participating shop when the platform launches.', 'shop-onboarding-manager' ); ?>"
-						</p>
-						<span class="som-agreement-ver"><?php printf( esc_html__( 'Agreement Version: %s', 'shop-onboarding-manager' ), esc_html( self::AGREEMENT_VERSION ) ); ?></span>
-					</div>
-
-					<?php if ( $agreement_accepted ) : ?>
-						<div class="som-alert-committed">
-							<strong>&#127881; <?php esc_html_e( 'Agreement Accepted!', 'shop-onboarding-manager' ); ?></strong>
-							<p><?php printf( esc_html__( 'Accepted on %s', 'shop-onboarding-manager' ), esc_html( $agreement_at ) ); ?></p>
-						</div>
-					<?php else : ?>
-						<div style="margin-bottom: 16px;">
-							<label class="som-checkbox-label">
-								<input type="checkbox" id="som_chk_agreement" />
-								<span><?php esc_html_e( 'I accept the participation terms above', 'shop-onboarding-manager' ); ?></span>
-							</label>
-							<button type="button" id="som_btn_accept_agreement" class="som-submit-btn" style="margin-top: 10px;" disabled>
-								&#9998; <?php esc_html_e( 'Accept Agreement', 'shop-onboarding-manager' ); ?>
-							</button>
-						</div>
-					<?php endif; ?>
-
-					<!-- Request Correction Box -->
-					<div style="margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 16px;">
-						<h3>&#9998; <?php esc_html_e( 'Request Information Correction', 'shop-onboarding-manager' ); ?></h3>
-						<form id="som_form_change_request">
-							<div class="som-form-group">
-								<label for="som_cr_field" class="som-sublabel"><?php esc_html_e( 'Select Field to Change', 'shop-onboarding-manager' ); ?></label>
-								<select id="som_cr_field" name="field_name" class="som-select" required>
-									<option value=""><?php esc_html_e( '-- Select Field --', 'shop-onboarding-manager' ); ?></option>
-									<option value="Shop Name"><?php esc_html_e( 'Shop Name', 'shop-onboarding-manager' ); ?></option>
-									<option value="Owner Name"><?php esc_html_e( 'Owner Name', 'shop-onboarding-manager' ); ?></option>
-									<option value="Phone Number"><?php esc_html_e( 'Phone Number', 'shop-onboarding-manager' ); ?></option>
-									<option value="Address"><?php esc_html_e( 'Address', 'shop-onboarding-manager' ); ?></option>
-									<option value="Shop Type"><?php esc_html_e( 'Shop Type', 'shop-onboarding-manager' ); ?></option>
-								</select>
-							</div>
-
-							<div class="som-form-group">
-								<label for="som_cr_val" class="som-sublabel"><?php esc_html_e( 'Correct Value', 'shop-onboarding-manager' ); ?></label>
-								<input type="text" id="som_cr_val" name="requested_value" class="som-input" required placeholder="Enter correct detail..." />
-							</div>
-
-							<button type="submit" id="som_btn_submit_cr" class="som-submit-btn som-btn-outline" style="min-height: 40px; padding: 8px 14px;">
-								&#128233; <?php esc_html_e( 'Submit Correction Request', 'shop-onboarding-manager' ); ?>
-							</button>
-						</form>
-					</div>
-				</div>
-
-				<!-- Card 3: Full Width - Compact My Shop Catalog Summary Widget -->
-				<div class="som-dash-card full-width" style="grid-column: 1 / -1;">
-					<div class="som-catalog-header" style="border-bottom: 1px solid #e2e8f0; padding-bottom: 14px; margin-bottom: 20px;">
-						<div>
-							<h3 style="border:none; margin:0; padding:0;">&#128722; <?php esc_html_e( 'My Shop Catalog Summary', 'shop-onboarding-manager' ); ?></h3>
-							<p style="font-size: 0.9rem; color: #64748b; margin: 4px 0 0 0;"><?php esc_html_e( 'Quick overview of items, active listings, and stock availability.', 'shop-onboarding-manager' ); ?></p>
-						</div>
-						<a href="<?php echo esc_url( $catalog_url ); ?>" class="som-submit-btn" style="width: auto; padding: 10px 20px; min-height: 42px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
-							<?php esc_html_e( 'Manage Catalog &rarr;', 'shop-onboarding-manager' ); ?>
+					<div style="margin-top: 16px;">
+						<a href="<?php echo esc_url( home_url( '/merchant-catalog/' ) ); ?>" class="som-submit-btn" style="text-decoration:none; display:block; text-align:center;">
+							&#128722; <?php esc_html_e( 'Manage Full Catalog &rarr;', 'shop-onboarding-manager' ); ?>
 						</a>
 					</div>
+				</div>
 
-					<!-- Summary Stat Grid (3 Metric Cards) -->
-					<div class="som-cat-summary-grid">
-						<div class="som-summary-card">
-							<div class="som-summary-icon">&#128230;</div>
-							<div class="som-summary-info">
-								<span class="som-summary-val"><?php echo esc_html( $catalog_summary['total'] ); ?></span>
-								<span class="som-summary-lbl"><?php esc_html_e( 'Total Products', 'shop-onboarding-manager' ); ?></span>
-							</div>
+				<div class="som-dash-card">
+					<div class="som-card-header">
+						<h3>&#128221; <?php esc_html_e( 'Shop Information', 'shop-onboarding-manager' ); ?></h3>
+					</div>
+					<div class="som-info-list">
+						<div class="som-info-item">
+							<strong><?php esc_html_e( 'Shop Name:', 'shop-onboarding-manager' ); ?></strong>
+							<span><?php echo esc_html( $shop_name ); ?></span>
 						</div>
-
-						<div class="som-summary-card success">
-							<div class="som-summary-icon">&#10003;</div>
-							<div class="som-summary-info">
-								<span class="som-summary-val"><?php echo esc_html( $catalog_summary['active'] ); ?></span>
-								<span class="som-summary-lbl"><?php esc_html_e( 'Active Listings', 'shop-onboarding-manager' ); ?></span>
-							</div>
+						<div class="som-info-item">
+							<strong><?php esc_html_e( 'Owner:', 'shop-onboarding-manager' ); ?></strong>
+							<span><?php echo esc_html( $owner_name ? $owner_name : '—' ); ?></span>
 						</div>
-
-						<div class="som-summary-card warning">
-							<div class="som-summary-icon">&#9888;</div>
-							<div class="som-summary-info">
-								<span class="som-summary-val"><?php echo esc_html( $catalog_summary['outofstock'] ); ?></span>
-								<span class="som-summary-lbl"><?php esc_html_e( 'Out of Stock', 'shop-onboarding-manager' ); ?></span>
-							</div>
+						<div class="som-info-item">
+							<strong><?php esc_html_e( 'Phone:', 'shop-onboarding-manager' ); ?></strong>
+							<span><?php echo esc_html( $phone_number ? $phone_number : '—' ); ?></span>
+						</div>
+						<div class="som-info-item">
+							<strong><?php esc_html_e( 'Category:', 'shop-onboarding-manager' ); ?></strong>
+							<span><?php echo esc_html( $shop_type ? $shop_type : '—' ); ?></span>
+						</div>
+						<div class="som-info-item">
+							<strong><?php esc_html_e( 'Address:', 'shop-onboarding-manager' ); ?></strong>
+							<span><?php echo esc_html( $address ? $address : '—' ); ?></span>
 						</div>
 					</div>
 				</div>
 			</div>
-
-			<!-- Response Message Alert -->
-			<div id="som_dash_msg" class="som-response-msg"></div>
 		</div>
-
-		<!-- Dashboard Inline JavaScript Handler -->
-		<script>
-		if (typeof jQuery !== 'undefined') {
-			jQuery(document).ready(function($) {
-				var nonce = '<?php echo esc_js( $nonce ); ?>';
-				var ajaxUrl = '<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>';
-
-				// 1. Confirm Details Button
-				$('#som_btn_confirm_details').on('click', function() {
-					var $btn = $(this);
-					$btn.prop('disabled', true).text('Confirming...');
-					$.ajax({
-						url: ajaxUrl,
-						type: 'POST',
-						data: { action: 'som_merchant_confirm_details', nonce: nonce },
-						success: function(res) {
-							if (res.success) {
-								$btn.parent().html('<p style="color: #15803d; font-weight: 600; margin: 0; font-size: 0.9rem;">&#10003; Confirmed just now</p>');
-							} else {
-								alert(res.data.message || 'Error confirming details.');
-								$btn.prop('disabled', false).html('&#10003; I confirm my shop details are correct');
-							}
-						}
-					});
-				});
-
-				// 2. Agreement Checkbox & Accept Button
-				$('#som_chk_agreement').on('change', function() {
-					$('#som_btn_accept_agreement').prop('disabled', !$(this).is(':checked'));
-				});
-
-				$('#som_btn_accept_agreement').on('click', function() {
-					var $btn = $(this);
-					$btn.prop('disabled', true).text('Accepting...');
-					$.ajax({
-						url: ajaxUrl,
-						type: 'POST',
-						data: { action: 'som_merchant_accept_agreement', nonce: nonce },
-						success: function(res) {
-							if (res.success) {
-								location.reload();
-							} else {
-								alert(res.data.message || 'Error accepting agreement.');
-								$btn.prop('disabled', false).html('&#9998; Accept Agreement');
-							}
-						}
-					});
-				});
-
-				// 3. Correction Request Form
-				$('#som_form_change_request').on('submit', function(e) {
-					e.preventDefault();
-					var $btn = $('#som_btn_submit_cr');
-					$btn.prop('disabled', true).text('Submitting...');
-					$.ajax({
-						url: ajaxUrl,
-						type: 'POST',
-						data: {
-							action: 'som_merchant_request_change',
-							nonce: nonce,
-							field_name: $('#som_cr_field').val(),
-							requested_value: $('#som_cr_val').val()
-						},
-						success: function(res) {
-							$btn.prop('disabled', false).html('&#128233; Submit Correction Request');
-							if (res.success) {
-								alert(res.data.message);
-								$('#som_form_change_request')[0].reset();
-							} else {
-								alert(res.data.message);
-							}
-						}
-					});
-				});
-			});
-		}
-		</script>
 		<?php
 		return ob_get_clean();
 	}

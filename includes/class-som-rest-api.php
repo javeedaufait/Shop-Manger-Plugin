@@ -1,6 +1,6 @@
 <?php
 /**
- * NearMart Versioned REST API Module (Phase 9).
+ * NearMart Versioned REST API Module (Phase 3 HYBRID Catalog).
  *
  * Base Namespace: nearmart/v1
  * Base URL: /wp-json/nearmart/v1/
@@ -266,7 +266,7 @@ class SOM_REST_API {
 	}
 
 	/**
-	 * Endpoint 3: GET /wp-json/nearmart/v1/shops/{shop_id}/products
+	 * Endpoint 3: GET /wp-json/nearmart/v1/shops/{shop_id}/products (HYBRID Model).
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
@@ -284,10 +284,10 @@ class SOM_REST_API {
 			return self::format_error_response( 'shop_not_found', __( 'Shop not found or unavailable.', 'shop-onboarding-manager' ), 404 );
 		}
 
-		$offset = ( $page - 1 ) * $limit;
+		$offset     = ( $page - 1 ) * $limit;
 		$has_filter = ! empty( $search ) || ! empty( $category );
 
-		// Query active products from repository with SQL pagination if no in-memory filter needed
+		// Query active products from repository
 		$raw_products = nearmart_get_shop_products(
 			$shop_id,
 			array(
@@ -302,51 +302,44 @@ class SOM_REST_API {
 
 		$products = array();
 		foreach ( $raw_products as $p ) {
-			$product_id  = $p->product_id;
-			$master_post = get_post( $product_id );
-
-			if ( ! $master_post || 'product' !== $master_post->post_type || 'publish' !== $master_post->post_status ) {
+			$item = nearmart_format_catalog_item( $p );
+			if ( ! $item || 'active' !== $item['status'] ) {
 				continue;
 			}
 
-			$title = $master_post->post_title;
-			$sku   = get_post_meta( $product_id, '_sku', true );
+			$title    = $item['title'];
+			$cat_name = $item['category'];
 
 			// Filter by search
 			if ( ! empty( $search ) ) {
 				$match_title = false !== stripos( $title, $search );
-				$match_sku   = false !== stripos( (string) $sku, $search );
-				$match_ssku  = false !== stripos( (string) $p->shop_sku, $search );
+				$match_brand = false !== stripos( (string) $item['brand'], $search );
+				$match_sku   = false !== stripos( (string) $item['master_sku'], $search );
+				$match_ssku  = false !== stripos( (string) $item['shop_sku'], $search );
 
-				if ( ! $match_title && ! $match_sku && ! $match_ssku ) {
+				if ( ! $match_title && ! $match_brand && ! $match_sku && ! $match_ssku ) {
 					continue;
 				}
 			}
-
-			$cat_terms = wp_get_post_terms( $product_id, 'product_cat', array( 'fields' => 'names' ) );
-			$cat_name  = ! empty( $cat_terms ) ? $cat_terms[0] : __( 'Uncategorized', 'shop-onboarding-manager' );
 
 			// Filter by category name
 			if ( ! empty( $category ) && false === stripos( $cat_name, $category ) ) {
 				continue;
 			}
 
-			$specs     = nearmart_get_master_product_specs( $product_id );
-			$thumb_url = get_the_post_thumbnail_url( $product_id, 'full' );
-
 			$products[] = array(
-				'id'             => (int) $product_id,
+				'id'             => (int) $item['id'],
 				'name'           => $title,
-				'image'          => $thumb_url ? (string) $thumb_url : null,
+				'image'          => $item['thumb_url'] ? (string) $item['thumb_url'] : null,
 				'category'       => $cat_name,
-				'brand'          => $specs['brand_name'] ? (string) $specs['brand_name'] : null,
-				'unit'           => $specs['unit'] ? (string) $specs['unit'] : null,
-				'barcode'        => $specs['barcode'] ? (string) $specs['barcode'] : null,
-				'price'          => (float) number_format( (float) $p->price, 2, '.', '' ),
-				'sale_price'     => null !== $p->sale_price && '' !== $p->sale_price ? (float) number_format( (float) $p->sale_price, 2, '.', '' ) : null,
-				'available'      => 'instock' === $p->stock_status,
-				'stock_quantity' => null !== $p->stock_quantity ? (int) $p->stock_quantity : null,
-				'shop_sku'       => $p->shop_sku ? (string) $p->shop_sku : null,
+				'brand'          => $item['brand'] ? (string) $item['brand'] : null,
+				'unit'           => $item['unit'] ? (string) $item['unit'] : null,
+				'barcode'        => $item['barcode'] ? (string) $item['barcode'] : null,
+				'price'          => (float) $item['price'],
+				'sale_price'     => null !== $item['sale_price'] && '' !== $item['sale_price'] ? (float) $item['sale_price'] : null,
+				'available'      => 'instock' === $item['stock_status'],
+				'stock_quantity' => null !== $item['stock_quantity'] ? (int) $item['stock_quantity'] : null,
+				'shop_sku'       => $item['shop_sku'] ? (string) $item['shop_sku'] : null,
 			);
 		}
 
@@ -388,54 +381,84 @@ class SOM_REST_API {
 		$shop_id    = $request->get_param( 'shop_id' );
 
 		$post = get_post( $product_id );
-		if ( ! $post || 'product' !== $post->post_type || 'publish' !== $post->post_status ) {
-			return self::format_error_response( 'product_not_found', __( 'Master product not found or unavailable.', 'shop-onboarding-manager' ), 404 );
+		if ( $post && 'product' === $post->post_type && 'publish' === $post->post_status ) {
+			$specs     = nearmart_get_master_product_specs( $product_id );
+			$cats      = wp_get_post_terms( $product_id, 'product_cat', array( 'fields' => 'names' ) );
+			$thumb_url = get_the_post_thumbnail_url( $product_id, 'full' );
+
+			$reg_price = get_post_meta( $product_id, '_regular_price', true );
+			if ( '' === $reg_price || null === $reg_price ) {
+				$reg_price = get_post_meta( $product_id, '_price', true );
+			}
+			$sug_price = ( '' !== $reg_price && null !== $reg_price && is_numeric( $reg_price ) ) ? (float) number_format( (float) $reg_price, 2, '.', '' ) : null;
+
+			$product_data = array(
+				'id'              => (int) $product_id,
+				'name'            => get_the_title( $product_id ),
+				'image'           => $thumb_url ? (string) $thumb_url : null,
+				'category'        => ! empty( $cats ) ? $cats[0] : __( 'Uncategorized', 'shop-onboarding-manager' ),
+				'brand'           => $specs['brand_name'] ? (string) $specs['brand_name'] : null,
+				'unit'            => $specs['unit'] ? (string) $specs['unit'] : null,
+				'barcode'         => $specs['barcode'] ? (string) $specs['barcode'] : null,
+				'sku'             => $specs['sku'] ? (string) $specs['sku'] : null,
+				'suggested_price' => $sug_price,
+			);
+
+			if ( $shop_id && nearmart_has_shop_product( $shop_id, $product_id ) ) {
+				$shop_item = nearmart_get_shop_product( $shop_id, $product_id );
+				if ( $shop_item ) {
+					$product_data['shop_context'] = array(
+						'shop_id'        => (int) $shop_id,
+						'price'          => (float) number_format( (float) $shop_item->price, 2, '.', '' ),
+						'sale_price'     => null !== $shop_item->sale_price && '' !== $shop_item->sale_price ? (float) number_format( (float) $shop_item->sale_price, 2, '.', '' ) : null,
+						'available'      => 'instock' === $shop_item->stock_status,
+						'stock_quantity' => null !== $shop_item->stock_quantity ? (int) $shop_item->stock_quantity : null,
+						'shop_sku'       => $shop_item->shop_sku ? (string) $shop_item->shop_sku : null,
+					);
+				}
+			}
+
+			return new WP_REST_Response(
+				array(
+					'success' => true,
+					'data'    => array(
+						'product' => $product_data,
+					),
+				),
+				200
+			);
 		}
 
-		$specs     = nearmart_get_master_product_specs( $product_id );
-		$cats      = wp_get_post_terms( $product_id, 'product_cat', array( 'fields' => 'names' ) );
-		$thumb_url = get_the_post_thumbnail_url( $product_id, 'full' );
-
-		$reg_price = get_post_meta( $product_id, '_regular_price', true );
-		if ( '' === $reg_price || null === $reg_price ) {
-			$reg_price = get_post_meta( $product_id, '_price', true );
-		}
-		$sug_price = ( '' !== $reg_price && null !== $reg_price && is_numeric( $reg_price ) ) ? (float) number_format( (float) $reg_price, 2, '.', '' ) : null;
-
-		$product_data = array(
-			'id'              => (int) $product_id,
-			'name'            => get_the_title( $product_id ),
-			'image'           => $thumb_url ? (string) $thumb_url : null,
-			'category'        => ! empty( $cats ) ? $cats[0] : __( 'Uncategorized', 'shop-onboarding-manager' ),
-			'brand'           => $specs['brand_name'] ? (string) $specs['brand_name'] : null,
-			'unit'            => $specs['unit'] ? (string) $specs['unit'] : null,
-			'barcode'         => $specs['barcode'] ? (string) $specs['barcode'] : null,
-			'sku'             => $specs['sku'] ? (string) $specs['sku'] : null,
-			'suggested_price' => $sug_price,
-		);
-
-		if ( $shop_id && nearmart_has_shop_product( $shop_id, $product_id ) ) {
-			$shop_item = nearmart_get_shop_product( $shop_id, $product_id );
-			if ( $shop_item ) {
-				$product_data['shop_context'] = array(
-					'shop_id'        => (int) $shop_id,
-					'price'          => (float) number_format( (float) $shop_item->price, 2, '.', '' ),
-					'sale_price'     => null !== $shop_item->sale_price && '' !== $shop_item->sale_price ? (float) number_format( (float) $shop_item->sale_price, 2, '.', '' ) : null,
-					'available'      => 'instock' === $shop_item->stock_status,
-					'stock_quantity' => null !== $shop_item->stock_quantity ? (int) $shop_item->stock_quantity : null,
-					'shop_sku'       => $shop_item->shop_sku ? (string) $shop_item->shop_sku : null,
+		// Fallback check for Standalone Shop Product row ID
+		$shop_row = nearmart_get_shop_product_by_id( $product_id );
+		if ( $shop_row ) {
+			$item = nearmart_format_catalog_item( $shop_row );
+			if ( $item ) {
+				return new WP_REST_Response(
+					array(
+						'success' => true,
+						'data'    => array(
+							'product' => array(
+								'id'             => (int) $item['id'],
+								'name'           => $item['title'],
+								'image'          => $item['thumb_url'] ? (string) $item['thumb_url'] : null,
+								'category'       => $item['category'],
+								'brand'          => $item['brand'] ? (string) $item['brand'] : null,
+								'unit'           => $item['unit'] ? (string) $item['unit'] : null,
+								'barcode'        => $item['barcode'] ? (string) $item['barcode'] : null,
+								'price'          => (float) $item['price'],
+								'sale_price'     => null !== $item['sale_price'] && '' !== $item['sale_price'] ? (float) $item['sale_price'] : null,
+								'available'      => 'instock' === $item['stock_status'],
+								'stock_quantity' => null !== $item['stock_quantity'] ? (int) $item['stock_quantity'] : null,
+								'shop_sku'       => $item['shop_sku'] ? (string) $item['shop_sku'] : null,
+							),
+						),
+					),
+					200
 				);
 			}
 		}
 
-		return new WP_REST_Response(
-			array(
-				'success' => true,
-				'data'    => array(
-					'product' => $product_data,
-				),
-			),
-			200
-		);
+		return self::format_error_response( 'product_not_found', __( 'Product not found or unavailable.', 'shop-onboarding-manager' ), 404 );
 	}
 }
