@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin Product Requests Management Module (Phase 8).
+ * Admin Product Requests Management Module (Enhanced Master Creation & Linking).
  *
  * @package Shop_Onboarding_Manager
  */
@@ -24,6 +24,7 @@ class SOM_Admin_Product_Requests {
 		// Admin AJAX Endpoints.
 		add_action( 'wp_ajax_som_admin_get_product_requests', array( __CLASS__, 'ajax_get_product_requests' ) );
 		add_action( 'wp_ajax_som_admin_update_product_request', array( __CLASS__, 'ajax_update_product_request' ) );
+		add_action( 'wp_ajax_som_admin_create_master_from_request', array( __CLASS__, 'ajax_create_master_from_request' ) );
 	}
 
 	/**
@@ -76,10 +77,12 @@ class SOM_Admin_Product_Requests {
 		$formatted = array();
 		foreach ( $requests as $r ) {
 			$master_title = '';
+			$edit_url     = '';
 			if ( $r->master_product_id ) {
 				$mp = get_post( $r->master_product_id );
 				if ( $mp ) {
 					$master_title = $mp->post_title;
+					$edit_url     = admin_url( 'post.php?post=' . $r->master_product_id . '&action=edit' );
 				}
 			}
 
@@ -98,12 +101,85 @@ class SOM_Admin_Product_Requests {
 				'status'            => $r->status,
 				'master_product_id' => $r->master_product_id,
 				'master_title'      => $master_title,
+				'edit_url'          => $edit_url,
 				'admin_notes'       => $r->admin_notes ? $r->admin_notes : '',
 				'created_at'        => date_i18n( 'M j, Y g:i a', strtotime( $r->created_at ) ),
 			);
 		}
 
 		wp_send_json_success( array( 'requests' => $formatted ) );
+	}
+
+	/**
+	 * AJAX endpoint: Create New WooCommerce Master Product from Merchant Request.
+	 */
+	public static function ajax_create_master_from_request() {
+		check_ajax_referer( 'som_admin_requests_nonce', 'nonce' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
+		}
+
+		$request_id  = isset( $_POST['request_id'] ) ? absint( $_POST['request_id'] ) : 0;
+		$title       = isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash( $_POST['title'] ) ) : '';
+		$category    = isset( $_POST['category'] ) ? sanitize_text_field( wp_unslash( $_POST['category'] ) ) : '';
+		$brand       = isset( $_POST['brand'] ) ? sanitize_text_field( wp_unslash( $_POST['brand'] ) ) : '';
+		$unit        = isset( $_POST['unit'] ) ? sanitize_text_field( wp_unslash( $_POST['unit'] ) ) : '';
+		$barcode     = isset( $_POST['barcode'] ) ? sanitize_text_field( wp_unslash( $_POST['barcode'] ) ) : '';
+		$description = isset( $_POST['description'] ) ? sanitize_textarea_field( wp_unslash( $_POST['description'] ) ) : '';
+		$admin_notes = isset( $_POST['admin_notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['admin_notes'] ) ) : '';
+
+		if ( ! $request_id || empty( $title ) ) {
+			wp_send_json_error( array( 'message' => __( 'Request ID and Master Product Title are required.', 'shop-onboarding-manager' ) ) );
+		}
+
+		// Create WooCommerce Master Product Post
+		$post_id = wp_insert_post(
+			array(
+				'post_title'   => $title,
+				'post_content' => $description,
+				'post_status'  => 'publish',
+				'post_type'    => 'product',
+			)
+		);
+
+		if ( is_wp_error( $post_id ) || ! $post_id ) {
+			wp_send_json_error( array( 'message' => __( 'Failed to create WooCommerce master product.', 'shop-onboarding-manager' ) ) );
+		}
+
+		// Update product meta specs
+		if ( ! empty( $brand ) ) {
+			update_post_meta( $post_id, '_nearmart_brand_name', $brand );
+		}
+		if ( ! empty( $unit ) ) {
+			update_post_meta( $post_id, '_nearmart_unit', $unit );
+		}
+		if ( ! empty( $barcode ) ) {
+			update_post_meta( $post_id, '_nearmart_barcode', $barcode );
+		}
+
+		// Assign taxonomy term if category provided
+		if ( ! empty( $category ) ) {
+			wp_set_object_terms( $post_id, $category, 'product_cat', true );
+		}
+
+		// Link product & set status to completed
+		$updated = SOM_Product_Request_Repository::update_request_status( $request_id, 'completed', $admin_notes, $post_id );
+
+		if ( ! $updated ) {
+			wp_send_json_error( array( 'message' => __( 'Master product created, but failed to link request status.', 'shop-onboarding-manager' ) ) );
+		}
+
+		$edit_url = admin_url( 'post.php?post=' . $post_id . '&action=edit' );
+
+		wp_send_json_success(
+			array(
+				'message'      => __( 'WooCommerce master product created successfully and linked to request!', 'shop-onboarding-manager' ),
+				'product_id'   => $post_id,
+				'product_name' => $title,
+				'edit_url'     => $edit_url,
+			)
+		);
 	}
 
 	/**
@@ -123,6 +199,11 @@ class SOM_Admin_Product_Requests {
 
 		if ( ! $request_id ) {
 			wp_send_json_error( array( 'message' => __( 'Invalid request ID.', 'shop-onboarding-manager' ) ) );
+		}
+
+		// Validation Rule: Cannot set status to completed without a linked master product
+		if ( 'completed' === $status && empty( $master_product_id ) ) {
+			wp_send_json_error( array( 'message' => __( 'A master product must be created or linked before marking a request as Completed.', 'shop-onboarding-manager' ) ) );
 		}
 
 		if ( $master_product_id ) {
@@ -160,7 +241,7 @@ class SOM_Admin_Product_Requests {
 				&#128221; <?php esc_html_e( 'Merchant Product Requests', 'shop-onboarding-manager' ); ?>
 			</h1>
 			<p style="color: #64748b; font-size: 0.95rem; margin-top: 4px; margin-bottom: 24px;">
-				<?php esc_html_e( 'Review new product requests submitted by merchants. Create the master product in WooCommerce Products, then link it and mark the request as Completed.', 'shop-onboarding-manager' ); ?>
+				<?php esc_html_e( 'Review new product requests submitted by merchants. Create a new master product or link an existing one before marking a request as Completed.', 'shop-onboarding-manager' ); ?>
 			</p>
 
 			<!-- Filter Bar -->
@@ -206,21 +287,83 @@ class SOM_Admin_Product_Requests {
 			</div>
 		</div>
 
-		<!-- MODAL: Review & Update Product Request -->
+		<!-- MODAL: Review & Fulfill Product Request -->
 		<div id="som_admin_request_modal" class="som-modal-overlay" style="display: none;">
-			<div class="som-modal-content">
+			<div class="som-modal-content" style="max-width: 680px;">
 				<div class="som-modal-header">
-					<h3>&#128221; <?php esc_html_e( 'Review Product Request', 'shop-onboarding-manager' ); ?></h3>
+					<h3>&#128221; <?php esc_html_e( 'Review & Fulfill Product Request', 'shop-onboarding-manager' ); ?></h3>
 					<button type="button" class="som-modal-close" onclick="document.getElementById('som_admin_request_modal').style.display='none';">&times;</button>
 				</div>
 
-				<form id="som_admin_form_update_request">
+				<div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+					<strong id="som_req_title" style="font-size: 1.05rem; color: #0f172a; display: block;"></strong>
+					<div id="som_req_meta" style="font-size: 0.82rem; color: #64748b; margin-top: 4px;"></div>
+					<div id="som_req_notes" style="font-size: 0.8rem; color: #334155; margin-top: 8px; font-style: italic;"></div>
+				</div>
+
+				<!-- Action Mode Selector -->
+				<div style="display: flex; gap: 8px; border-bottom: 2px solid #e2e8f0; margin-bottom: 16px;">
+					<button type="button" id="som_req_tab_create" class="button button-primary" style="font-weight: 700;">
+						&#10133; <?php esc_html_e( 'Create New Master Product', 'shop-onboarding-manager' ); ?>
+					</button>
+					<button type="button" id="som_req_tab_link" class="button button-secondary" style="font-weight: 700;">
+						&#128279; <?php esc_html_e( 'Link Existing Master / Update Status', 'shop-onboarding-manager' ); ?>
+					</button>
+				</div>
+
+				<!-- TAB 1: Create New Master Product Pre-filled Form -->
+				<form id="som_admin_form_create_master" style="margin-bottom: 10px;">
+					<input type="hidden" id="som_create_req_id" value="" />
+
+					<div class="som-form-group" style="margin-bottom: 12px;">
+						<label for="som_create_title" class="som-label required"><?php esc_html_e( 'Master Product Name *', 'shop-onboarding-manager' ); ?></label>
+						<input type="text" id="som_create_title" class="som-input" required />
+					</div>
+
+					<div class="som-form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+						<div>
+							<label for="som_create_category" class="som-label"><?php esc_html_e( 'Category', 'shop-onboarding-manager' ); ?></label>
+							<input type="text" id="som_create_category" class="som-input" />
+						</div>
+						<div>
+							<label for="som_create_brand" class="som-label"><?php esc_html_e( 'Brand', 'shop-onboarding-manager' ); ?></label>
+							<input type="text" id="som_create_brand" class="som-input" />
+						</div>
+					</div>
+
+					<div class="som-form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+						<div>
+							<label for="som_create_unit" class="som-label"><?php esc_html_e( 'Unit / Size', 'shop-onboarding-manager' ); ?></label>
+							<input type="text" id="som_create_unit" class="som-input" />
+						</div>
+						<div>
+							<label for="som_create_barcode" class="som-label"><?php esc_html_e( 'Barcode / SKU', 'shop-onboarding-manager' ); ?></label>
+							<input type="text" id="som_create_barcode" class="som-input" />
+						</div>
+					</div>
+
+					<div class="som-form-group" style="margin-bottom: 12px;">
+						<label for="som_create_desc" class="som-label"><?php esc_html_e( 'Description / Notes', 'shop-onboarding-manager' ); ?></label>
+						<textarea id="som_create_desc" class="som-input" rows="2"></textarea>
+					</div>
+
+					<div class="som-form-group" style="margin-bottom: 16px;">
+						<label for="som_create_admin_notes" class="som-label"><?php esc_html_e( 'Admin Note to Merchant (Optional)', 'shop-onboarding-manager' ); ?></label>
+						<input type="text" id="som_create_admin_notes" class="som-input" placeholder="e.g. Master product created and added to platform." />
+					</div>
+
+					<button type="submit" id="som_btn_create_master" class="button button-primary button-large" style="width: 100%;">
+						&#10133; <?php esc_html_e( 'Create Master Product & Mark Completed', 'shop-onboarding-manager' ); ?>
+					</button>
+				</form>
+
+				<!-- TAB 2: Link Existing Master or Update Status Form -->
+				<form id="som_admin_form_update_request" style="display: none;">
 					<input type="hidden" id="som_req_id" name="request_id" value="" />
 
-					<div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; margin-bottom: 16px;">
-						<strong id="som_req_title" style="font-size: 1.05rem; color: #0f172a; display: block;"></strong>
-						<div id="som_req_meta" style="font-size: 0.82rem; color: #64748b; margin-top: 4px;"></div>
-						<div id="som_req_notes" style="font-size: 0.8rem; color: #334155; margin-top: 8px; font-style: italic;"></div>
+					<div id="som_req_master_status_box" style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; padding:10px 14px; margin-bottom:14px; display:none;">
+						<strong style="color:#166534; font-size:0.9rem;" id="som_req_master_status_text"></strong>
+						<div id="som_req_master_edit_link" style="margin-top:4px;"></div>
 					</div>
 
 					<div class="som-form-group" style="margin-bottom: 14px;">
@@ -228,14 +371,14 @@ class SOM_Admin_Product_Requests {
 						<select id="som_req_status" name="status" class="som-select" required>
 							<option value="pending"><?php esc_html_e( 'Pending (Awaiting Review)', 'shop-onboarding-manager' ); ?></option>
 							<option value="reviewed"><?php esc_html_e( 'Reviewed (In Progress)', 'shop-onboarding-manager' ); ?></option>
-							<option value="completed"><?php esc_html_e( 'Completed (Master Product Created)', 'shop-onboarding-manager' ); ?></option>
+							<option value="completed"><?php esc_html_e( 'Completed (Requires Linked Master)', 'shop-onboarding-manager' ); ?></option>
 							<option value="rejected"><?php esc_html_e( 'Rejected', 'shop-onboarding-manager' ); ?></option>
 						</select>
 					</div>
 
 					<div class="som-form-group" style="margin-bottom: 14px;">
 						<label for="som_req_master_id" class="som-label"><?php esc_html_e( 'Linked Master Product ID (WooCommerce Post ID)', 'shop-onboarding-manager' ); ?></label>
-						<input type="number" id="som_req_master_id" name="master_product_id" class="som-input" placeholder="e.g. 35 (Optional - link after creating WooCommerce product)" />
+						<input type="number" id="som_req_master_id" name="master_product_id" class="som-input" placeholder="e.g. 35 (Enter WooCommerce Post ID to link)" />
 					</div>
 
 					<div class="som-form-group" style="margin-bottom: 18px;">
@@ -244,7 +387,7 @@ class SOM_Admin_Product_Requests {
 					</div>
 
 					<button type="submit" id="som_req_btn_save" class="button button-primary button-large" style="width: 100%;">
-						&#128190; <?php esc_html_e( 'Update Request Status', 'shop-onboarding-manager' ); ?>
+						&#128190; <?php esc_html_e( 'Save Status & Master Link', 'shop-onboarding-manager' ); ?>
 					</button>
 				</form>
 			</div>
@@ -296,7 +439,10 @@ class SOM_Admin_Product_Requests {
 										html += '<br /><span style="font-size:0.75rem; color:#64748b;">' + specs.join(' &bull; ') + '</span>';
 									}
 									if (req.master_product_id) {
-										html += '<br /><span style="font-size:0.75rem; color:#16a34a; font-weight:600;">Linked Master Product: ID #' + req.master_product_id + (req.master_title ? ' (' + escapeHtml(req.master_title) + ')' : '') + '</span>';
+										html += '<br /><span style="font-size:0.75rem; color:#16a34a; font-weight:600;">Linked Master: ID #' + req.master_product_id + (req.master_title ? ' (' + escapeHtml(req.master_title) + ')' : '') + '</span>';
+										if (req.edit_url) {
+											html += ' &bull; <a href="' + req.edit_url + '" target="_blank" style="font-size:0.75rem; color:#2563eb; font-weight:600; text-decoration:underline;">Edit Master ↗</a>';
+										}
 									}
 									html += '</td>';
 
@@ -333,11 +479,37 @@ class SOM_Admin_Product_Requests {
 
 				$('#som_req_status_filter').on('change', loadRequests);
 
-				// Open Review Modal
+				// Modal Tab Switchers
+				$('#som_req_tab_create').on('click', function() {
+					$('#som_req_tab_link').removeClass('button-primary').addClass('button-secondary');
+					$(this).removeClass('button-secondary').addClass('button-primary');
+					$('#som_admin_form_update_request').hide();
+					$('#som_admin_form_create_master').show();
+				});
+
+				$('#som_req_tab_link').on('click', function() {
+					$('#som_req_tab_create').removeClass('button-primary').addClass('button-secondary');
+					$(this).removeClass('button-secondary').addClass('button-primary');
+					$('#som_admin_form_create_master').hide();
+					$('#som_admin_form_update_request').show();
+				});
+
+				// Open Review Modal & Pre-fill Create Form
 				$(document).on('click', '.som-btn-review-req', function() {
 					var req = $(this).data('req');
 					if (!req) return;
 
+					// Populate Create Master Form (Pre-filled)
+					$('#som_create_req_id').val(req.id);
+					$('#som_create_title').val(req.product_name || '');
+					$('#som_create_category').val(req.category || '');
+					$('#som_create_brand').val(req.brand || '');
+					$('#som_create_unit').val(req.unit || '');
+					$('#som_create_barcode').val(req.barcode || '');
+					$('#som_create_desc').val(req.notes || '');
+					$('#som_create_admin_notes').val(req.admin_notes || 'Master product created and linked.');
+
+					// Populate Link/Update Form
 					$('#som_req_id').val(req.id);
 					$('#som_req_title').text('Requested: ' + req.product_name);
 
@@ -356,14 +528,71 @@ class SOM_Admin_Product_Requests {
 						$('#som_req_notes').hide();
 					}
 
+					if (req.master_product_id) {
+						$('#som_req_master_status_text').text('Linked Master Product: ID #' + req.master_product_id + (req.master_title ? ' (' + req.master_title + ')' : ''));
+						if (req.edit_url) {
+							$('#som_req_master_edit_link').html('<a href="' + req.edit_url + '" target="_blank" style="color:#2563eb; font-weight:700; text-decoration:underline;">Edit WooCommerce Master Product ↗</a>');
+						} else {
+							$('#som_req_master_edit_link').html('');
+						}
+						$('#som_req_master_status_box').show();
+					} else {
+						$('#som_req_master_status_box').hide();
+					}
+
 					$('#som_req_status').val(req.status);
 					$('#som_req_master_id').val(req.master_product_id || '');
 					$('#som_req_admin_notes').val(req.admin_notes || '');
 
+					// Default tab selection
+					if (req.master_product_id) {
+						$('#som_req_tab_link').click();
+					} else {
+						$('#som_req_tab_create').click();
+					}
+
 					$('#som_admin_request_modal').show();
 				});
 
-				// Update Request Form Submit
+				// Form 1: Create Master Product Submit
+				$('#som_admin_form_create_master').on('submit', function(e) {
+					e.preventDefault();
+					var $btn = $('#som_btn_create_master');
+					$btn.prop('disabled', true).text('Creating Master Product...');
+
+					$.ajax({
+						url: ajaxUrl,
+						type: 'POST',
+						data: {
+							action: 'som_admin_create_master_from_request',
+							nonce: nonce,
+							request_id: $('#som_create_req_id').val(),
+							title: $('#som_create_title').val(),
+							category: $('#som_create_category').val(),
+							brand: $('#som_create_brand').val(),
+							unit: $('#som_create_unit').val(),
+							barcode: $('#som_create_barcode').val(),
+							description: $('#som_create_desc').val(),
+							admin_notes: $('#som_create_admin_notes').val()
+						},
+						success: function(res) {
+							$btn.prop('disabled', false).html('&#10133; Create Master Product & Mark Completed');
+							if (res.success) {
+								alert(res.data.message || 'Master product created successfully!');
+								$('#som_admin_request_modal').hide();
+								loadRequests();
+							} else {
+								alert(res.data.message || 'Error creating master product.');
+							}
+						},
+						error: function() {
+							$btn.prop('disabled', false).html('&#10133; Create Master Product & Mark Completed');
+							alert('Server error creating master product.');
+						}
+					});
+				});
+
+				// Form 2: Update Request Status Submit
 				$('#som_admin_form_update_request').on('submit', function(e) {
 					e.preventDefault();
 					var $btn = $('#som_req_btn_save');
@@ -381,7 +610,7 @@ class SOM_Admin_Product_Requests {
 							admin_notes: $('#som_req_admin_notes').val()
 						},
 						success: function(res) {
-							$btn.prop('disabled', false).html('&#128190; Update Request Status');
+							$btn.prop('disabled', false).html('&#128190; Save Status & Master Link');
 							if (res.success) {
 								alert(res.data.message || 'Request updated successfully!');
 								$('#som_admin_request_modal').hide();
@@ -391,7 +620,7 @@ class SOM_Admin_Product_Requests {
 							}
 						},
 						error: function() {
-							$btn.prop('disabled', false).html('&#128190; Update Request Status');
+							$btn.prop('disabled', false).html('&#128190; Save Status & Master Link');
 							alert('Server error updating request.');
 						}
 					});
