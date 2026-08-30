@@ -1,6 +1,6 @@
 <?php
 /**
- * Dedicated Merchant Catalog Module (Merchant-Friendly Terminology Upgrade).
+ * Dedicated Merchant Catalog Module (Compact Scalable UI Upgrade).
  *
  * @package Shop_Onboarding_Manager
  */
@@ -203,43 +203,44 @@ class SOM_Merchant_Catalog {
 
 			<!-- Main Dedicated Catalog Card -->
 			<div class="som-dash-card full-width" style="margin-top: 20px;">
-				<!-- Search & Filter Bar -->
-				<div class="som-catalog-bar">
-					<div class="som-catalog-search-wrap">
-						<input type="text" id="som_cat_search" class="som-input" placeholder="Search catalog items by name, brand, or SKU..." />
+				<!-- Compact Scalable Search & Filter Bar -->
+				<div class="som-catalog-bar" style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:16px;">
+					<div class="som-catalog-search-wrap" style="flex:1; min-width:260px;">
+						<input type="text" id="som_cat_search" class="som-input" placeholder="Search by product name, brand, SKU or barcode..." style="width:100%; min-height:42px;" />
 					</div>
-					<div class="som-catalog-filters">
-						<select id="som_cat_status_filter" class="som-select" style="min-height: 44px;">
-							<option value="all"><?php esc_html_e( 'All Statuses', 'shop-onboarding-manager' ); ?></option>
-							<option value="active"><?php esc_html_e( 'Active', 'shop-onboarding-manager' ); ?></option>
-							<option value="inactive"><?php esc_html_e( 'Inactive', 'shop-onboarding-manager' ); ?></option>
+					<div class="som-catalog-filters" style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+						<select id="som_cat_category_filter" class="som-select" style="min-height: 42px; min-width:140px;">
+							<option value="all"><?php esc_html_e( 'All Categories', 'shop-onboarding-manager' ); ?></option>
 						</select>
-						<select id="som_cat_stock_filter" class="som-select" style="min-height: 44px;">
+						<select id="som_cat_stock_filter" class="som-select" style="min-height: 42px; min-width:130px;">
 							<option value="all"><?php esc_html_e( 'All Availability', 'shop-onboarding-manager' ); ?></option>
 							<option value="instock"><?php esc_html_e( 'Available', 'shop-onboarding-manager' ); ?></option>
 							<option value="outofstock"><?php esc_html_e( 'Unavailable', 'shop-onboarding-manager' ); ?></option>
 						</select>
+						<select id="som_cat_per_page" class="som-select" style="min-height: 42px; min-width:120px;">
+							<option value="25"><?php esc_html_e( '25 per page', 'shop-onboarding-manager' ); ?></option>
+							<option value="50"><?php esc_html_e( '50 per page', 'shop-onboarding-manager' ); ?></option>
+							<option value="100"><?php esc_html_e( '100 per page', 'shop-onboarding-manager' ); ?></option>
+						</select>
 					</div>
 				</div>
 
-				<!-- Catalog Table Wrap -->
+				<!-- Compact Streamlined Catalog Table Wrap -->
 				<div class="som-catalog-table-wrap">
-					<table class="som-catalog-table">
+					<table class="som-catalog-table compact-table" style="width:100%; border-collapse:collapse;">
 						<thead>
-							<tr>
-								<th style="width: 60px;"><?php esc_html_e( 'Image', 'shop-onboarding-manager' ); ?></th>
-								<th><?php esc_html_e( 'Product Name & Specs', 'shop-onboarding-manager' ); ?></th>
-								<th><?php esc_html_e( 'Type', 'shop-onboarding-manager' ); ?></th>
-								<th><?php esc_html_e( 'Category', 'shop-onboarding-manager' ); ?></th>
-								<th><?php esc_html_e( 'Shop Price', 'shop-onboarding-manager' ); ?></th>
-								<th><?php esc_html_e( 'Availability', 'shop-onboarding-manager' ); ?></th>
-								<th><?php esc_html_e( 'Status', 'shop-onboarding-manager' ); ?></th>
-								<th style="width: 120px; text-align: right;"><?php esc_html_e( 'Actions', 'shop-onboarding-manager' ); ?></th>
+							<tr style="border-bottom:2px solid #e2e8f0; background:#f8fafc; text-align:left;">
+								<th style="width: 50px; padding:10px 12px;"><?php esc_html_e( 'Image', 'shop-onboarding-manager' ); ?></th>
+								<th style="padding:10px 12px;"><?php esc_html_e( 'Product Name & Specs', 'shop-onboarding-manager' ); ?></th>
+								<th style="padding:10px 12px;"><?php esc_html_e( 'Category', 'shop-onboarding-manager' ); ?></th>
+								<th style="padding:10px 12px;"><?php esc_html_e( 'Shop Price', 'shop-onboarding-manager' ); ?></th>
+								<th style="padding:10px 12px;"><?php esc_html_e( 'Availability', 'shop-onboarding-manager' ); ?></th>
+								<th style="width: 120px; padding:10px 12px; text-align: right;"><?php esc_html_e( 'Actions', 'shop-onboarding-manager' ); ?></th>
 							</tr>
 						</thead>
 						<tbody id="som_catalog_tbody">
 							<tr>
-								<td colspan="8" style="text-align: center; padding: 24px; color: #64748b;">
+								<td colspan="6" style="text-align: center; padding: 24px; color: #64748b;">
 									&#128259; <?php esc_html_e( 'Loading catalog items...', 'shop-onboarding-manager' ); ?>
 								</td>
 							</tr>
@@ -247,10 +248,10 @@ class SOM_Merchant_Catalog {
 					</table>
 				</div>
 
-				<!-- Pagination Bar -->
-				<div class="som-catalog-pagination">
-					<span id="som_catalog_info">Showing 0 items</span>
-					<div class="som-pagination-btns">
+				<!-- Scalable Pagination Bar -->
+				<div class="som-catalog-pagination" style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; flex-wrap:wrap; gap:12px;">
+					<span id="som_catalog_info" style="color: #64748b; font-size: 0.88rem; font-weight: 500;">Showing 0 products</span>
+					<div class="som-pagination-btns" style="display:flex; gap:8px;">
 						<button type="button" id="som_cat_prev_btn" class="som-btn-icon" disabled>&larr; Previous</button>
 						<button type="button" id="som_cat_next_btn" class="som-btn-icon" disabled>Next &rarr;</button>
 					</div>
@@ -628,7 +629,9 @@ class SOM_Merchant_Catalog {
 				function loadCatalog(page) {
 					currentPage = page || 1;
 					var $tbody = $('#som_catalog_tbody');
-					$tbody.html('<tr><td colspan="8" style="text-align:center; padding: 20px; color:#64748b;">&#128259; Loading catalog...</td></tr>');
+					$tbody.html('<tr><td colspan="6" style="text-align:center; padding: 20px; color:#64748b;">&#128259; Loading catalog...</td></tr>');
+
+					var perPage = parseInt($('#som_cat_per_page').val(), 10) || 25;
 
 					$.ajax({
 						url: ajaxUrl,
@@ -637,77 +640,98 @@ class SOM_Merchant_Catalog {
 							action: 'som_merchant_get_catalog',
 							nonce: nonce,
 							search: $('#som_cat_search').val(),
-							status: $('#som_cat_status_filter').val(),
+							category: $('#som_cat_category_filter').val(),
 							stock_status: $('#som_cat_stock_filter').val(),
-							page: currentPage
+							page: currentPage,
+							per_page: perPage
 						},
 						success: function(res) {
 							if (res.success) {
 								var items = res.data.items;
+								var totalCount = res.data.total_count || 0;
+								var totalPages = res.data.total_pages || 1;
+
+								// Populate dynamic categories dropdown if returned
+								if (res.data.categories && res.data.categories.length > 0) {
+									var currentCat = $('#som_cat_category_filter').val();
+									var catHtml = '<option value="all">All Categories</option>';
+									$.each(res.data.categories, function(idx, catName) {
+										var sel = (catName === currentCat) ? ' selected' : '';
+										catHtml += '<option value="' + escapeHtml(catName) + '"' + sel + '>' + escapeHtml(catName) + '</option>';
+									});
+									$('#som_cat_category_filter').html(catHtml);
+								}
+
 								if (!items || items.length === 0) {
-									$tbody.html('<tr><td colspan="8" style="text-align:center; padding: 24px; color:#64748b;">No products in your catalog yet. Click <strong>"Add Product to Catalog"</strong> to add items!</td></tr>');
-									$('#som_catalog_info').text('Showing 0 items');
+									$tbody.html('<tr><td colspan="6" style="text-align:center; padding: 24px; color:#64748b;">No products found matching your filters. Click <strong>"Add Product to Catalog"</strong> to add items!</td></tr>');
+									$('#som_catalog_info').text('Showing 0 products');
 									$('#som_cat_prev_btn, #som_cat_next_btn').prop('disabled', true);
 									return;
 								}
 
 								var html = '';
 								$.each(items, function(i, item) {
-									html += '<tr data-id="' + item.id + '">';
-									html += '<td><div class="som-cat-thumb-box">';
+									html += '<tr data-id="' + item.id + '" style="border-bottom:1px solid #f1f5f9;">';
+									html += '<td style="padding:8px 12px;"><div class="som-cat-thumb-box" style="width:40px; height:40px; border-radius:6px; overflow:hidden; background:#f8fafc; display:flex; align-items:center; justify-content:center;">';
 									if (item.thumb_url) {
-										html += '<img src="' + item.thumb_url + '" alt="' + escapeHtml(item.title) + '" />';
+										html += '<img src="' + item.thumb_url + '" alt="' + escapeHtml(item.title) + '" style="width:100%; height:100%; object-fit:cover;" />';
 									} else {
-										html += '<span class="som-cat-placeholder">&#128230;</span>';
+										html += '<span class="som-cat-placeholder" style="font-size:1.1rem;">&#128230;</span>';
 									}
 									html += '</div></td>';
 
-									html += '<td class="som-cat-product-info">';
-									html += '<strong>' + escapeHtml(item.title) + '</strong>';
+									// Compact Product Title (2-line clamp) & Inline Type Badge
+									html += '<td style="padding:8px 12px;">';
+									html += '<div style="line-height:1.25;">';
+									html += '<strong style="display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; font-size:0.92rem; color:#1e293b;" title="' + escapeHtml(item.title) + '">' + escapeHtml(item.title) + '</strong>';
+									html += '<div style="margin-top:3px; font-size:0.78rem; color:#64748b; display:flex; align-items:center; gap:6px; flex-wrap:wrap;">';
+									if (item.is_standalone) {
+										html += '<span style="font-size:0.68rem; color:#0369a1; background:#e0f2fe; padding:1px 6px; border-radius:4px; font-weight:700;">Shop Product</span>';
+									} else {
+										html += '<span style="font-size:0.68rem; color:#15803d; background:#dcfce7; padding:1px 6px; border-radius:4px; font-weight:700;">Catalog Product</span>';
+									}
 									var metaArr = [];
 									if (item.brand) metaArr.push('Brand: ' + escapeHtml(item.brand));
 									if (item.unit) metaArr.push('Unit: ' + escapeHtml(item.unit));
-									if (item.shop_sku) metaArr.push('Shop SKU: ' + escapeHtml(item.shop_sku));
+									if (item.shop_sku) metaArr.push('SKU: ' + escapeHtml(item.shop_sku));
 									if (metaArr.length > 0) {
-										html += '<span class="som-cat-meta-tag">' + metaArr.join(' &bull; ') + '</span>';
+										html += '<span>' + metaArr.join(' &bull; ') + '</span>';
 									}
-									html += '</td>';
+									html += '</div></div></td>';
 
-									// Type Tag
-									if (item.is_standalone) {
-										html += '<td><span style="font-size:0.75rem; color:#0369a1; background:#e0f2fe; padding:4px 8px; border-radius:10px; font-weight:700;">Shop Product</span></td>';
-									} else {
-										html += '<td><span style="font-size:0.75rem; color:#15803d; background:#dcfce7; padding:4px 8px; border-radius:10px; font-weight:700;">Catalog Product</span></td>';
-									}
+									html += '<td style="padding:8px 12px;"><span style="font-size:0.85rem; color:#475569;">' + escapeHtml(item.category) + '</span></td>';
 
-									html += '<td><span class="som-cat-meta-tag">' + escapeHtml(item.category) + '</span></td>';
-
-									html += '<td><span class="som-cat-price">';
+									html += '<td style="padding:8px 12px;"><span class="som-cat-price" style="font-weight:700; color:#0f172a;">';
 									if (item.sale_price) {
-										html += '<del>₹' + item.price + '</del> ₹' + item.sale_price;
+										html += '<del style="color:#94a3b8; font-weight:400; font-size:0.82rem; margin-right:4px;">₹' + item.price + '</del> ₹' + item.sale_price;
 									} else {
 										html += '₹' + item.price;
 									}
 									html += '</span></td>';
 
 									var availLabel = item.stock_status === 'instock' ? 'Available' : 'Unavailable';
-									html += '<td><span class="som-cat-badge ' + item.stock_status + '">' + availLabel + '</span></td>';
-									html += '<td><span class="som-cat-badge ' + item.status + '">' + item.status + '</span></td>';
+									var availColor = item.stock_status === 'instock' ? '#16a34a' : '#dc2626';
+									var availBg = item.stock_status === 'instock' ? '#f0fdf4' : '#fef2f2';
+									html += '<td style="padding:8px 12px;"><span style="font-size:0.78rem; font-weight:700; color:' + availColor + '; background:' + availBg + '; padding:3px 8px; border-radius:12px;">' + availLabel + '</span></td>';
 
-									html += '<td><div class="som-cat-actions">';
-									html += '<button type="button" class="som-btn-icon som-btn-edit-item" data-item=\'' + JSON.stringify(item) + '\'>&#9998; Edit</button>';
-									html += '<button type="button" class="som-btn-icon danger som-btn-remove-item" data-id="' + item.id + '" data-title="' + escapeHtml(item.title) + '">&#128465;</button>';
+									html += '<td style="padding:8px 12px; text-align:right;"><div class="som-cat-actions" style="display:flex; justify-content:flex-end; gap:4px;">';
+									html += '<button type="button" class="som-btn-icon som-btn-edit-item" data-item=\'' + JSON.stringify(item) + '\' style="padding:4px 8px; font-size:0.8rem;">&#9998; Edit</button>';
+									html += '<button type="button" class="som-btn-icon danger som-btn-remove-item" data-id="' + item.id + '" data-title="' + escapeHtml(item.title) + '" style="padding:4px 8px; font-size:0.8rem;">&#128465;</button>';
 									html += '</div></td>';
 									html += '</tr>';
 								});
 
 								$tbody.html(html);
 
-								$('#som_catalog_info').text('Page ' + res.data.current_page + ' of ' + res.data.total_pages + ' (' + res.data.total_count + ' items)');
-								$('#som_cat_prev_btn').prop('disabled', res.data.current_page <= 1);
-								$('#som_cat_next_btn').prop('disabled', res.data.current_page >= res.data.total_pages);
+								// Calculate exact range string e.g. "Showing 1–25 of 527 products"
+								var startItem = totalCount > 0 ? (currentPage - 1) * perPage + 1 : 0;
+								var endItem = Math.min(totalCount, currentPage * perPage);
+								$('#som_catalog_info').text('Showing ' + startItem + '–' + endItem + ' of ' + totalCount + ' products');
+
+								$('#som_cat_prev_btn').prop('disabled', currentPage <= 1);
+								$('#som_cat_next_btn').prop('disabled', currentPage >= totalPages);
 							} else {
-								$tbody.html('<tr><td colspan="8" style="text-align:center; color:#ef4444;">' + (res.data.message || 'Error loading catalog') + '</td></tr>');
+								$tbody.html('<tr><td colspan="6" style="text-align:center; color:#ef4444; padding:20px;">' + (res.data.message || 'Error loading catalog') + '</td></tr>');
 							}
 						}
 					});
@@ -721,7 +745,7 @@ class SOM_Merchant_Catalog {
 					searchTimer = setTimeout(function() { loadCatalog(1); }, 400);
 				});
 
-				$('#som_cat_status_filter, #som_cat_stock_filter').on('change', function() {
+				$('#som_cat_category_filter, #som_cat_stock_filter, #som_cat_per_page').on('change', function() {
 					loadCatalog(1);
 				});
 

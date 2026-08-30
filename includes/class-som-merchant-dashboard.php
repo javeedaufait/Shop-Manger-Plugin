@@ -118,34 +118,46 @@ class SOM_Merchant_Dashboard {
 		}
 
 		$search       = isset( $_POST['search'] ) ? sanitize_text_field( wp_unslash( $_POST['search'] ) ) : '';
-		$status       = isset( $_POST['status'] ) ? sanitize_key( $_POST['status'] ) : 'all';
+		$category     = isset( $_POST['category'] ) ? sanitize_text_field( wp_unslash( $_POST['category'] ) ) : 'all';
 		$stock_status = isset( $_POST['stock_status'] ) ? sanitize_key( $_POST['stock_status'] ) : 'all';
 		$page         = isset( $_POST['page'] ) ? max( 1, absint( $_POST['page'] ) ) : 1;
-		$limit        = 20;
+		$limit        = isset( $_POST['per_page'] ) ? min( 100, max( 10, absint( $_POST['per_page'] ) ) ) : 25;
 		$offset       = ( $page - 1 ) * $limit;
 
 		$raw_products = nearmart_get_shop_products(
 			$shop_id,
 			array(
-				'status'       => $status,
+				'status'       => 'all',
 				'stock_status' => $stock_status,
-				'limit'        => 500,
+				'limit'        => 1000,
 				'offset'       => 0,
 				'orderby'      => 'created_at',
 				'order'        => 'DESC',
 			)
 		);
 
-		$items = array();
+		$items      = array();
+		$categories = array();
+
 		foreach ( $raw_products as $p ) {
 			$item = nearmart_format_catalog_item( $p );
 			if ( ! $item ) {
 				continue;
 			}
 
+			if ( ! empty( $item['category'] ) && ! in_array( $item['category'], $categories, true ) ) {
+				$categories[] = $item['category'];
+			}
+
+			if ( 'all' !== $category && '' !== $category ) {
+				if ( false === stripos( $item['category'], $category ) ) {
+					continue;
+				}
+			}
+
 			if ( ! empty( $search ) ) {
 				$match_title = false !== stripos( $item['title'], $search );
-				$match_brand = false !== stripos( $item['brand'], $search );
+				$match_brand = false !== stripos( (string) $item['brand'], $search );
 				$match_sku   = false !== stripos( (string) $item['master_sku'], $search );
 				$match_ssku  = false !== stripos( (string) $item['shop_sku'], $search );
 
@@ -157,6 +169,7 @@ class SOM_Merchant_Dashboard {
 			$items[] = $item;
 		}
 
+		sort( $categories );
 		$total_count = count( $items );
 		$paged_items = array_slice( $items, $offset, $limit );
 		$total_pages = ceil( $total_count / $limit );
@@ -167,6 +180,8 @@ class SOM_Merchant_Dashboard {
 				'total_count'  => $total_count,
 				'total_pages'  => max( 1, $total_pages ),
 				'current_page' => $page,
+				'per_page'     => $limit,
+				'categories'   => $categories,
 			)
 		);
 	}
