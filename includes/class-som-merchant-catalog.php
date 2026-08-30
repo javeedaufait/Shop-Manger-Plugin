@@ -1,6 +1,6 @@
 <?php
 /**
- * Dedicated Merchant Catalog Module (Phase 2 HYBRID Catalog Frontend).
+ * Dedicated Merchant Catalog Module (Merchant-Friendly Terminology Upgrade).
  *
  * @package Shop_Onboarding_Manager
  */
@@ -26,7 +26,7 @@ class SOM_Merchant_Catalog {
 	}
 
 	/**
-	 * AJAX endpoint: Merchant Submit Request for New Product.
+	 * AJAX endpoint: Merchant Submit Request for Product.
 	 */
 	public static function ajax_request_new_product() {
 		check_ajax_referer( 'som_merchant_dashboard_nonce', 'nonce' );
@@ -192,7 +192,7 @@ class SOM_Merchant_Catalog {
 			<div class="som-dashboard-header" style="margin-top: 16px;">
 				<div class="som-header-title">
 					<h2>&#128722; <?php printf( esc_html__( 'My Shop Catalog — %s', 'shop-onboarding-manager' ), esc_html( $shop_name ) ); ?></h2>
-					<p><?php esc_html_e( 'Manage prices, availability, and products (Master-Linked or Standalone) for your store catalog.', 'shop-onboarding-manager' ); ?></p>
+					<p><?php esc_html_e( 'Manage prices, availability, and products for your store catalog.', 'shop-onboarding-manager' ); ?></p>
 				</div>
 				<div style="display: flex; gap: 10px; flex-wrap: wrap;">
 					<button type="button" id="som_btn_open_add_modal" class="som-submit-btn" style="width: auto; padding: 12px 20px; min-height: 44px;">
@@ -261,7 +261,7 @@ class SOM_Merchant_Catalog {
 			<div id="som_dash_msg" class="som-response-msg"></div>
 		</div>
 
-		<!-- MODAL 1: Dual-Mode Add Product Modal (Phase 2 HYBRID Catalog) -->
+		<!-- MODAL 1: Dual-Mode Add Product Modal (Merchant-Friendly Terminology) -->
 		<div id="som_add_product_modal" class="som-modal-overlay" style="display: none;">
 			<div class="som-modal-content" style="max-width: 680px;">
 				<div class="som-modal-header">
@@ -272,18 +272,22 @@ class SOM_Merchant_Catalog {
 				<!-- Dual-Mode Tab Controls -->
 				<div style="display: flex; gap: 8px; border-bottom: 2px solid #e2e8f0; margin-bottom: 18px;">
 					<button type="button" id="som_tab_btn_master" class="som-modal-tab-btn active" style="padding: 10px 16px; border: none; background: none; font-weight: 700; color: #2563eb; border-bottom: 3px solid #2563eb; cursor: pointer;">
-						&#128065; <?php esc_html_e( 'Search Existing Master Product', 'shop-onboarding-manager' ); ?>
+						&#128065; <?php esc_html_e( 'Add an Existing Product', 'shop-onboarding-manager' ); ?>
 					</button>
 					<button type="button" id="som_tab_btn_standalone" class="som-modal-tab-btn" style="padding: 10px 16px; border: none; background: none; font-weight: 700; color: #64748b; border-bottom: 3px solid transparent; cursor: pointer;">
-						&#10133; <?php esc_html_e( 'Add Standalone New Product', 'shop-onboarding-manager' ); ?>
+						&#10133; <?php esc_html_e( 'Add a New Product', 'shop-onboarding-manager' ); ?>
 					</button>
 				</div>
 
-				<!-- TAB 1: Search Existing Master Product -->
+				<!-- TAB 1: Add an Existing Product -->
 				<div id="som_tab_content_master" class="som-tab-content">
+					<p style="font-size: 0.88rem; color: #64748b; margin: 0 0 14px 0;">
+						<?php esc_html_e( 'Search the NearMart product catalog and add an existing product to your shop.', 'shop-onboarding-manager' ); ?>
+					</p>
+
 					<div class="som-form-group">
-						<label for="som_master_search" class="som-label"><?php esc_html_e( '1. Search Master Product (Name, SKU, or Barcode)', 'shop-onboarding-manager' ); ?></label>
-						<input type="text" id="som_master_search" class="som-input" placeholder="<?php esc_attr_e( 'Type at least 2 characters to search master catalog...', 'shop-onboarding-manager' ); ?>" />
+						<label for="som_master_search" class="som-label"><?php esc_html_e( 'Search Product (Name, Brand, SKU, or Barcode)', 'shop-onboarding-manager' ); ?></label>
+						<input type="text" id="som_master_search" class="som-input" placeholder="<?php esc_attr_e( 'Search by product name, brand, SKU or barcode...', 'shop-onboarding-manager' ); ?>" />
 						<div id="som_master_results" class="som-master-search-results"></div>
 					</div>
 
@@ -336,17 +340,17 @@ class SOM_Merchant_Catalog {
 					</form>
 				</div>
 
-				<!-- TAB 2: Add Standalone New Product -->
+				<!-- TAB 2: Add a New Product -->
 				<div id="som_tab_content_standalone" class="som-tab-content" style="display: none;">
-					<p style="font-size: 0.85rem; color: #64748b; margin-bottom: 14px;">
-						<?php esc_html_e( 'Create a standalone item specific to your shop. Standalone items do not require a master product.', 'shop-onboarding-manager' ); ?>
+					<p style="font-size: 0.88rem; color: #64748b; margin-bottom: 14px;">
+						<?php esc_html_e( 'Add a product that is not currently in the NearMart catalog. It will initially be available only in your shop.', 'shop-onboarding-manager' ); ?>
 					</p>
 
 					<!-- Lightweight Master Similarity Banner -->
 					<div id="som_standalone_suggestion_banner" style="display: none; background: #eff6ff; border: 1px solid #93c5fd; border-radius: 8px; padding: 12px; margin-bottom: 14px;">
 						<div style="display: flex; gap: 10px; align-items: center; justify-content: space-between;">
 							<div style="font-size: 0.85rem; color: #1e40af;">
-								<strong>💡 <?php esc_html_e( 'Similar Master Product Found:', 'shop-onboarding-manager' ); ?></strong>
+								<strong>💡 <?php esc_html_e( 'Similar Existing Product Found:', 'shop-onboarding-manager' ); ?></strong>
 								<span id="som_suggested_master_title" style="font-weight: 700;"></span>
 							</div>
 							<div style="display: flex; gap: 6px;">
@@ -428,14 +432,14 @@ class SOM_Merchant_Catalog {
 						</div>
 
 						<button type="submit" id="som_btn_save_standalone" class="som-submit-btn">
-							&#128190; <?php esc_html_e( 'Save Standalone Product', 'shop-onboarding-manager' ); ?>
+							&#128190; <?php esc_html_e( 'Save New Product', 'shop-onboarding-manager' ); ?>
 						</button>
 					</form>
 				</div>
 			</div>
 		</div>
 
-		<!-- MODAL 2: Edit Catalog Product Modal (HYBRID Model) -->
+		<!-- MODAL 2: Edit Catalog Product Modal -->
 		<div id="som_edit_product_modal" class="som-modal-overlay" style="display: none;">
 			<div class="som-modal-content">
 				<div class="som-modal-header">
@@ -466,7 +470,7 @@ class SOM_Merchant_Catalog {
 					<!-- Editable Product Specs Box (For Standalone Items) -->
 					<div id="som_edit_standalone_specs_box" style="display:none; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:14px; margin-bottom:16px;">
 						<p style="font-size:0.82rem; font-weight:700; color:#166534; margin-bottom:10px;">
-							&#10133; <?php esc_html_e( 'Standalone Shop Product Specifications', 'shop-onboarding-manager' ); ?>
+							&#10133; <?php esc_html_e( 'Shop Product Specifications', 'shop-onboarding-manager' ); ?>
 						</p>
 						<div class="som-form-group">
 							<label for="som_edit_custom_name" class="som-label required"><?php esc_html_e( 'Product Name', 'shop-onboarding-manager' ); ?></label>
@@ -542,16 +546,16 @@ class SOM_Merchant_Catalog {
 			</div>
 		</div>
 
-		<!-- MODAL 3: Merchant Request New Product Modal -->
+		<!-- MODAL 3: Merchant Request Product Modal -->
 		<div id="som_request_product_modal" class="som-modal-overlay" style="display: none;">
 			<div class="som-modal-content">
 				<div class="som-modal-header">
-					<h3>&#10133; <?php esc_html_e( 'Request New Product', 'shop-onboarding-manager' ); ?></h3>
+					<h3>&#10133; <?php esc_html_e( 'Request Product', 'shop-onboarding-manager' ); ?></h3>
 					<button type="button" class="som-modal-close" onclick="document.getElementById('som_request_product_modal').style.display='none';">&times;</button>
 				</div>
 
 				<p style="font-size: 0.88rem; color: #64748b; margin-bottom: 16px;">
-					<?php esc_html_e( 'Can\'t find a product in our master catalog? Submit a request below. Admin will review and add the master product to the platform.', 'shop-onboarding-manager' ); ?>
+					<?php esc_html_e( 'Can\'t find a product in our catalog? Submit a request below. Admin will review and add the product to the NearMart platform.', 'shop-onboarding-manager' ); ?>
 				</p>
 
 				<form id="som_form_request_new_product">
@@ -588,7 +592,7 @@ class SOM_Merchant_Catalog {
 					</div>
 
 					<button type="submit" id="som_btn_submit_req" class="som-submit-btn">
-						&#128238; <?php esc_html_e( 'Submit Product Request', 'shop-onboarding-manager' ); ?>
+						&#128238; <?php esc_html_e( 'Submit Request', 'shop-onboarding-manager' ); ?>
 					</button>
 				</form>
 			</div>
@@ -608,7 +612,7 @@ class SOM_Merchant_Catalog {
 			</div>
 		</div>
 
-		<!-- Catalog Inline JavaScript Handler (Phase 2 HYBRID Catalog) -->
+		<!-- Catalog Inline JavaScript Handler -->
 		<script>
 		if (typeof jQuery !== 'undefined') {
 			jQuery(document).ready(function($) {
@@ -671,9 +675,9 @@ class SOM_Merchant_Catalog {
 
 									// Type Tag
 									if (item.is_standalone) {
-										html += '<td><span style="font-size:0.75rem; color:#0369a1; background:#e0f2fe; padding:4px 8px; border-radius:10px; font-weight:700;">Standalone</span></td>';
+										html += '<td><span style="font-size:0.75rem; color:#0369a1; background:#e0f2fe; padding:4px 8px; border-radius:10px; font-weight:700;">Shop Product</span></td>';
 									} else {
-										html += '<td><span style="font-size:0.75rem; color:#15803d; background:#dcfce7; padding:4px 8px; border-radius:10px; font-weight:700;">Master-Linked</span></td>';
+										html += '<td><span style="font-size:0.75rem; color:#15803d; background:#dcfce7; padding:4px 8px; border-radius:10px; font-weight:700;">Catalog Product</span></td>';
 									}
 
 									html += '<td><span class="som-cat-meta-tag">' + escapeHtml(item.category) + '</span></td>';
@@ -752,8 +756,12 @@ class SOM_Merchant_Catalog {
 				});
 
 				function renderMasterSearchPrompt() {
-					var html = '<p style="padding:14px; text-align:center; color:#64748b; margin:0;">Type at least 2 characters to search master products...</p>';
-					html += '<div style="text-align:center; padding-bottom:14px;"><button type="button" class="som-submit-btn som-btn-secondary som-btn-trigger-req" style="width:auto; padding:8px 16px; font-size:0.88rem;">&#10133; Request New Master Product</button></div>';
+					var html = '<div style="text-align:center; padding:18px 12px 14px 12px;">';
+					html += '<strong style="font-size:0.95rem; color:#1e293b; display:block; margin-bottom:8px;">Can\'t find what you\'re looking for?</strong>';
+					html += '<div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:8px;">';
+					html += '<button type="button" class="som-submit-btn som-btn-secondary som-btn-trigger-req" style="width:auto; padding:8px 16px; font-size:0.85rem;">&#128221; Request Product</button>';
+					html += '<button type="button" class="som-submit-btn som-btn-trigger-add-new" style="width:auto; padding:8px 16px; font-size:0.85rem;">&#10133; Add New Product</button>';
+					html += '</div></div>';
 					$('#som_master_results').html(html);
 				}
 
@@ -776,7 +784,7 @@ class SOM_Merchant_Catalog {
 
 				function performMasterSearch(queryStr) {
 					if (!queryStr || queryStr.length < 2) return;
-					$('#som_master_results').html('<p style="padding:14px; color:#64748b; margin:0; text-align:center;">&#128259; Searching master products...</p>');
+					$('#som_master_results').html('<p style="padding:14px; color:#64748b; margin:0; text-align:center;">&#128259; Searching products...</p>');
 
 					$.ajax({
 						url: ajaxUrl,
@@ -815,11 +823,21 @@ class SOM_Merchant_Catalog {
 									html += '</div>';
 								});
 
-								html += '<div style="text-align:center; padding: 12px 0 4px 0; border-top:1px solid #f1f5f9;"><span style="font-size:0.82rem; color:#64748b;">Can\'t find what you need? </span><button type="button" class="som-btn-trigger-req" style="background:none; border:none; color:#2563eb; font-weight:700; text-decoration:underline; cursor:pointer;">Request New Product</button></div>';
+								html += '<div style="text-align:center; padding: 14px 0 6px 0; border-top:1px solid #f1f5f9;">';
+								html += '<strong style="font-size:0.9rem; color:#1e293b; display:block; margin-bottom:6px;">Can\'t find what you\'re looking for?</strong>';
+								html += '<div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:6px;">';
+								html += '<button type="button" class="som-submit-btn som-btn-secondary som-btn-trigger-req" style="width:auto; padding:6px 14px; font-size:0.82rem;">&#128221; Request Product</button>';
+								html += '<button type="button" class="som-submit-btn som-btn-trigger-add-new" style="width:auto; padding:6px 14px; font-size:0.82rem;">&#10133; Add New Product</button>';
+								html += '</div></div>';
 								$('#som_master_results').html(html);
 							} else {
-								var html = '<p style="padding:14px; color:#64748b; margin:0; text-align:center;">No master products found matching your search.</p>';
-								html += '<div style="text-align:center; padding-bottom:14px;"><button type="button" class="som-submit-btn som-btn-secondary som-btn-trigger-req" style="width:auto; padding:8px 16px; font-size:0.88rem;">&#10133; Request New Product</button></div>';
+								var html = '<div style="text-align:center; padding:18px 12px 14px 12px;">';
+								html += '<p style="color:#64748b; margin:0 0 10px 0;">No existing products found matching your search.</p>';
+								html += '<strong style="font-size:0.95rem; color:#1e293b; display:block; margin-bottom:8px;">Can\'t find what you\'re looking for?</strong>';
+								html += '<div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:8px;">';
+								html += '<button type="button" class="som-submit-btn som-btn-secondary som-btn-trigger-req" style="width:auto; padding:8px 16px; font-size:0.85rem;">&#128221; Request Product</button>';
+								html += '<button type="button" class="som-submit-btn som-btn-trigger-add-new" style="width:auto; padding:8px 16px; font-size:0.85rem;">&#10133; Add New Product</button>';
+								html += '</div></div>';
 								$('#som_master_results').html(html);
 							}
 						}
@@ -840,7 +858,7 @@ class SOM_Merchant_Catalog {
 					$(this).addClass('selected');
 
 					$('#som_add_product_id').val(m.product_id);
-					$('#som_add_selected_title').html('&#10003; Selected Master Product: ' + escapeHtml(m.title) + (m.unit ? ' (' + escapeHtml(m.unit) + ')' : ''));
+					$('#som_add_selected_title').html('&#10003; Selected Product: ' + escapeHtml(m.title) + (m.unit ? ' (' + escapeHtml(m.unit) + ')' : ''));
 
 					if (m.suggested_price) {
 						$('#som_add_price').val(m.suggested_price);
@@ -896,6 +914,15 @@ class SOM_Merchant_Catalog {
 
 				$('#som_btn_dismiss_suggestion').on('click', function() {
 					$('#som_standalone_suggestion_banner').slideUp();
+				});
+
+				// Trigger Add New Tab Switcher Event Listener
+				$(document).on('click', '.som-btn-trigger-add-new', function() {
+					var searchVal = $('#som_master_search').val().trim();
+					$('#som_tab_btn_standalone').click();
+					if (searchVal) {
+						$('#som_st_name').val(searchVal);
+					}
 				});
 
 				// Submit Add Master Product Form
@@ -962,20 +989,20 @@ class SOM_Merchant_Catalog {
 							status: $('#som_st_status').val()
 						},
 						success: function(res) {
-							$btn.prop('disabled', false).html('&#128190; Save Standalone Product');
+							$btn.prop('disabled', false).html('&#128190; Save New Product');
 							if (res.success) {
-								alert(res.data.message || 'Standalone product added successfully!');
+								alert(res.data.message || 'New product added successfully!');
 								$('#som_add_product_modal').hide();
 								$('#som_form_add_standalone_product')[0].reset();
 								$('#som_standalone_suggestion_banner').hide();
 								loadCatalog(1);
 							} else {
-								alert(res.data.message || 'Error adding standalone product.');
+								alert(res.data.message || 'Error adding new product.');
 							}
 						},
 						error: function() {
-							$btn.prop('disabled', false).html('&#128190; Save Standalone Product');
-							alert('Server error adding standalone product. Please try again.');
+							$btn.prop('disabled', false).html('&#128190; Save New Product');
+							alert('Server error adding product. Please try again.');
 						}
 					});
 				});
@@ -989,7 +1016,6 @@ class SOM_Merchant_Catalog {
 					$('#som_edit_product_id').val(item.product_id || '');
 
 					if (item.is_standalone) {
-						// Show Standalone Specs form
 						$('#som_edit_master_specs_box').hide();
 						$('#som_edit_standalone_specs_box').show();
 
@@ -999,7 +1025,6 @@ class SOM_Merchant_Catalog {
 						$('#som_edit_custom_unit').val(item.unit || '');
 						$('#som_edit_custom_barcode').val(item.barcode || '');
 					} else {
-						// Show Master Specs box
 						$('#som_edit_standalone_specs_box').hide();
 						$('#som_edit_master_specs_box').show();
 
@@ -1083,7 +1108,7 @@ class SOM_Merchant_Catalog {
 					var title = $(this).data('title') || 'this product';
 
 					var msg = 'Are you sure you want to remove "' + title + '" from your shop catalog?\n\n' +
-						'This will only remove the item from your store. Master products in WooCommerce will not be deleted.';
+						'This will only remove the item from your store.';
 
 					if (!confirm(msg)) return;
 
@@ -1133,7 +1158,7 @@ class SOM_Merchant_Catalog {
 							notes: $('#som_req_notes').val()
 						},
 						success: function(res) {
-							$btn.prop('disabled', false).html('&#128238; Submit Product Request');
+							$btn.prop('disabled', false).html('&#128238; Submit Request');
 							if (res.success) {
 								alert(res.data.message || 'Request submitted successfully!');
 								$('#som_request_product_modal').hide();
