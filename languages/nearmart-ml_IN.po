@@ -1,15 +1,16 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: NearMart 1.3.0\n"
+"Project-Id-Version: NearMart Shop Onboarding Manager\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-31 10:00+0000\n"
-"PO-Revision-Date: 2026-08-31 10:00+0000\n"
-"Last-Translator: \n"
-"Language-Team: Malayalam\n"
+"POT-Creation-Date: 2026-08-31 17:40+0530\n"
+"PO-Revision-Date: 2026-08-31 17:40+0530\n"
+"Last-Translator: NearMart Team <support@nearmart.local>\n"
+"Language-Team: Malayalam <ml@li.org>\n"
 "Language: ml_IN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Generator: NearMart Multilingual Tools\n"
 
 msgid "Merchant Portal"
 msgstr "മെർച്ചന്റ് പോർട്ടൽ"
@@ -304,4 +305,163 @@ msgstr "നിങ്ങളുടെ കട രജിസ്റ്റർ ചെയ
 
 msgid "Language"
 msgstr "ഭാഷ"
+
+msgid "Join NearMart as a Partner Shop"
+msgstr "നിയർമാർട്ടിൽ പങ്കാളിയാകൂ"
+
+msgid "NearMart connects local supermarkets and grocery stores directly with nearby neighborhood customers for convenient, queue-free pickup."
+msgstr "തൊട്ടടുത്തുള്ള ഉപഭോക്താക്കളുമായി നിങ്ങളുടെ സൂപ്പർമാർക്കറ്റുകളെയും പലചരക്ക് കടകളെയും ബന്ധിപ്പിച്ച് വേഗത്തിലുള്ള പിക്കപ്പ് സേവനം നൽകുന്നു."
+
+msgid "Reach Nearby Customers"
+msgstr "കൂടുതൽ ഉപഭോക്താക്കളിലേക്ക് എത്തുക"
+
+msgid "Get discovered by local shoppers living right in your neighborhood."
+msgstr "നിങ്ങളുടെ പ്രദേശത്തെ ഉപഭോക്താക്കൾക്ക് നിങ്ങളുടെ കട വേഗത്തിൽ കണ്ടെത്താം."
+
+msgid "Get Orders Through NearMart"
+msgstr "ഓൺലൈൻ ഓർഡറുകൾ നേടുക"
+
+msgid "Receive advance grocery orders so you can pack items ahead of time."
+msgstr "സാധനങ്ങൾ നേരത്തെ തന്നെ പാക്ക് ചെയ്തുവെക്കാൻ മുൻകൂട്ടി ഓർഡറുകൾ സ്വീകരിക്കുക."
+
+msgid "No Setup Fee"
+msgstr "സൗജന്യ രജിസ്ട്രേഷൻ"
+
+msgid "Free to join during our initial launch for early partner stores."
+msgstr "ആദ്യഘട്ടത്തിൽ ചേരുന്ന പങ്കാളിത്ത കടകൾക്ക് രജിസ്ട്രേഷൻ പൂർണ്ണമായും സൗജന്യമാണ്."
+
+msgid "Easy Merchant Portal"
+msgstr "ലളിതമായ വ്യാപാരി പോർട്ടൽ"
+
+msgid "Simple mobile-friendly dashboard to confirm details and agreements."
+msgstr "വിശദാംശങ്ങളും കരാറുകളും പരിശോധിക്കാൻ ലളിതമായ മൊബൈൽ പോർട്ടൽ."
+
+msgid "Interested? Contact Our Team"
+msgstr "പങ്കാളിയാകാൻ താല്പര്യമുണ്ടോ? ഞങ്ങളെ ബന്ധപ്പെടൂ"
+
+msgid "Our field team will visit your shop to set up your partner account."
+msgstr "നിങ്ങളുടെ പങ്കാളിത്ത അക്കൗണ്ട് ആരംഭിക്കാൻ ഞങ്ങളുടെ ഫീൽഡ് ടീം നേരിട്ടെത്തും."
+
+msgid "Chat on WhatsApp (+91 91234 56789)"
+msgstr "WhatsApp-ൽ ചാറ്റ് ചെയ്യുക (+91 91234 56789)"
+
+msgid "Email Support (support@nearmart.local)"
+msgstr "ഇമെയിൽ അയക്കുക (support@nearmart.local)"
+
+msgid "Shop Onboarding Form"
+msgstr "കട ചേർക്കാനുള്ള ഫോം"
+
+msgid "Register a new supermarket or grocery store"
+msgstr "ഒരു പുതിയ സൂപ്പർമാർക്കറ്റോ പലചരക്ക് കടയോ രജിസ്റ്റർ ചെയ്യുക"
+
+msgid "Shop Name"
+msgstr "കടയുടെ പേര്"
+
+msgid "Owner Name"
+msgstr "ഉടമയുടെ പേര്"
+
+msgid "Phone Number"
+msgstr "ഫോൺ നമ്പർ"
+
+msgid "Address"
+msgstr "വിലാസം"
+
+msgid "Shop Type"
+msgstr "കടയുടെ തരം"
+
+msgid "Take / Upload Photo"
+msgstr "ഫോട്ടോ എടുക്കുക / അപ്‌ലോഡ് ചെയ്യുക"
+
+msgid "GPS Location"
+msgstr "GPS ലൊക്കേഷൻ"
+
+msgid "Capture GPS"
+msgstr "GPS രേഖപ്പെടുത്തുക"
+
+msgid "Latitude"
+msgstr "ലാറ്റിറ്റ്യൂഡ്"
+
+msgid "Longitude"
+msgstr "ലോഞ്ചിറ്റ്യൂഡ്"
+
+msgid "Accuracy (m)"
+msgstr "കൃത്യത (മീറ്റർ)"
+
+msgid "Follow-up Date"
+msgstr "തുടർനടപടി തീയതി"
+
+msgid "Assign Existing Merchant"
+msgstr "നിലവിലുള്ള വ്യാപാരിയെ തിരഞ്ഞെടുക്കുക"
+
+msgid "Create New Merchant Login Account"
+msgstr "പുതിയ വ്യാപാരി ലോഗിൻ അക്കൗണ്ട് നിർമ്മിക്കുക"
+
+msgid "Field Notes"
+msgstr "ഫീൽഡ് കുറിപ്പുകൾ"
+
+msgid "Shopkeeper Concerns"
+msgstr "കടയുടമയുടെ സംശയങ്ങൾ / നിർദ്ദേശങ്ങൾ"
+
+msgid "Register Shop"
+msgstr "കട രജിസ്റ്റർ ചെയ്യുക"
+
+msgid "For Shop Owners"
+msgstr "കടയുടമകൾക്കായി"
+
+msgid "Commission rate, delivery timing, payment terms..."
+msgstr "കമ്മീഷൻ നിരക്ക്, സമയം, പേയ്‌മെന്റ് നിബന്ധനകൾ..."
+
+msgid "Observations, store size, traffic..."
+msgstr "കടയുടെ വലിപ്പം, തിരക്ക്, മറ്റ് നിരീക്ഷണങ്ങൾ..."
+
+msgid "Full street address, area, landmark"
+msgstr "പൂർണ്ണ വിലാസം, പ്രദേശം, ലാൻഡ്മാർക്ക്"
+
+msgid "Supermarket"
+msgstr "സൂപ്പർമാർക്കറ്റ്"
+
+msgid "Grocery Store"
+msgstr "പലചരക്ക് കട"
+
+msgid "Convenience Store"
+msgstr "കൺവീനിയൻസ് സ്റ്റോർ"
+
+msgid "Bakery"
+msgstr "ബേക്കറി"
+
+msgid "Butchery"
+msgstr "ഇറച്ചി കട"
+
+msgid "Fruit & Vegetable Market"
+msgstr "പഴം & പച്ചക്കറി കട"
+
+msgid "Specialty Store"
+msgstr "പ്രത്യേക വിഭവ കട"
+
+msgid "Other"
+msgstr "മറ്റുള്ളവ"
+
+msgid "Contacted"
+msgstr "ബന്ധപ്പെട്ടു"
+
+msgid "Interested"
+msgstr "താല്പര്യമുണ്ട്"
+
+msgid "Verified"
+msgstr "സ്ഥിരീകരിച്ചു"
+
+msgid "Committed"
+msgstr "സമ്മതിച്ചു"
+
+msgid "Internal Field Team Page"
+msgstr "ഫീൽഡ് ടീം പേജ്"
+
+msgid "Access to this registration form is restricted to authorized NearMart onboarding staff and administrators."
+msgstr "ഈ രജിസ്ട്രേഷൻ ഫോം നിയർമാർട്ട് ഫീൽഡ് സ്റ്റാഫുകൾക്കും അഡ്മിനുകൾക്കും മാത്രമായി പരിമിതപ്പെടുത്തിയിരിക്കുന്നു."
+
+msgid "Field Agent Login"
+msgstr "ഫീൽഡ് ഏജന്റ് ലോഗിൻ"
+
+msgid "Are you a shop owner? Learn how to join NearMart →"
+msgstr "നിങ്ങൾ ഒരു കടയുടമയാണോ? എങ്ങനെ പങ്കാളിയാകാമെന്ന് അറിയൂ →"
 
