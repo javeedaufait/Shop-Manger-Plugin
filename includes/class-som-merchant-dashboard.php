@@ -45,14 +45,14 @@ class SOM_Merchant_Dashboard {
 		$shop_id = nearmart_get_current_merchant_shop_id( $user_id );
 
 		if ( ! $shop_id || ! nearmart_user_can_manage_shop( $user_id, $shop_id ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'nearmart' ) ), 403 );
 		}
 
 		update_post_meta( $shop_id, 'som_details_confirmed', true );
 		update_post_meta( $shop_id, 'som_details_confirmed_at', current_time( 'mysql' ) );
 		update_post_meta( $shop_id, 'som_details_confirmed_by', $user_id );
 
-		wp_send_json_success( array( 'message' => __( 'Shop details confirmed successfully!', 'shop-onboarding-manager' ) ) );
+		wp_send_json_success( array( 'message' => __( 'Shop details confirmed successfully!', 'nearmart' ) ) );
 	}
 
 	/**
@@ -65,7 +65,7 @@ class SOM_Merchant_Dashboard {
 		$shop_id = nearmart_get_current_merchant_shop_id( $user_id );
 
 		if ( ! $shop_id || ! nearmart_user_can_manage_shop( $user_id, $shop_id ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'nearmart' ) ), 403 );
 		}
 
 		update_post_meta( $shop_id, 'som_agreement_accepted', true );
@@ -73,7 +73,7 @@ class SOM_Merchant_Dashboard {
 		update_post_meta( $shop_id, 'som_agreement_accepted_at', current_time( 'mysql' ) );
 		update_post_meta( $shop_id, 'som_agreement_accepted_by', $user_id );
 
-		wp_send_json_success( array( 'message' => __( 'Participation agreement accepted successfully!', 'shop-onboarding-manager' ) ) );
+		wp_send_json_success( array( 'message' => __( 'Participation agreement accepted successfully!', 'nearmart' ) ) );
 	}
 
 	/**
@@ -86,12 +86,12 @@ class SOM_Merchant_Dashboard {
 		$shop_id = nearmart_get_current_merchant_shop_id( $user_id );
 
 		if ( ! $shop_id || ! nearmart_user_can_manage_shop( $user_id, $shop_id ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'nearmart' ) ), 403 );
 		}
 
 		$notes = isset( $_POST['notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['notes'] ) ) : '';
 		if ( empty( $notes ) ) {
-			wp_send_json_error( array( 'message' => __( 'Please enter details for your change request.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Please enter details for your change request.', 'nearmart' ) ) );
 		}
 
 		$existing_concerns = get_post_meta( $shop_id, 'som_concerns', true );
@@ -101,7 +101,7 @@ class SOM_Merchant_Dashboard {
 
 		update_post_meta( $shop_id, 'som_concerns', $updated_concerns );
 
-		wp_send_json_success( array( 'message' => __( 'Your change request has been submitted to admin.', 'shop-onboarding-manager' ) ) );
+		wp_send_json_success( array( 'message' => __( 'Your change request has been submitted to admin.', 'nearmart' ) ) );
 	}
 
 	/**
@@ -114,7 +114,7 @@ class SOM_Merchant_Dashboard {
 		$shop_id = nearmart_get_current_merchant_shop_id( $user_id );
 
 		if ( ! $shop_id || ! nearmart_user_can_manage_shop( $user_id, $shop_id ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'nearmart' ) ), 403 );
 		}
 
 		$search       = isset( $_POST['search'] ) ? sanitize_text_field( wp_unslash( $_POST['search'] ) ) : '';
@@ -199,7 +199,7 @@ class SOM_Merchant_Dashboard {
 		$shop_id = nearmart_get_current_merchant_shop_id( $user_id );
 
 		if ( ! $shop_id || ! nearmart_user_can_manage_shop( $user_id, $shop_id ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'nearmart' ) ), 403 );
 		}
 
 		$query = isset( $_POST['q'] ) ? sanitize_text_field( wp_unslash( $_POST['q'] ) ) : '';
@@ -245,7 +245,7 @@ class SOM_Merchant_Dashboard {
 				$results[] = array(
 					'product_id'      => $pid,
 					'title'           => get_the_title( $pid ),
-					'category'        => ! empty( $cats ) ? $cats[0] : __( 'Uncategorized', 'shop-onboarding-manager' ),
+					'category'        => ! empty( $cats ) ? $cats[0] : __( 'Uncategorized', 'nearmart' ),
 					'brand'           => $specs['brand_name'],
 					'unit'            => $specs['unit'],
 					'barcode'         => $specs['barcode'],
@@ -270,7 +270,7 @@ class SOM_Merchant_Dashboard {
 		$shop_id = nearmart_get_current_merchant_shop_id( $user_id );
 
 		if ( ! $shop_id || ! nearmart_user_can_manage_shop( $user_id, $shop_id ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'nearmart' ) ), 403 );
 		}
 
 		$product_id     = isset( $_POST['product_id'] ) ? absint( $_POST['product_id'] ) : 0;
@@ -282,11 +282,11 @@ class SOM_Merchant_Dashboard {
 		$shop_sku       = isset( $_POST['shop_sku'] ) ? sanitize_text_field( wp_unslash( $_POST['shop_sku'] ) ) : null;
 
 		if ( ! $product_id || get_post_type( $product_id ) !== 'product' || get_post_status( $product_id ) !== 'publish' ) {
-			wp_send_json_error( array( 'message' => __( 'Invalid or inactive master product selected.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Invalid or inactive master product selected.', 'nearmart' ) ) );
 		}
 
 		if ( nearmart_has_shop_product( $shop_id, $product_id ) ) {
-			wp_send_json_error( array( 'message' => __( 'This product is already in your shop catalog.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'This product is already in your shop catalog.', 'nearmart' ) ) );
 		}
 
 		$result = nearmart_add_shop_product(
@@ -303,10 +303,10 @@ class SOM_Merchant_Dashboard {
 		);
 
 		if ( false === $result ) {
-			wp_send_json_error( array( 'message' => __( 'Failed to add product to catalog.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Failed to add product to catalog.', 'nearmart' ) ) );
 		}
 
-		wp_send_json_success( array( 'message' => __( 'Master product added to your shop catalog successfully!', 'shop-onboarding-manager' ) ) );
+		wp_send_json_success( array( 'message' => __( 'Master product added to your shop catalog successfully!', 'nearmart' ) ) );
 	}
 
 	/**
@@ -319,7 +319,7 @@ class SOM_Merchant_Dashboard {
 		$shop_id = nearmart_get_current_merchant_shop_id( $user_id );
 
 		if ( ! $shop_id || ! nearmart_user_can_manage_shop( $user_id, $shop_id ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'nearmart' ) ), 403 );
 		}
 
 		$custom_name     = isset( $_POST['custom_name'] ) ? sanitize_text_field( wp_unslash( $_POST['custom_name'] ) ) : '';
@@ -335,7 +335,7 @@ class SOM_Merchant_Dashboard {
 		$shop_sku        = isset( $_POST['shop_sku'] ) ? sanitize_text_field( wp_unslash( $_POST['shop_sku'] ) ) : null;
 
 		if ( empty( $custom_name ) ) {
-			wp_send_json_error( array( 'message' => __( 'Product name is required.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Product name is required.', 'nearmart' ) ) );
 		}
 
 		// Check duplicate standalone name in shop
@@ -344,7 +344,7 @@ class SOM_Merchant_Dashboard {
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$dup = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE shop_id = %d AND LOWER(custom_name) = LOWER(%s) AND status != 'deleted'", $shop_id, $custom_name ) );
 		if ( (int) $dup > 0 ) {
-			wp_send_json_error( array( 'message' => sprintf( __( 'A product named "%s" is already in your shop catalog.', 'shop-onboarding-manager' ), esc_html( $custom_name ) ) ) );
+			wp_send_json_error( array( 'message' => sprintf( __( 'A product named "%s" is already in your shop catalog.', 'nearmart' ), esc_html( $custom_name ) ) ) );
 		}
 
 		$insert_id = nearmart_add_standalone_shop_product(
@@ -365,10 +365,10 @@ class SOM_Merchant_Dashboard {
 		);
 
 		if ( ! $insert_id ) {
-			wp_send_json_error( array( 'message' => __( 'Failed to add standalone product to catalog.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Failed to add standalone product to catalog.', 'nearmart' ) ) );
 		}
 
-		wp_send_json_success( array( 'message' => __( 'Standalone product added to your catalog successfully!', 'shop-onboarding-manager' ) ) );
+		wp_send_json_success( array( 'message' => __( 'Standalone product added to your catalog successfully!', 'nearmart' ) ) );
 	}
 
 	/**
@@ -381,7 +381,7 @@ class SOM_Merchant_Dashboard {
 		$shop_id = nearmart_get_current_merchant_shop_id( $user_id );
 
 		if ( ! $shop_id || ! nearmart_user_can_manage_shop( $user_id, $shop_id ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'nearmart' ) ), 403 );
 		}
 
 		$name = isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
@@ -439,7 +439,7 @@ class SOM_Merchant_Dashboard {
 		$shop_id = nearmart_get_current_merchant_shop_id( $user_id );
 
 		if ( ! $shop_id || ! nearmart_user_can_manage_shop( $user_id, $shop_id ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'nearmart' ) ), 403 );
 		}
 
 		$id             = isset( $_POST['id'] ) ? absint( $_POST['id'] ) : 0;
@@ -466,7 +466,7 @@ class SOM_Merchant_Dashboard {
 		}
 
 		if ( ! $row || (int) $row->shop_id !== (int) $shop_id ) {
-			wp_send_json_error( array( 'message' => __( 'Product not found in your shop catalog.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Product not found in your shop catalog.', 'nearmart' ) ) );
 		}
 
 		$update_data = array(
@@ -499,10 +499,10 @@ class SOM_Merchant_Dashboard {
 		$result = nearmart_update_shop_product_by_id( $row->id, $update_data );
 
 		if ( false === $result ) {
-			wp_send_json_error( array( 'message' => __( 'Failed to update catalog product.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Failed to update catalog product.', 'nearmart' ) ) );
 		}
 
-		wp_send_json_success( array( 'message' => __( 'Catalog product updated successfully!', 'shop-onboarding-manager' ) ) );
+		wp_send_json_success( array( 'message' => __( 'Catalog product updated successfully!', 'nearmart' ) ) );
 	}
 
 	/**
@@ -515,7 +515,7 @@ class SOM_Merchant_Dashboard {
 		$shop_id = nearmart_get_current_merchant_shop_id( $user_id );
 
 		if ( ! $shop_id || ! nearmart_user_can_manage_shop( $user_id, $shop_id ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'nearmart' ) ), 403 );
 		}
 
 		$id         = isset( $_POST['id'] ) ? absint( $_POST['id'] ) : 0;
@@ -529,16 +529,16 @@ class SOM_Merchant_Dashboard {
 		}
 
 		if ( ! $row || (int) $row->shop_id !== (int) $shop_id ) {
-			wp_send_json_error( array( 'message' => __( 'Invalid product catalog entry.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Invalid product catalog entry.', 'nearmart' ) ) );
 		}
 
 		$result = nearmart_remove_shop_product_by_id( $row->id );
 
 		if ( false === $result ) {
-			wp_send_json_error( array( 'message' => __( 'Failed to remove product from catalog.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Failed to remove product from catalog.', 'nearmart' ) ) );
 		}
 
-		wp_send_json_success( array( 'message' => __( 'Product removed from your shop catalog.', 'shop-onboarding-manager' ) ) );
+		wp_send_json_success( array( 'message' => __( 'Product removed from your shop catalog.', 'nearmart' ) ) );
 	}
 
 	/**
@@ -551,16 +551,16 @@ class SOM_Merchant_Dashboard {
 		$user_id = get_current_user_id();
 		if ( ! $user_id || ! nearmart_user_can_manage_shop_catalog( $user_id ) ) {
 			return '<div class="som-merchant-card"><div class="som-response-msg error" style="display:block;">' .
-				esc_html__( 'Please log in with a merchant account to access your dashboard.', 'shop-onboarding-manager' ) .
+				esc_html__( 'Please log in with a merchant account to access your dashboard.', 'nearmart' ) .
 				' <br /><br /><a href="' . esc_url( home_url( '/merchant-login/' ) ) . '" class="som-submit-btn som-btn-secondary" style="text-decoration:none; display:inline-block; width:auto; padding:10px 20px;">' .
-				esc_html__( 'Go to Merchant Login &rarr;', 'shop-onboarding-manager' ) . '</a></div></div>';
+				esc_html__( 'Go to Merchant Login &rarr;', 'nearmart' ) . '</a></div></div>';
 		}
 
 		$shop_id = nearmart_get_current_merchant_shop_id( $user_id );
 		if ( ! $shop_id ) {
 			return '<div class="som-merchant-card"><div class="som-card-header"><h2>' .
-				esc_html__( 'Merchant Dashboard', 'shop-onboarding-manager' ) . '</h2></div><p>' .
-				esc_html__( 'No shop is currently linked to your merchant user account. Please contact NearMart support.', 'shop-onboarding-manager' ) .
+				esc_html__( 'Merchant Dashboard', 'nearmart' ) . '</h2></div><p>' .
+				esc_html__( 'No shop is currently linked to your merchant user account. Please contact NearMart support.', 'nearmart' ) .
 				'</p></div>';
 		}
 
@@ -585,14 +585,14 @@ class SOM_Merchant_Dashboard {
 
 			<div class="som-dashboard-header" style="margin-top: 16px;">
 				<div class="som-header-title">
-					<h2>&#127978; <?php printf( esc_html__( 'Welcome, %s', 'shop-onboarding-manager' ), esc_html( $shop_name ) ); ?></h2>
-					<p><?php esc_html_e( 'Manage your store details, catalog items, and account verification.', 'shop-onboarding-manager' ); ?></p>
+					<h2>&#127978; <?php printf( esc_html__( 'Welcome, %s', 'nearmart' ), esc_html( $shop_name ) ); ?></h2>
+					<p><?php esc_html_e( 'Manage your store details, catalog items, and account verification.', 'nearmart' ); ?></p>
 				</div>
 				<div class="som-header-status-badge">
 					<?php if ( $is_verified ) : ?>
-						<span class="som-badge verified">&#10004; <?php esc_html_e( 'Verified Shop', 'shop-onboarding-manager' ); ?></span>
+						<span class="som-badge verified">&#10004; <?php esc_html_e( 'Verified Shop', 'nearmart' ); ?></span>
 					<?php else : ?>
-						<span class="som-badge pending">&#128336; <?php esc_html_e( 'Verification Pending', 'shop-onboarding-manager' ); ?></span>
+						<span class="som-badge pending">&#128336; <?php esc_html_e( 'Verification Pending', 'nearmart' ); ?></span>
 					<?php endif; ?>
 				</div>
 			</div>
@@ -600,52 +600,52 @@ class SOM_Merchant_Dashboard {
 			<div class="som-dashboard-grid">
 				<div class="som-dash-card">
 					<div class="som-card-header">
-						<h3>&#128202; <?php esc_html_e( 'Catalog Overview', 'shop-onboarding-manager' ); ?></h3>
+						<h3>&#128202; <?php esc_html_e( 'Catalog Overview', 'nearmart' ); ?></h3>
 					</div>
 					<div class="som-catalog-stats-grid">
 						<div class="som-stat-box">
 							<span class="som-stat-value"><?php echo esc_html( $catalog_summary['total'] ); ?></span>
-							<span class="som-stat-label"><?php esc_html_e( 'Total Products', 'shop-onboarding-manager' ); ?></span>
+							<span class="som-stat-label"><?php esc_html_e( 'Total Products', 'nearmart' ); ?></span>
 						</div>
 						<div class="som-stat-box green">
 							<span class="som-stat-value"><?php echo esc_html( $catalog_summary['active'] ); ?></span>
-							<span class="som-stat-label"><?php esc_html_e( 'Active Listed', 'shop-onboarding-manager' ); ?></span>
+							<span class="som-stat-label"><?php esc_html_e( 'Active Listed', 'nearmart' ); ?></span>
 						</div>
 						<div class="som-stat-box orange">
 							<span class="som-stat-value"><?php echo esc_html( $catalog_summary['outofstock'] ); ?></span>
-							<span class="som-stat-label"><?php esc_html_e( 'Unavailable', 'shop-onboarding-manager' ); ?></span>
+							<span class="som-stat-label"><?php esc_html_e( 'Unavailable', 'nearmart' ); ?></span>
 						</div>
 					</div>
 					<div style="margin-top: 16px;">
 						<a href="<?php echo esc_url( home_url( '/merchant-catalog/' ) ); ?>" class="som-submit-btn" style="text-decoration:none; display:block; text-align:center;">
-							&#128722; <?php esc_html_e( 'Manage Full Catalog &rarr;', 'shop-onboarding-manager' ); ?>
+							&#128722; <?php esc_html_e( 'Manage Full Catalog &rarr;', 'nearmart' ); ?>
 						</a>
 					</div>
 				</div>
 
 				<div class="som-dash-card">
 					<div class="som-card-header">
-						<h3>&#128221; <?php esc_html_e( 'Shop Information', 'shop-onboarding-manager' ); ?></h3>
+						<h3>&#128221; <?php esc_html_e( 'Shop Information', 'nearmart' ); ?></h3>
 					</div>
 					<div class="som-info-list">
 						<div class="som-info-item">
-							<strong><?php esc_html_e( 'Shop Name:', 'shop-onboarding-manager' ); ?></strong>
+							<strong><?php esc_html_e( 'Shop Name:', 'nearmart' ); ?></strong>
 							<span><?php echo esc_html( $shop_name ); ?></span>
 						</div>
 						<div class="som-info-item">
-							<strong><?php esc_html_e( 'Owner:', 'shop-onboarding-manager' ); ?></strong>
+							<strong><?php esc_html_e( 'Owner:', 'nearmart' ); ?></strong>
 							<span><?php echo esc_html( $owner_name ? $owner_name : '—' ); ?></span>
 						</div>
 						<div class="som-info-item">
-							<strong><?php esc_html_e( 'Phone:', 'shop-onboarding-manager' ); ?></strong>
+							<strong><?php esc_html_e( 'Phone:', 'nearmart' ); ?></strong>
 							<span><?php echo esc_html( $phone_number ? $phone_number : '—' ); ?></span>
 						</div>
 						<div class="som-info-item">
-							<strong><?php esc_html_e( 'Category:', 'shop-onboarding-manager' ); ?></strong>
+							<strong><?php esc_html_e( 'Category:', 'nearmart' ); ?></strong>
 							<span><?php echo esc_html( $shop_type ? $shop_type : '—' ); ?></span>
 						</div>
 						<div class="som-info-item">
-							<strong><?php esc_html_e( 'Address:', 'shop-onboarding-manager' ); ?></strong>
+							<strong><?php esc_html_e( 'Address:', 'nearmart' ); ?></strong>
 							<span><?php echo esc_html( $address ? $address : '—' ); ?></span>
 						</div>
 					</div>

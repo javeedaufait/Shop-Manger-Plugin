@@ -26,20 +26,20 @@ class SOM_Post_Types {
 	 */
 	public static function register_post_types() {
 		$labels = array(
-			'name'                  => _x( 'Shops', 'Post type general name', 'shop-onboarding-manager' ),
-			'singular_name'         => _x( 'Shop', 'Post type singular name', 'shop-onboarding-manager' ),
-			'menu_name'             => _x( 'Shops', 'Admin Menu text', 'shop-onboarding-manager' ),
-			'name_admin_bar'        => _x( 'Shop', 'Add New on Toolbar', 'shop-onboarding-manager' ),
-			'add_new'               => __( 'Add New Shop', 'shop-onboarding-manager' ),
-			'add_new_item'          => __( 'Add New Shop', 'shop-onboarding-manager' ),
-			'new_item'              => __( 'New Shop', 'shop-onboarding-manager' ),
-			'edit_item'             => __( 'Edit Shop', 'shop-onboarding-manager' ),
-			'view_item'             => __( 'View Shop', 'shop-onboarding-manager' ),
-			'all_items'             => __( 'All Shops', 'shop-onboarding-manager' ),
-			'search_items'          => __( 'Search Shops', 'shop-onboarding-manager' ),
-			'parent_item_colon'     => __( 'Parent Shops:', 'shop-onboarding-manager' ),
-			'not_found'             => __( 'No shops found.', 'shop-onboarding-manager' ),
-			'not_found_in_trash'    => __( 'No shops found in Trash.', 'shop-onboarding-manager' ),
+			'name'                  => _x( 'Shops', 'Post type general name', 'nearmart' ),
+			'singular_name'         => _x( 'Shop', 'Post type singular name', 'nearmart' ),
+			'menu_name'             => _x( 'Shops', 'Admin Menu text', 'nearmart' ),
+			'name_admin_bar'        => _x( 'Shop', 'Add New on Toolbar', 'nearmart' ),
+			'add_new'               => __( 'Add New Shop', 'nearmart' ),
+			'add_new_item'          => __( 'Add New Shop', 'nearmart' ),
+			'new_item'              => __( 'New Shop', 'nearmart' ),
+			'edit_item'             => __( 'Edit Shop', 'nearmart' ),
+			'view_item'             => __( 'View Shop', 'nearmart' ),
+			'all_items'             => __( 'All Shops', 'nearmart' ),
+			'search_items'          => __( 'Search Shops', 'nearmart' ),
+			'parent_item_colon'     => __( 'Parent Shops:', 'nearmart' ),
+			'not_found'             => __( 'No shops found.', 'nearmart' ),
+			'not_found_in_trash'    => __( 'No shops found in Trash.', 'nearmart' ),
 		);
 
 		$args = array(

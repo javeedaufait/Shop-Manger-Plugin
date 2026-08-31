@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: Shop Onboarding Manager
- * Plugin URI:  https://example.com/shop-onboarding-manager
+ * Plugin URI:  https://example.com/nearmart
  * Description: MVP foundation for onboarding supermarkets and grocery shops.
  * Version:     1.3.0
  * Author:      Nearmart
- * Text Domain: shop-onboarding-manager
+ * Text Domain: nearmart
  * Domain Path: /languages
  *
  * @package Shop_Onboarding_Manager

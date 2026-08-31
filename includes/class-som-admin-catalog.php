@@ -37,8 +37,8 @@ class SOM_Admin_Catalog {
 	public static function register_admin_menu() {
 		add_submenu_page(
 			'som-admin',
-			__( 'Shop Catalogs', 'shop-onboarding-manager' ),
-			__( 'Shop Catalogs', 'shop-onboarding-manager' ),
+			__( 'Shop Catalogs', 'nearmart' ),
+			__( 'Shop Catalogs', 'nearmart' ),
 			'manage_options',
 			'som-admin-catalog',
 			array( __CLASS__, 'render_admin_catalog_page' )
@@ -52,7 +52,7 @@ class SOM_Admin_Catalog {
 		check_ajax_referer( 'som_admin_catalog_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'nearmart' ) ), 403 );
 		}
 
 		$shop_id      = isset( $_POST['shop_id'] ) ? absint( $_POST['shop_id'] ) : 0;
@@ -65,7 +65,7 @@ class SOM_Admin_Catalog {
 		$offset       = ( max( 1, $page ) - 1 ) * $limit;
 
 		if ( ! $shop_id || ! in_array( get_post_type( $shop_id ), array( 'shop', 'shop_onboarding' ), true ) ) {
-			wp_send_json_error( array( 'message' => __( 'Invalid shop selected.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Invalid shop selected.', 'nearmart' ) ) );
 		}
 
 		$raw_products = nearmart_get_shop_products(
@@ -131,7 +131,7 @@ class SOM_Admin_Catalog {
 		check_ajax_referer( 'som_admin_catalog_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'nearmart' ) ), 403 );
 		}
 
 		$query   = isset( $_POST['q'] ) ? sanitize_text_field( wp_unslash( $_POST['q'] ) ) : '';
@@ -178,7 +178,7 @@ class SOM_Admin_Catalog {
 				$results[] = array(
 					'product_id'      => $pid,
 					'title'           => get_the_title( $pid ),
-					'category'        => ! empty( $cats ) ? $cats[0] : __( 'Uncategorized', 'shop-onboarding-manager' ),
+					'category'        => ! empty( $cats ) ? $cats[0] : __( 'Uncategorized', 'nearmart' ),
 					'brand'           => $specs['brand_name'],
 					'unit'            => $specs['unit'],
 					'barcode'         => $specs['barcode'],
@@ -200,7 +200,7 @@ class SOM_Admin_Catalog {
 		check_ajax_referer( 'som_admin_catalog_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'nearmart' ) ), 403 );
 		}
 
 		$shop_id        = isset( $_POST['shop_id'] ) ? absint( $_POST['shop_id'] ) : 0;
@@ -213,11 +213,11 @@ class SOM_Admin_Catalog {
 		$shop_sku       = isset( $_POST['shop_sku'] ) ? sanitize_text_field( wp_unslash( $_POST['shop_sku'] ) ) : null;
 
 		if ( ! $shop_id || ! $product_id || get_post_type( $product_id ) !== 'product' ) {
-			wp_send_json_error( array( 'message' => __( 'Invalid shop or master product.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Invalid shop or master product.', 'nearmart' ) ) );
 		}
 
 		if ( nearmart_has_shop_product( $shop_id, $product_id ) ) {
-			wp_send_json_error( array( 'message' => __( 'Product is already in this shop catalog.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Product is already in this shop catalog.', 'nearmart' ) ) );
 		}
 
 		$result = nearmart_add_shop_product(
@@ -234,10 +234,10 @@ class SOM_Admin_Catalog {
 		);
 
 		if ( false === $result ) {
-			wp_send_json_error( array( 'message' => __( 'Failed to add product to shop catalog.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Failed to add product to shop catalog.', 'nearmart' ) ) );
 		}
 
-		wp_send_json_success( array( 'message' => __( 'Master product added to shop catalog successfully!', 'shop-onboarding-manager' ) ) );
+		wp_send_json_success( array( 'message' => __( 'Master product added to shop catalog successfully!', 'nearmart' ) ) );
 	}
 
 	/**
@@ -247,7 +247,7 @@ class SOM_Admin_Catalog {
 		check_ajax_referer( 'som_admin_catalog_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'nearmart' ) ), 403 );
 		}
 
 		$shop_id         = isset( $_POST['shop_id'] ) ? absint( $_POST['shop_id'] ) : 0;
@@ -264,7 +264,7 @@ class SOM_Admin_Catalog {
 		$shop_sku        = isset( $_POST['shop_sku'] ) ? sanitize_text_field( wp_unslash( $_POST['shop_sku'] ) ) : null;
 
 		if ( ! $shop_id || empty( $custom_name ) ) {
-			wp_send_json_error( array( 'message' => __( 'Shop ID and Product name are required.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Shop ID and Product name are required.', 'nearmart' ) ) );
 		}
 
 		$insert_id = nearmart_add_standalone_shop_product(
@@ -285,10 +285,10 @@ class SOM_Admin_Catalog {
 		);
 
 		if ( ! $insert_id ) {
-			wp_send_json_error( array( 'message' => __( 'Failed to add standalone product to shop catalog.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Failed to add standalone product to shop catalog.', 'nearmart' ) ) );
 		}
 
-		wp_send_json_success( array( 'message' => __( 'Standalone product added to shop catalog successfully!', 'shop-onboarding-manager' ) ) );
+		wp_send_json_success( array( 'message' => __( 'Standalone product added to shop catalog successfully!', 'nearmart' ) ) );
 	}
 
 	/**
@@ -298,7 +298,7 @@ class SOM_Admin_Catalog {
 		check_ajax_referer( 'som_admin_catalog_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'nearmart' ) ), 403 );
 		}
 
 		$id             = isset( $_POST['id'] ) ? absint( $_POST['id'] ) : 0;
@@ -326,7 +326,7 @@ class SOM_Admin_Catalog {
 		}
 
 		if ( ! $row ) {
-			wp_send_json_error( array( 'message' => __( 'Shop product catalog entry not found.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Shop product catalog entry not found.', 'nearmart' ) ) );
 		}
 
 		$update_data = array(
@@ -359,10 +359,10 @@ class SOM_Admin_Catalog {
 		$result = nearmart_update_shop_product_by_id( $row->id, $update_data );
 
 		if ( false === $result ) {
-			wp_send_json_error( array( 'message' => __( 'Failed to update shop product.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Failed to update shop product.', 'nearmart' ) ) );
 		}
 
-		wp_send_json_success( array( 'message' => __( 'Shop product updated successfully!', 'shop-onboarding-manager' ) ) );
+		wp_send_json_success( array( 'message' => __( 'Shop product updated successfully!', 'nearmart' ) ) );
 	}
 
 	/**
@@ -372,36 +372,36 @@ class SOM_Admin_Catalog {
 		check_ajax_referer( 'som_admin_catalog_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'nearmart' ) ), 403 );
 		}
 
 		$id                = isset( $_POST['id'] ) ? absint( $_POST['id'] ) : 0;
 		$master_product_id = isset( $_POST['master_product_id'] ) ? absint( $_POST['master_product_id'] ) : 0;
 
 		if ( ! $id ) {
-			wp_send_json_error( array( 'message' => __( 'Invalid catalog item ID.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Invalid catalog item ID.', 'nearmart' ) ) );
 		}
 
 		if ( ! $master_product_id || get_post_type( $master_product_id ) !== 'product' || get_post_status( $master_product_id ) !== 'publish' ) {
-			wp_send_json_error( array( 'message' => __( 'Invalid or inactive WooCommerce master product selected.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Invalid or inactive WooCommerce master product selected.', 'nearmart' ) ) );
 		}
 
 		$row = nearmart_get_shop_product_by_id( $id );
 		if ( ! $row ) {
-			wp_send_json_error( array( 'message' => __( 'Shop product catalog entry not found.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Shop product catalog entry not found.', 'nearmart' ) ) );
 		}
 
 		if ( nearmart_has_shop_product( $row->shop_id, $master_product_id ) ) {
-			wp_send_json_error( array( 'message' => __( 'This shop catalog already contains a record linked to that master product.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'This shop catalog already contains a record linked to that master product.', 'nearmart' ) ) );
 		}
 
 		$result = nearmart_update_shop_product_by_id( $id, array( 'product_id' => $master_product_id ) );
 
 		if ( false === $result ) {
-			wp_send_json_error( array( 'message' => __( 'Failed to link shop product to master product.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Failed to link shop product to master product.', 'nearmart' ) ) );
 		}
 
-		wp_send_json_success( array( 'message' => __( 'Shop product linked to WooCommerce master product successfully!', 'shop-onboarding-manager' ) ) );
+		wp_send_json_success( array( 'message' => __( 'Shop product linked to WooCommerce master product successfully!', 'nearmart' ) ) );
 	}
 
 	/**
@@ -411,7 +411,7 @@ class SOM_Admin_Catalog {
 		check_ajax_referer( 'som_admin_catalog_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'nearmart' ) ), 403 );
 		}
 
 		$id         = isset( $_POST['id'] ) ? absint( $_POST['id'] ) : 0;
@@ -426,16 +426,16 @@ class SOM_Admin_Catalog {
 		}
 
 		if ( ! $row ) {
-			wp_send_json_error( array( 'message' => __( 'Invalid product catalog entry.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Invalid product catalog entry.', 'nearmart' ) ) );
 		}
 
 		$result = nearmart_remove_shop_product_by_id( $row->id );
 
 		if ( false === $result ) {
-			wp_send_json_error( array( 'message' => __( 'Failed to remove product from shop catalog.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Failed to remove product from shop catalog.', 'nearmart' ) ) );
 		}
 
-		wp_send_json_success( array( 'message' => __( 'Product removed from shop catalog.', 'shop-onboarding-manager' ) ) );
+		wp_send_json_success( array( 'message' => __( 'Product removed from shop catalog.', 'nearmart' ) ) );
 	}
 
 	/**
@@ -453,7 +453,7 @@ class SOM_Admin_Catalog {
 	 */
 	public static function render_admin_catalog_page() {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'Unauthorized access.', 'shop-onboarding-manager' ) );
+			wp_die( esc_html__( 'Unauthorized access.', 'nearmart' ) );
 		}
 
 		$shops = get_posts(
@@ -469,16 +469,16 @@ class SOM_Admin_Catalog {
 		$nonce = wp_create_nonce( 'som_admin_catalog_nonce' );
 		?>
 		<div class="wrap som-admin-wrap">
-			<h1 class="wp-heading-inline">&#127978; <?php esc_html_e( 'Shop Catalogs Management', 'shop-onboarding-manager' ); ?></h1>
+			<h1 class="wp-heading-inline">&#127978; <?php esc_html_e( 'Shop Catalogs Management', 'nearmart' ); ?></h1>
 			<hr class="wp-header-end" />
 
 			<div style="background:#fff; border:1px solid #c3c4c7; border-radius:8px; padding:16px 20px; margin-top:16px; display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap;">
 				<div style="display:flex; align-items:center; gap:12px;">
 					<label for="som_admin_shop_select" style="font-weight:700; font-size:0.95rem; color:#1d2327;">
-						&#127978; <?php esc_html_e( 'Select Shop:', 'shop-onboarding-manager' ); ?>
+						&#127978; <?php esc_html_e( 'Select Shop:', 'nearmart' ); ?>
 					</label>
 					<select id="som_admin_shop_select" style="min-width:280px; padding:6px 12px; font-size:0.95rem; border-radius:4px;">
-						<option value=""><?php esc_html_e( '-- Choose a Shop --', 'shop-onboarding-manager' ); ?></option>
+						<option value=""><?php esc_html_e( '-- Choose a Shop --', 'nearmart' ); ?></option>
 						<?php foreach ( $shops as $s ) : ?>
 							<option value="<?php echo esc_attr( $s->ID ); ?>"><?php echo esc_html( $s->post_title ); ?> (ID: <?php echo esc_html( $s->ID ); ?>)</option>
 						<?php endforeach; ?>
@@ -486,7 +486,7 @@ class SOM_Admin_Catalog {
 				</div>
 				<div>
 					<button type="button" id="som_admin_btn_open_add" class="button button-primary button-large" disabled>
-						&#10133; <?php esc_html_e( 'Add Product to Shop Catalog', 'shop-onboarding-manager' ); ?>
+						&#10133; <?php esc_html_e( 'Add Product to Shop Catalog', 'nearmart' ); ?>
 					</button>
 				</div>
 			</div>
@@ -495,15 +495,15 @@ class SOM_Admin_Catalog {
 				<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:20px;">
 					<div style="background:#fff; border:1px solid #c3c4c7; border-radius:8px; padding:14px; text-align:center;">
 						<span style="font-size:1.8rem; font-weight:800; color:#1d2327; display:block;" id="som_stat_total">0</span>
-						<span style="font-size:0.82rem; color:#64748b; font-weight:600; text-transform:uppercase;"><?php esc_html_e( 'Total Products', 'shop-onboarding-manager' ); ?></span>
+						<span style="font-size:0.82rem; color:#64748b; font-weight:600; text-transform:uppercase;"><?php esc_html_e( 'Total Products', 'nearmart' ); ?></span>
 					</div>
 					<div style="background:#fff; border:1px solid #c3c4c7; border-radius:8px; padding:14px; text-align:center;">
 						<span style="font-size:1.8rem; font-weight:800; color:#16a34a; display:block;" id="som_stat_active">0</span>
-						<span style="font-size:0.82rem; color:#64748b; font-weight:600; text-transform:uppercase;"><?php esc_html_e( 'Active Listed', 'shop-onboarding-manager' ); ?></span>
+						<span style="font-size:0.82rem; color:#64748b; font-weight:600; text-transform:uppercase;"><?php esc_html_e( 'Active Listed', 'nearmart' ); ?></span>
 					</div>
 					<div style="background:#fff; border:1px solid #c3c4c7; border-radius:8px; padding:14px; text-align:center;">
 						<span style="font-size:1.8rem; font-weight:800; color:#ea580c; display:block;" id="som_stat_outofstock">0</span>
-						<span style="font-size:0.82rem; color:#64748b; font-weight:600; text-transform:uppercase;"><?php esc_html_e( 'Out of Stock', 'shop-onboarding-manager' ); ?></span>
+						<span style="font-size:0.82rem; color:#64748b; font-weight:600; text-transform:uppercase;"><?php esc_html_e( 'Out of Stock', 'nearmart' ); ?></span>
 					</div>
 				</div>
 
@@ -512,19 +512,19 @@ class SOM_Admin_Catalog {
 						<input type="text" id="som_admin_cat_search" class="regular-text" placeholder="Search by name, brand, or SKU..." style="max-width:320px;" />
 						<div style="display:flex; gap:10px; flex-wrap:wrap;">
 							<select id="som_admin_type_filter">
-								<option value="all"><?php esc_html_e( 'All Product Types', 'shop-onboarding-manager' ); ?></option>
-								<option value="linked"><?php esc_html_e( 'Master-Linked Products', 'shop-onboarding-manager' ); ?></option>
-								<option value="unlinked"><?php esc_html_e( 'Unlinked / Standalone Products', 'shop-onboarding-manager' ); ?></option>
+								<option value="all"><?php esc_html_e( 'All Product Types', 'nearmart' ); ?></option>
+								<option value="linked"><?php esc_html_e( 'Master-Linked Products', 'nearmart' ); ?></option>
+								<option value="unlinked"><?php esc_html_e( 'Unlinked / Standalone Products', 'nearmart' ); ?></option>
 							</select>
 							<select id="som_admin_cat_status">
-								<option value="all"><?php esc_html_e( 'All Statuses', 'shop-onboarding-manager' ); ?></option>
-								<option value="active"><?php esc_html_e( 'Active', 'shop-onboarding-manager' ); ?></option>
-								<option value="inactive"><?php esc_html_e( 'Inactive', 'shop-onboarding-manager' ); ?></option>
+								<option value="all"><?php esc_html_e( 'All Statuses', 'nearmart' ); ?></option>
+								<option value="active"><?php esc_html_e( 'Active', 'nearmart' ); ?></option>
+								<option value="inactive"><?php esc_html_e( 'Inactive', 'nearmart' ); ?></option>
 							</select>
 							<select id="som_admin_cat_stock">
-								<option value="all"><?php esc_html_e( 'All Availability', 'shop-onboarding-manager' ); ?></option>
-								<option value="instock"><?php esc_html_e( 'In Stock', 'shop-onboarding-manager' ); ?></option>
-								<option value="outofstock"><?php esc_html_e( 'Out of Stock', 'shop-onboarding-manager' ); ?></option>
+								<option value="all"><?php esc_html_e( 'All Availability', 'nearmart' ); ?></option>
+								<option value="instock"><?php esc_html_e( 'In Stock', 'nearmart' ); ?></option>
+								<option value="outofstock"><?php esc_html_e( 'Out of Stock', 'nearmart' ); ?></option>
 							</select>
 						</div>
 					</div>
@@ -564,7 +564,7 @@ class SOM_Admin_Catalog {
 		<div id="som_admin_link_modal" class="som-modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:99999; align-items:center; justify-content:center;">
 			<div style="background:#fff; width:100%; max-width:600px; border-radius:8px; padding:20px; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
 				<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:12px; margin-bottom:16px;">
-					<h3 style="margin:0;">&#128279; <?php esc_html_e( 'Link Shop Product to WooCommerce Master Product', 'shop-onboarding-manager' ); ?></h3>
+					<h3 style="margin:0;">&#128279; <?php esc_html_e( 'Link Shop Product to WooCommerce Master Product', 'nearmart' ); ?></h3>
 					<button type="button" class="button-link" onclick="document.getElementById('som_admin_link_modal').style.display='none';">&times;</button>
 				</div>
 				<input type="hidden" id="som_admin_link_item_id" value="" />
@@ -573,7 +573,7 @@ class SOM_Admin_Catalog {
 				</p>
 
 				<div class="som-form-group" style="margin-bottom:16px;">
-					<label for="som_admin_link_search" style="font-weight:700; display:block; margin-bottom:6px;"><?php esc_html_e( 'Search WooCommerce Master Products:', 'shop-onboarding-manager' ); ?></label>
+					<label for="som_admin_link_search" style="font-weight:700; display:block; margin-bottom:6px;"><?php esc_html_e( 'Search WooCommerce Master Products:', 'nearmart' ); ?></label>
 					<input type="text" id="som_admin_link_search" class="regular-text" style="width:100%;" placeholder="Type master product name or SKU..." />
 					<div id="som_admin_link_results" style="max-height:220px; overflow-y:auto; border:1px solid #c3c4c7; border-radius:4px; margin-top:8px;"></div>
 				</div>
@@ -594,7 +594,7 @@ class SOM_Admin_Catalog {
 		<div id="som_admin_add_modal" class="som-modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:99999; align-items:center; justify-content:center;">
 			<div style="background:#fff; width:100%; max-width:640px; border-radius:8px; padding:20px; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
 				<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:12px; margin-bottom:16px;">
-					<h3 style="margin:0;">&#10133; <?php esc_html_e( 'Add Product to Shop Catalog', 'shop-onboarding-manager' ); ?></h3>
+					<h3 style="margin:0;">&#10133; <?php esc_html_e( 'Add Product to Shop Catalog', 'nearmart' ); ?></h3>
 					<button type="button" class="button-link" onclick="document.getElementById('som_admin_add_modal').style.display='none';">&times;</button>
 				</div>
 
@@ -611,7 +611,7 @@ class SOM_Admin_Catalog {
 				<!-- TAB 1: Master Product Search -->
 				<div id="som_admin_tab_content_master">
 					<div class="som-form-group" style="margin-bottom:16px;">
-						<label for="som_admin_add_search" style="font-weight:700; display:block; margin-bottom:6px;"><?php esc_html_e( 'Search Master Product:', 'shop-onboarding-manager' ); ?></label>
+						<label for="som_admin_add_search" style="font-weight:700; display:block; margin-bottom:6px;"><?php esc_html_e( 'Search Master Product:', 'nearmart' ); ?></label>
 						<input type="text" id="som_admin_add_search" class="regular-text" style="width:100%;" placeholder="Type master product name or SKU..." />
 						<div id="som_admin_add_results" style="max-height:180px; overflow-y:auto; border:1px solid #c3c4c7; border-radius:4px; margin-top:8px;"></div>
 					</div>
@@ -748,7 +748,7 @@ class SOM_Admin_Catalog {
 		<div id="som_admin_edit_modal" class="som-modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:99999; align-items:center; justify-content:center;">
 			<div style="background:#fff; width:100%; max-width:600px; border-radius:8px; padding:20px; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
 				<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:12px; margin-bottom:16px;">
-					<h3 style="margin:0;">&#9998; <?php esc_html_e( 'Edit Shop Catalog Entry', 'shop-onboarding-manager' ); ?></h3>
+					<h3 style="margin:0;">&#9998; <?php esc_html_e( 'Edit Shop Catalog Entry', 'nearmart' ); ?></h3>
 					<button type="button" class="button-link" onclick="document.getElementById('som_admin_edit_modal').style.display='none';">&times;</button>
 				</div>
 
@@ -1016,7 +1016,7 @@ class SOM_Admin_Catalog {
 				if (!mp) return;
 
 				if (mp.in_catalog) {
-					alert('This product is already in this shop catalog!');
+					alert('<?php echo esc_js( __( 'This product is already in this shop catalog!', 'nearmart' ) ); ?>');
 					return;
 				}
 

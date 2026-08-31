@@ -36,7 +36,7 @@ class SOM_Merchant_Catalog {
 		$shop_id = nearmart_get_current_merchant_shop_id( $user_id );
 
 		if ( ! $shop_id || ! nearmart_user_can_manage_shop( $user_id, $shop_id ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'nearmart' ) ), 403 );
 		}
 
 		$product_name = isset( $_POST['product_name'] ) ? sanitize_text_field( wp_unslash( $_POST['product_name'] ) ) : '';
@@ -47,11 +47,11 @@ class SOM_Merchant_Catalog {
 		$notes        = isset( $_POST['notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['notes'] ) ) : '';
 
 		if ( empty( $product_name ) ) {
-			wp_send_json_error( array( 'message' => __( 'Product name is required.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Product name is required.', 'nearmart' ) ) );
 		}
 
 		if ( nearmart_has_pending_product_request( $shop_id, $product_name ) ) {
-			wp_send_json_error( array( 'message' => sprintf( __( 'A product request for "%s" is already pending review.', 'shop-onboarding-manager' ), esc_html( $product_name ) ) ) );
+			wp_send_json_error( array( 'message' => sprintf( __( 'A product request for "%s" is already pending review.', 'nearmart' ), esc_html( $product_name ) ) ) );
 		}
 
 		$insert_id = nearmart_create_product_request(
@@ -68,10 +68,10 @@ class SOM_Merchant_Catalog {
 		);
 
 		if ( ! $insert_id ) {
-			wp_send_json_error( array( 'message' => __( 'Failed to submit product request. Please try again.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Failed to submit product request. Please try again.', 'nearmart' ) ) );
 		}
 
-		wp_send_json_success( array( 'message' => __( 'Your product request has been submitted successfully! Admin will review it shortly.', 'shop-onboarding-manager' ) ) );
+		wp_send_json_success( array( 'message' => __( 'Your product request has been submitted successfully! Admin will review it shortly.', 'nearmart' ) ) );
 	}
 
 	/**
@@ -84,7 +84,7 @@ class SOM_Merchant_Catalog {
 		$shop_id = nearmart_get_current_merchant_shop_id( $user_id );
 
 		if ( ! $shop_id || ! nearmart_user_can_manage_shop( $user_id, $shop_id ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'nearmart' ) ), 403 );
 		}
 
 		$requests  = nearmart_get_merchant_product_requests( $shop_id, $user_id );
@@ -142,7 +142,7 @@ class SOM_Merchant_Catalog {
 		$shop_id = nearmart_get_current_merchant_shop_id( $user_id );
 
 		if ( ! $shop_id || ! nearmart_user_can_manage_shop( $user_id, $shop_id ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'nearmart' ) ), 403 );
 		}
 
 		$request_id     = isset( $_POST['request_id'] ) ? absint( $_POST['request_id'] ) : 0;
@@ -153,17 +153,17 @@ class SOM_Merchant_Catalog {
 		$shop_sku       = isset( $_POST['shop_sku'] ) ? sanitize_text_field( wp_unslash( $_POST['shop_sku'] ) ) : null;
 
 		if ( ! $request_id ) {
-			wp_send_json_error( array( 'message' => __( 'Invalid product request ID.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Invalid product request ID.', 'nearmart' ) ) );
 		}
 
 		$req = SOM_Product_Request_Repository::get_request_by_id( $request_id );
 
 		if ( ! $req || (int) $req->shop_id !== (int) $shop_id ) {
-			wp_send_json_error( array( 'message' => __( 'Product request not found for your shop.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Product request not found for your shop.', 'nearmart' ) ) );
 		}
 
 		if ( 'approved' !== $req->status || ! $req->master_product_id ) {
-			wp_send_json_error( array( 'message' => __( 'This product request is not in Approved – Ready to Add status.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'This product request is not in Approved – Ready to Add status.', 'nearmart' ) ) );
 		}
 
 		$master_product_id = absint( $req->master_product_id );
@@ -201,7 +201,7 @@ class SOM_Merchant_Catalog {
 		// Update product request status to completed (Added to Catalog)
 		SOM_Product_Request_Repository::update_request_status( $request_id, 'completed', $req->admin_notes, $master_product_id );
 
-		wp_send_json_success( array( 'message' => __( 'Product added to your shop catalog successfully!', 'shop-onboarding-manager' ) ) );
+		wp_send_json_success( array( 'message' => __( 'Product added to your shop catalog successfully!', 'nearmart' ) ) );
 	}
 
 	/**
@@ -222,20 +222,20 @@ class SOM_Merchant_Catalog {
 		?>
 		<div class="som-portal-nav">
 			<div class="som-portal-nav-brand">
-				<span>&#127978;</span> <strong><?php esc_html_e( 'Merchant Portal', 'shop-onboarding-manager' ); ?></strong>
+				<span>&#127978;</span> <strong><?php esc_html_e( 'Merchant Portal', 'nearmart' ); ?></strong>
 			</div>
 			<div class="som-portal-nav-links">
 				<a href="<?php echo esc_url( $dashboard_url ); ?>" class="som-nav-link<?php echo esc_attr( $dash_active ); ?>">
-					&#127968; <?php esc_html_e( 'Dashboard', 'shop-onboarding-manager' ); ?>
+					&#127968; <?php esc_html_e( 'Dashboard', 'nearmart' ); ?>
 				</a>
 				<a href="<?php echo esc_url( $catalog_url ); ?>" class="som-nav-link<?php echo esc_attr( $cat_active ); ?>">
-					&#128722; <?php esc_html_e( 'My Catalog', 'shop-onboarding-manager' ); ?>
+					&#128722; <?php esc_html_e( 'My Catalog', 'nearmart' ); ?>
 				</a>
 				<a href="#" id="som_btn_open_my_requests" class="som-nav-link">
-					&#128221; <?php esc_html_e( 'My Product Requests', 'shop-onboarding-manager' ); ?>
+					&#128221; <?php esc_html_e( 'My Product Requests', 'nearmart' ); ?>
 				</a>
 				<a href="<?php echo esc_url( $logout_url ); ?>" class="som-nav-link logout">
-					&#128682; <?php esc_html_e( 'Log Out', 'shop-onboarding-manager' ); ?>
+					&#128682; <?php esc_html_e( 'Log Out', 'nearmart' ); ?>
 				</a>
 			</div>
 		</div>
@@ -253,16 +253,16 @@ class SOM_Merchant_Catalog {
 		$user_id = get_current_user_id();
 		if ( ! $user_id || ! nearmart_user_can_manage_shop_catalog( $user_id ) ) {
 			return '<div class="som-merchant-card"><div class="som-response-msg error" style="display:block;">' .
-				esc_html__( 'Please log in with a merchant or staff account to access your shop catalog.', 'shop-onboarding-manager' ) .
+				esc_html__( 'Please log in with a merchant or staff account to access your shop catalog.', 'nearmart' ) .
 				' <br /><br /><a href="' . esc_url( home_url( '/merchant-login/' ) ) . '" class="som-submit-btn som-btn-secondary" style="text-decoration:none; display:inline-block; width:auto; padding:10px 20px;">' .
-				esc_html__( 'Go to Merchant Login &rarr;', 'shop-onboarding-manager' ) . '</a></div></div>';
+				esc_html__( 'Go to Merchant Login &rarr;', 'nearmart' ) . '</a></div></div>';
 		}
 
 		$shop_id = nearmart_get_current_merchant_shop_id( $user_id );
 		if ( ! $shop_id ) {
 			return '<div class="som-merchant-card"><div class="som-card-header"><h2>' .
-				esc_html__( 'My Catalog', 'shop-onboarding-manager' ) . '</h2></div><p>' .
-				esc_html__( 'No shop is currently linked to your merchant user account. Please contact NearMart support.', 'shop-onboarding-manager' ) .
+				esc_html__( 'My Catalog', 'nearmart' ) . '</h2></div><p>' .
+				esc_html__( 'No shop is currently linked to your merchant user account. Please contact NearMart support.', 'nearmart' ) .
 				'</p></div>';
 		}
 
@@ -278,12 +278,12 @@ class SOM_Merchant_Catalog {
 			<!-- Catalog Header Section -->
 			<div class="som-dashboard-header" style="margin-top: 16px;">
 				<div class="som-header-title">
-					<h2>&#128722; <?php printf( esc_html__( 'My Shop Catalog — %s', 'shop-onboarding-manager' ), esc_html( $shop_name ) ); ?></h2>
-					<p><?php esc_html_e( 'Manage prices, availability, and products for your store catalog.', 'shop-onboarding-manager' ); ?></p>
+					<h2>&#128722; <?php printf( esc_html__( 'My Shop Catalog — %s', 'nearmart' ), esc_html( $shop_name ) ); ?></h2>
+					<p><?php esc_html_e( 'Manage prices, availability, and products for your store catalog.', 'nearmart' ); ?></p>
 				</div>
 				<div style="display: flex; gap: 10px; flex-wrap: wrap;">
 					<button type="button" id="som_btn_open_add_modal" class="som-submit-btn" style="width: auto; padding: 12px 20px; min-height: 44px;">
-						&#10133; <?php esc_html_e( 'Add Product to Catalog', 'shop-onboarding-manager' ); ?>
+						&#10133; <?php esc_html_e( 'Add Product to Catalog', 'nearmart' ); ?>
 					</button>
 				</div>
 			</div>
@@ -297,17 +297,17 @@ class SOM_Merchant_Catalog {
 					</div>
 					<div class="som-catalog-filters" style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
 						<select id="som_cat_category_filter" class="som-select" style="min-height: 42px; min-width:140px;">
-							<option value="all"><?php esc_html_e( 'All Categories', 'shop-onboarding-manager' ); ?></option>
+							<option value="all"><?php esc_html_e( 'All Categories', 'nearmart' ); ?></option>
 						</select>
 						<select id="som_cat_stock_filter" class="som-select" style="min-height: 42px; min-width:130px;">
-							<option value="all"><?php esc_html_e( 'All Availability', 'shop-onboarding-manager' ); ?></option>
-							<option value="instock"><?php esc_html_e( 'Available', 'shop-onboarding-manager' ); ?></option>
-							<option value="outofstock"><?php esc_html_e( 'Unavailable', 'shop-onboarding-manager' ); ?></option>
+							<option value="all"><?php esc_html_e( 'All Availability', 'nearmart' ); ?></option>
+							<option value="instock"><?php esc_html_e( 'Available', 'nearmart' ); ?></option>
+							<option value="outofstock"><?php esc_html_e( 'Unavailable', 'nearmart' ); ?></option>
 						</select>
 						<select id="som_cat_per_page" class="som-select" style="min-height: 42px; min-width:120px;">
-							<option value="25"><?php esc_html_e( '25 per page', 'shop-onboarding-manager' ); ?></option>
-							<option value="50"><?php esc_html_e( '50 per page', 'shop-onboarding-manager' ); ?></option>
-							<option value="100"><?php esc_html_e( '100 per page', 'shop-onboarding-manager' ); ?></option>
+							<option value="25"><?php esc_html_e( '25 per page', 'nearmart' ); ?></option>
+							<option value="50"><?php esc_html_e( '50 per page', 'nearmart' ); ?></option>
+							<option value="100"><?php esc_html_e( '100 per page', 'nearmart' ); ?></option>
 						</select>
 					</div>
 				</div>
@@ -317,18 +317,18 @@ class SOM_Merchant_Catalog {
 					<table class="som-catalog-table compact-table" style="width:100%; border-collapse:collapse;">
 						<thead>
 							<tr style="border-bottom:2px solid #e2e8f0; background:#f8fafc; text-align:left;">
-								<th style="width: 50px; padding:10px 12px;"><?php esc_html_e( 'Image', 'shop-onboarding-manager' ); ?></th>
-								<th style="padding:10px 12px;"><?php esc_html_e( 'Product Name & Specs', 'shop-onboarding-manager' ); ?></th>
-								<th style="padding:10px 12px;"><?php esc_html_e( 'Category', 'shop-onboarding-manager' ); ?></th>
-								<th style="padding:10px 12px;"><?php esc_html_e( 'Shop Price', 'shop-onboarding-manager' ); ?></th>
-								<th style="padding:10px 12px;"><?php esc_html_e( 'Availability', 'shop-onboarding-manager' ); ?></th>
-								<th style="width: 120px; padding:10px 12px; text-align: right;"><?php esc_html_e( 'Actions', 'shop-onboarding-manager' ); ?></th>
+								<th style="width: 50px; padding:10px 12px;"><?php esc_html_e( 'Image', 'nearmart' ); ?></th>
+								<th style="padding:10px 12px;"><?php esc_html_e( 'Product Name & Specs', 'nearmart' ); ?></th>
+								<th style="padding:10px 12px;"><?php esc_html_e( 'Category', 'nearmart' ); ?></th>
+								<th style="padding:10px 12px;"><?php esc_html_e( 'Shop Price', 'nearmart' ); ?></th>
+								<th style="padding:10px 12px;"><?php esc_html_e( 'Availability', 'nearmart' ); ?></th>
+								<th style="width: 120px; padding:10px 12px; text-align: right;"><?php esc_html_e( 'Actions', 'nearmart' ); ?></th>
 							</tr>
 						</thead>
 						<tbody id="som_catalog_tbody">
 							<tr>
 								<td colspan="6" style="text-align: center; padding: 24px; color: #64748b;">
-									&#128259; <?php esc_html_e( 'Loading catalog items...', 'shop-onboarding-manager' ); ?>
+									&#128259; <?php esc_html_e( 'Loading catalog items...', 'nearmart' ); ?>
 								</td>
 							</tr>
 						</tbody>
@@ -353,29 +353,29 @@ class SOM_Merchant_Catalog {
 		<div id="som_add_product_modal" class="som-modal-overlay" style="display: none;">
 			<div class="som-modal-content" style="max-width: 680px;">
 				<div class="som-modal-header">
-					<h3>&#10133; <?php esc_html_e( 'Add Product to Catalog', 'shop-onboarding-manager' ); ?></h3>
+					<h3>&#10133; <?php esc_html_e( 'Add Product to Catalog', 'nearmart' ); ?></h3>
 					<button type="button" class="som-modal-close" onclick="document.getElementById('som_add_product_modal').style.display='none';">&times;</button>
 				</div>
 
 				<!-- Dual-Mode Tab Controls -->
 				<div style="display: flex; gap: 8px; border-bottom: 2px solid #e2e8f0; margin-bottom: 18px;">
 					<button type="button" id="som_tab_btn_master" class="som-modal-tab-btn active" style="padding: 10px 16px; border: none; background: none; font-weight: 700; color: #2563eb; border-bottom: 3px solid #2563eb; cursor: pointer;">
-						&#128065; <?php esc_html_e( 'Add an Existing Product', 'shop-onboarding-manager' ); ?>
+						&#128065; <?php esc_html_e( 'Add an Existing Product', 'nearmart' ); ?>
 					</button>
 					<button type="button" id="som_tab_btn_standalone" class="som-modal-tab-btn" style="padding: 10px 16px; border: none; background: none; font-weight: 700; color: #64748b; border-bottom: 3px solid transparent; cursor: pointer;">
-						&#10133; <?php esc_html_e( 'Add a New Product', 'shop-onboarding-manager' ); ?>
+						&#10133; <?php esc_html_e( 'Add a New Product', 'nearmart' ); ?>
 					</button>
 				</div>
 
 				<!-- TAB 1: Add an Existing Product -->
 				<div id="som_tab_content_master" class="som-tab-content">
 					<p style="font-size: 0.88rem; color: #64748b; margin: 0 0 14px 0;">
-						<?php esc_html_e( 'Search the NearMart product catalog and add an existing product to your shop.', 'shop-onboarding-manager' ); ?>
+						<?php esc_html_e( 'Search the NearMart product catalog and add an existing product to your shop.', 'nearmart' ); ?>
 					</p>
 
 					<div class="som-form-group">
-						<label for="som_master_search" class="som-label"><?php esc_html_e( 'Search Product (Name, Brand, SKU, or Barcode)', 'shop-onboarding-manager' ); ?></label>
-						<input type="text" id="som_master_search" class="som-input" placeholder="<?php esc_attr_e( 'Search by product name, brand, SKU or barcode...', 'shop-onboarding-manager' ); ?>" />
+						<label for="som_master_search" class="som-label"><?php esc_html_e( 'Search Product (Name, Brand, SKU, or Barcode)', 'nearmart' ); ?></label>
+						<input type="text" id="som_master_search" class="som-input" placeholder="<?php esc_attr_e( 'Search by product name, brand, SKU or barcode...', 'nearmart' ); ?>" />
 						<div id="som_master_results" class="som-master-search-results"></div>
 					</div>
 
@@ -385,45 +385,45 @@ class SOM_Merchant_Catalog {
 
 						<div class="som-form-row">
 							<div class="som-form-group">
-								<label for="som_add_price" class="som-label required"><?php esc_html_e( 'Shop Price (₹)', 'shop-onboarding-manager' ); ?></label>
+								<label for="som_add_price" class="som-label required"><?php esc_html_e( 'Shop Price (₹)', 'nearmart' ); ?></label>
 								<input type="number" step="0.01" id="som_add_price" name="price" class="som-input" required placeholder="0.00" />
 							</div>
 							<div class="som-form-group">
-								<label for="som_add_sale_price" class="som-label"><?php esc_html_e( 'Sale Price (₹)', 'shop-onboarding-manager' ); ?></label>
+								<label for="som_add_sale_price" class="som-label"><?php esc_html_e( 'Sale Price (₹)', 'nearmart' ); ?></label>
 								<input type="number" step="0.01" id="som_add_sale_price" name="sale_price" class="som-input" placeholder="Optional" />
 							</div>
 						</div>
 
 						<div class="som-form-row">
 							<div class="som-form-group">
-								<label for="som_add_stock_status" class="som-label"><?php esc_html_e( 'Availability', 'shop-onboarding-manager' ); ?></label>
+								<label for="som_add_stock_status" class="som-label"><?php esc_html_e( 'Availability', 'nearmart' ); ?></label>
 								<select id="som_add_stock_status" name="stock_status" class="som-select">
-									<option value="instock"><?php esc_html_e( 'Available', 'shop-onboarding-manager' ); ?></option>
-									<option value="outofstock"><?php esc_html_e( 'Unavailable', 'shop-onboarding-manager' ); ?></option>
+									<option value="instock"><?php esc_html_e( 'Available', 'nearmart' ); ?></option>
+									<option value="outofstock"><?php esc_html_e( 'Unavailable', 'nearmart' ); ?></option>
 								</select>
 							</div>
 							<div class="som-form-group">
-								<label for="som_add_stock_quantity" class="som-label"><?php esc_html_e( 'Stock Qty', 'shop-onboarding-manager' ); ?></label>
+								<label for="som_add_stock_quantity" class="som-label"><?php esc_html_e( 'Stock Qty', 'nearmart' ); ?></label>
 								<input type="number" id="som_add_stock_quantity" name="stock_quantity" class="som-input" placeholder="Optional" />
 							</div>
 						</div>
 
 						<div class="som-form-row">
 							<div class="som-form-group">
-								<label for="som_add_shop_sku" class="som-label"><?php esc_html_e( 'Shop SKU', 'shop-onboarding-manager' ); ?></label>
+								<label for="som_add_shop_sku" class="som-label"><?php esc_html_e( 'Shop SKU', 'nearmart' ); ?></label>
 								<input type="text" id="som_add_shop_sku" name="shop_sku" class="som-input" placeholder="e.g. STORE-ITEM-01 (Optional)" />
 							</div>
 							<div class="som-form-group">
-								<label for="som_add_status" class="som-label"><?php esc_html_e( 'Listing Status', 'shop-onboarding-manager' ); ?></label>
+								<label for="som_add_status" class="som-label"><?php esc_html_e( 'Listing Status', 'nearmart' ); ?></label>
 								<select id="som_add_status" name="status" class="som-select">
-									<option value="active"><?php esc_html_e( 'Active (Visible to customers)', 'shop-onboarding-manager' ); ?></option>
-									<option value="inactive"><?php esc_html_e( 'Inactive (Hidden)', 'shop-onboarding-manager' ); ?></option>
+									<option value="active"><?php esc_html_e( 'Active (Visible to customers)', 'nearmart' ); ?></option>
+									<option value="inactive"><?php esc_html_e( 'Inactive (Hidden)', 'nearmart' ); ?></option>
 								</select>
 							</div>
 						</div>
 
 						<button type="submit" id="som_btn_save_add" class="som-submit-btn">
-							&#128190; <?php esc_html_e( 'Save to My Catalog', 'shop-onboarding-manager' ); ?>
+							&#128190; <?php esc_html_e( 'Save to My Catalog', 'nearmart' ); ?>
 						</button>
 					</form>
 				</div>
@@ -431,22 +431,22 @@ class SOM_Merchant_Catalog {
 				<!-- TAB 2: Add a New Product -->
 				<div id="som_tab_content_standalone" class="som-tab-content" style="display: none;">
 					<p style="font-size: 0.88rem; color: #64748b; margin-bottom: 14px;">
-						<?php esc_html_e( 'Add a product that is not currently in the NearMart catalog. It will initially be available only in your shop.', 'shop-onboarding-manager' ); ?>
+						<?php esc_html_e( 'Add a product that is not currently in the NearMart catalog. It will initially be available only in your shop.', 'nearmart' ); ?>
 					</p>
 
 					<!-- Lightweight Master Similarity Banner -->
 					<div id="som_standalone_suggestion_banner" style="display: none; background: #eff6ff; border: 1px solid #93c5fd; border-radius: 8px; padding: 12px; margin-bottom: 14px;">
 						<div style="display: flex; gap: 10px; align-items: center; justify-content: space-between;">
 							<div style="font-size: 0.85rem; color: #1e40af;">
-								<strong>💡 <?php esc_html_e( 'Similar Existing Product Found:', 'shop-onboarding-manager' ); ?></strong>
+								<strong>💡 <?php esc_html_e( 'Similar Existing Product Found:', 'nearmart' ); ?></strong>
 								<span id="som_suggested_master_title" style="font-weight: 700;"></span>
 							</div>
 							<div style="display: flex; gap: 6px;">
 								<button type="button" id="som_btn_use_suggested_master" class="button button-small button-primary" style="font-size: 0.8rem;">
-									&#128279; <?php esc_html_e( 'Use Existing Product', 'shop-onboarding-manager' ); ?>
+									&#128279; <?php esc_html_e( 'Use Existing Product', 'nearmart' ); ?>
 								</button>
 								<button type="button" id="som_btn_dismiss_suggestion" class="button button-small" style="font-size: 0.8rem;">
-									&times; <?php esc_html_e( 'Dismiss', 'shop-onboarding-manager' ); ?>
+									&times; <?php esc_html_e( 'Dismiss', 'nearmart' ); ?>
 								</button>
 							</div>
 						</div>
@@ -454,73 +454,73 @@ class SOM_Merchant_Catalog {
 
 					<form id="som_form_add_standalone_product">
 						<div class="som-form-group">
-							<label for="som_st_name" class="som-label required"><?php esc_html_e( 'Product Name', 'shop-onboarding-manager' ); ?></label>
+							<label for="som_st_name" class="som-label required"><?php esc_html_e( 'Product Name', 'nearmart' ); ?></label>
 							<input type="text" id="som_st_name" name="custom_name" class="som-input" required placeholder="e.g. Local Fresh Country Milk 1L" />
 						</div>
 
 						<div class="som-form-row">
 							<div class="som-form-group">
-								<label for="som_st_category" class="som-label"><?php esc_html_e( 'Category (Optional)', 'shop-onboarding-manager' ); ?></label>
+								<label for="som_st_category" class="som-label"><?php esc_html_e( 'Category (Optional)', 'nearmart' ); ?></label>
 								<input type="text" id="som_st_category" name="custom_category" class="som-input" placeholder="e.g. Dairy & Milk" />
 							</div>
 							<div class="som-form-group">
-								<label for="som_st_brand" class="som-label"><?php esc_html_e( 'Brand (Optional)', 'shop-onboarding-manager' ); ?></label>
+								<label for="som_st_brand" class="som-label"><?php esc_html_e( 'Brand (Optional)', 'nearmart' ); ?></label>
 								<input type="text" id="som_st_brand" name="custom_brand" class="som-input" placeholder="e.g. Local Farm" />
 							</div>
 						</div>
 
 						<div class="som-form-row">
 							<div class="som-form-group">
-								<label for="som_st_unit" class="som-label"><?php esc_html_e( 'Approximate Unit/Size (Optional)', 'shop-onboarding-manager' ); ?></label>
+								<label for="som_st_unit" class="som-label"><?php esc_html_e( 'Approximate Unit/Size (Optional)', 'nearmart' ); ?></label>
 								<input type="text" id="som_st_unit" name="custom_unit" class="som-input" placeholder="e.g. 1L, 500g, 10 pcs" />
 							</div>
 							<div class="som-form-group">
-								<label for="som_st_barcode" class="som-label"><?php esc_html_e( 'Barcode / SKU (Optional)', 'shop-onboarding-manager' ); ?></label>
+								<label for="som_st_barcode" class="som-label"><?php esc_html_e( 'Barcode / SKU (Optional)', 'nearmart' ); ?></label>
 								<input type="text" id="som_st_barcode" name="custom_barcode" class="som-input" placeholder="e.g. 8909999000111" />
 							</div>
 						</div>
 
 						<div class="som-form-row">
 							<div class="som-form-group">
-								<label for="som_st_price" class="som-label required"><?php esc_html_e( 'Shop Price (₹)', 'shop-onboarding-manager' ); ?></label>
+								<label for="som_st_price" class="som-label required"><?php esc_html_e( 'Shop Price (₹)', 'nearmart' ); ?></label>
 								<input type="number" step="0.01" id="som_st_price" name="price" class="som-input" required placeholder="0.00" />
 							</div>
 							<div class="som-form-group">
-								<label for="som_st_sale_price" class="som-label"><?php esc_html_e( 'Sale Price (₹)', 'shop-onboarding-manager' ); ?></label>
+								<label for="som_st_sale_price" class="som-label"><?php esc_html_e( 'Sale Price (₹)', 'nearmart' ); ?></label>
 								<input type="number" step="0.01" id="som_st_sale_price" name="sale_price" class="som-input" placeholder="Optional" />
 							</div>
 						</div>
 
 						<div class="som-form-row">
 							<div class="som-form-group">
-								<label for="som_st_stock_status" class="som-label"><?php esc_html_e( 'Availability', 'shop-onboarding-manager' ); ?></label>
+								<label for="som_st_stock_status" class="som-label"><?php esc_html_e( 'Availability', 'nearmart' ); ?></label>
 								<select id="som_st_stock_status" name="stock_status" class="som-select">
-									<option value="instock"><?php esc_html_e( 'Available', 'shop-onboarding-manager' ); ?></option>
-									<option value="outofstock"><?php esc_html_e( 'Unavailable', 'shop-onboarding-manager' ); ?></option>
+									<option value="instock"><?php esc_html_e( 'Available', 'nearmart' ); ?></option>
+									<option value="outofstock"><?php esc_html_e( 'Unavailable', 'nearmart' ); ?></option>
 								</select>
 							</div>
 							<div class="som-form-group">
-								<label for="som_st_stock_quantity" class="som-label"><?php esc_html_e( 'Stock Qty', 'shop-onboarding-manager' ); ?></label>
+								<label for="som_st_stock_quantity" class="som-label"><?php esc_html_e( 'Stock Qty', 'nearmart' ); ?></label>
 								<input type="number" id="som_st_stock_quantity" name="stock_quantity" class="som-input" placeholder="Optional" />
 							</div>
 						</div>
 
 						<div class="som-form-row">
 							<div class="som-form-group">
-								<label for="som_st_shop_sku" class="som-label"><?php esc_html_e( 'Shop SKU', 'shop-onboarding-manager' ); ?></label>
+								<label for="som_st_shop_sku" class="som-label"><?php esc_html_e( 'Shop SKU', 'nearmart' ); ?></label>
 								<input type="text" id="som_st_shop_sku" name="shop_sku" class="som-input" placeholder="e.g. LOCAL-MILK-01 (Optional)" />
 							</div>
 							<div class="som-form-group">
-								<label for="som_st_status" class="som-label"><?php esc_html_e( 'Listing Status', 'shop-onboarding-manager' ); ?></label>
+								<label for="som_st_status" class="som-label"><?php esc_html_e( 'Listing Status', 'nearmart' ); ?></label>
 								<select id="som_st_status" name="status" class="som-select">
-									<option value="active"><?php esc_html_e( 'Active (Visible to customers)', 'shop-onboarding-manager' ); ?></option>
-									<option value="inactive"><?php esc_html_e( 'Inactive (Hidden)', 'shop-onboarding-manager' ); ?></option>
+									<option value="active"><?php esc_html_e( 'Active (Visible to customers)', 'nearmart' ); ?></option>
+									<option value="inactive"><?php esc_html_e( 'Inactive (Hidden)', 'nearmart' ); ?></option>
 								</select>
 							</div>
 						</div>
 
 						<button type="submit" id="som_btn_save_standalone" class="som-submit-btn">
-							&#128190; <?php esc_html_e( 'Save New Product', 'shop-onboarding-manager' ); ?>
+							&#128190; <?php esc_html_e( 'Save New Product', 'nearmart' ); ?>
 						</button>
 					</form>
 				</div>
@@ -531,7 +531,7 @@ class SOM_Merchant_Catalog {
 		<div id="som_edit_product_modal" class="som-modal-overlay" style="display: none;">
 			<div class="som-modal-content">
 				<div class="som-modal-header">
-					<h3>&#9998; <?php esc_html_e( 'Edit Catalog Product', 'shop-onboarding-manager' ); ?></h3>
+					<h3>&#9998; <?php esc_html_e( 'Edit Catalog Product', 'nearmart' ); ?></h3>
 					<button type="button" class="som-modal-close" onclick="document.getElementById('som_edit_product_modal').style.display='none';">&times;</button>
 				</div>
 
@@ -551,38 +551,38 @@ class SOM_Merchant_Catalog {
 							</div>
 						</div>
 						<p style="font-size:0.75rem; color:#94a3b8; margin:8px 0 0 0; font-style:italic;">
-							&#8505; <?php esc_html_e( 'Master product specifications are managed by platform admins and cannot be changed here.', 'shop-onboarding-manager' ); ?>
+							&#8505; <?php esc_html_e( 'Master product specifications are managed by platform admins and cannot be changed here.', 'nearmart' ); ?>
 						</p>
 					</div>
 
 					<!-- Editable Product Specs Box (For Standalone Items) -->
 					<div id="som_edit_standalone_specs_box" style="display:none; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:14px; margin-bottom:16px;">
 						<p style="font-size:0.82rem; font-weight:700; color:#166534; margin-bottom:10px;">
-							&#10133; <?php esc_html_e( 'Shop Product Specifications', 'shop-onboarding-manager' ); ?>
+							&#10133; <?php esc_html_e( 'Shop Product Specifications', 'nearmart' ); ?>
 						</p>
 						<div class="som-form-group">
-							<label for="som_edit_custom_name" class="som-label required"><?php esc_html_e( 'Product Name', 'shop-onboarding-manager' ); ?></label>
+							<label for="som_edit_custom_name" class="som-label required"><?php esc_html_e( 'Product Name', 'nearmart' ); ?></label>
 							<input type="text" id="som_edit_custom_name" name="custom_name" class="som-input" />
 						</div>
 
 						<div class="som-form-row">
 							<div class="som-form-group">
-								<label for="som_edit_custom_category" class="som-label"><?php esc_html_e( 'Category', 'shop-onboarding-manager' ); ?></label>
+								<label for="som_edit_custom_category" class="som-label"><?php esc_html_e( 'Category', 'nearmart' ); ?></label>
 								<input type="text" id="som_edit_custom_category" name="custom_category" class="som-input" />
 							</div>
 							<div class="som-form-group">
-								<label for="som_edit_custom_brand" class="som-label"><?php esc_html_e( 'Brand', 'shop-onboarding-manager' ); ?></label>
+								<label for="som_edit_custom_brand" class="som-label"><?php esc_html_e( 'Brand', 'nearmart' ); ?></label>
 								<input type="text" id="som_edit_custom_brand" name="custom_brand" class="som-input" />
 							</div>
 						</div>
 
 						<div class="som-form-row">
 							<div class="som-form-group">
-								<label for="som_edit_custom_unit" class="som-label"><?php esc_html_e( 'Unit / Size', 'shop-onboarding-manager' ); ?></label>
+								<label for="som_edit_custom_unit" class="som-label"><?php esc_html_e( 'Unit / Size', 'nearmart' ); ?></label>
 								<input type="text" id="som_edit_custom_unit" name="custom_unit" class="som-input" />
 							</div>
 							<div class="som-form-group">
-								<label for="som_edit_custom_barcode" class="som-label"><?php esc_html_e( 'Barcode / SKU', 'shop-onboarding-manager' ); ?></label>
+								<label for="som_edit_custom_barcode" class="som-label"><?php esc_html_e( 'Barcode / SKU', 'nearmart' ); ?></label>
 								<input type="text" id="som_edit_custom_barcode" name="custom_barcode" class="som-input" />
 							</div>
 						</div>
@@ -590,45 +590,45 @@ class SOM_Merchant_Catalog {
 
 					<div class="som-form-row">
 						<div class="som-form-group">
-							<label for="som_edit_price" class="som-label required"><?php esc_html_e( 'Shop Price (₹)', 'shop-onboarding-manager' ); ?></label>
+							<label for="som_edit_price" class="som-label required"><?php esc_html_e( 'Shop Price (₹)', 'nearmart' ); ?></label>
 							<input type="number" step="0.01" id="som_edit_price" name="price" class="som-input" required />
 						</div>
 						<div class="som-form-group">
-							<label for="som_edit_sale_price" class="som-label"><?php esc_html_e( 'Sale Price (₹)', 'shop-onboarding-manager' ); ?></label>
+							<label for="som_edit_sale_price" class="som-label"><?php esc_html_e( 'Sale Price (₹)', 'nearmart' ); ?></label>
 							<input type="number" step="0.01" id="som_edit_sale_price" name="sale_price" class="som-input" placeholder="Optional" />
 						</div>
 					</div>
 
 					<div class="som-form-row">
 						<div class="som-form-group">
-							<label for="som_edit_stock_status" class="som-label"><?php esc_html_e( 'Availability', 'shop-onboarding-manager' ); ?></label>
+							<label for="som_edit_stock_status" class="som-label"><?php esc_html_e( 'Availability', 'nearmart' ); ?></label>
 							<select id="som_edit_stock_status" name="stock_status" class="som-select">
-								<option value="instock"><?php esc_html_e( 'Available', 'shop-onboarding-manager' ); ?></option>
-								<option value="outofstock"><?php esc_html_e( 'Unavailable', 'shop-onboarding-manager' ); ?></option>
+								<option value="instock"><?php esc_html_e( 'Available', 'nearmart' ); ?></option>
+								<option value="outofstock"><?php esc_html_e( 'Unavailable', 'nearmart' ); ?></option>
 							</select>
 						</div>
 						<div class="som-form-group">
-							<label for="som_edit_stock_quantity" class="som-label"><?php esc_html_e( 'Stock Qty', 'shop-onboarding-manager' ); ?></label>
+							<label for="som_edit_stock_quantity" class="som-label"><?php esc_html_e( 'Stock Qty', 'nearmart' ); ?></label>
 							<input type="number" id="som_edit_stock_quantity" name="stock_quantity" class="som-input" placeholder="Optional" />
 						</div>
 					</div>
 
 					<div class="som-form-row">
 						<div class="som-form-group">
-							<label for="som_edit_shop_sku" class="som-label"><?php esc_html_e( 'Shop SKU', 'shop-onboarding-manager' ); ?></label>
+							<label for="som_edit_shop_sku" class="som-label"><?php esc_html_e( 'Shop SKU', 'nearmart' ); ?></label>
 							<input type="text" id="som_edit_shop_sku" name="shop_sku" class="som-input" placeholder="e.g. STORE-ITEM-01 (Optional)" />
 						</div>
 						<div class="som-form-group">
-							<label for="som_edit_status" class="som-label"><?php esc_html_e( 'Listing Status', 'shop-onboarding-manager' ); ?></label>
+							<label for="som_edit_status" class="som-label"><?php esc_html_e( 'Listing Status', 'nearmart' ); ?></label>
 							<select id="som_edit_status" name="status" class="som-select">
-								<option value="active"><?php esc_html_e( 'Active', 'shop-onboarding-manager' ); ?></option>
-								<option value="inactive"><?php esc_html_e( 'Inactive', 'shop-onboarding-manager' ); ?></option>
+								<option value="active"><?php esc_html_e( 'Active', 'nearmart' ); ?></option>
+								<option value="inactive"><?php esc_html_e( 'Inactive', 'nearmart' ); ?></option>
 							</select>
 						</div>
 					</div>
 
 					<button type="submit" id="som_btn_save_edit" class="som-submit-btn">
-						&#128190; <?php esc_html_e( 'Update Product', 'shop-onboarding-manager' ); ?>
+						&#128190; <?php esc_html_e( 'Update Product', 'nearmart' ); ?>
 					</button>
 				</form>
 			</div>
@@ -638,49 +638,49 @@ class SOM_Merchant_Catalog {
 		<div id="som_request_product_modal" class="som-modal-overlay" style="display: none;">
 			<div class="som-modal-content">
 				<div class="som-modal-header">
-					<h3>&#10133; <?php esc_html_e( 'Request Product', 'shop-onboarding-manager' ); ?></h3>
+					<h3>&#10133; <?php esc_html_e( 'Request Product', 'nearmart' ); ?></h3>
 					<button type="button" class="som-modal-close" onclick="document.getElementById('som_request_product_modal').style.display='none';">&times;</button>
 				</div>
 
 				<p style="font-size: 0.88rem; color: #64748b; margin-bottom: 16px;">
-					<?php esc_html_e( 'Can\'t find a product in our catalog? Submit a request below. Admin will review and add the product to the NearMart platform.', 'shop-onboarding-manager' ); ?>
+					<?php esc_html_e( 'Can\'t find a product in our catalog? Submit a request below. Admin will review and add the product to the NearMart platform.', 'nearmart' ); ?>
 				</p>
 
 				<form id="som_form_request_new_product">
 					<div class="som-form-group">
-						<label for="som_req_product_name" class="som-label required"><?php esc_html_e( 'Product Name', 'shop-onboarding-manager' ); ?></label>
+						<label for="som_req_product_name" class="som-label required"><?php esc_html_e( 'Product Name', 'nearmart' ); ?></label>
 						<input type="text" id="som_req_product_name" name="product_name" class="som-input" required placeholder="e.g. Organic Multigrain Atta 5kg" />
 					</div>
 
 					<div class="som-form-row">
 						<div class="som-form-group">
-							<label for="som_req_brand" class="som-label"><?php esc_html_e( 'Brand (Optional)', 'shop-onboarding-manager' ); ?></label>
+							<label for="som_req_brand" class="som-label"><?php esc_html_e( 'Brand (Optional)', 'nearmart' ); ?></label>
 							<input type="text" id="som_req_brand" name="brand" class="som-input" placeholder="e.g. Aashirvaad" />
 						</div>
 						<div class="som-form-group">
-							<label for="som_req_category" class="som-label"><?php esc_html_e( 'Category (Optional)', 'shop-onboarding-manager' ); ?></label>
+							<label for="som_req_category" class="som-label"><?php esc_html_e( 'Category (Optional)', 'nearmart' ); ?></label>
 							<input type="text" id="som_req_category" name="category" class="som-input" placeholder="e.g. Groceries" />
 						</div>
 					</div>
 
 					<div class="som-form-row">
 						<div class="som-form-group">
-							<label for="som_req_unit" class="som-label"><?php esc_html_e( 'Approximate Unit/Size (Optional)', 'shop-onboarding-manager' ); ?></label>
+							<label for="som_req_unit" class="som-label"><?php esc_html_e( 'Approximate Unit/Size (Optional)', 'nearmart' ); ?></label>
 							<input type="text" id="som_req_unit" name="unit" class="som-input" placeholder="e.g. 5kg, 500ml, 10 pcs" />
 						</div>
 						<div class="som-form-group">
-							<label for="som_req_barcode" class="som-label"><?php esc_html_e( 'Barcode / SKU (Optional)', 'shop-onboarding-manager' ); ?></label>
+							<label for="som_req_barcode" class="som-label"><?php esc_html_e( 'Barcode / SKU (Optional)', 'nearmart' ); ?></label>
 							<input type="text" id="som_req_barcode" name="barcode" class="som-input" placeholder="e.g. 890123456789" />
 						</div>
 					</div>
 
 					<div class="som-form-group">
-						<label for="som_req_notes" class="som-label"><?php esc_html_e( 'Additional Notes / Description (Optional)', 'shop-onboarding-manager' ); ?></label>
+						<label for="som_req_notes" class="som-label"><?php esc_html_e( 'Additional Notes / Description (Optional)', 'nearmart' ); ?></label>
 						<textarea id="som_req_notes" name="notes" class="som-input" rows="3" placeholder="Provide any additional details to help admin identify the product..."></textarea>
 					</div>
 
 					<button type="submit" id="som_btn_submit_req" class="som-submit-btn">
-						&#128238; <?php esc_html_e( 'Submit Request', 'shop-onboarding-manager' ); ?>
+						&#128238; <?php esc_html_e( 'Submit Request', 'nearmart' ); ?>
 					</button>
 				</form>
 			</div>
@@ -690,7 +690,7 @@ class SOM_Merchant_Catalog {
 		<div id="som_my_requests_modal" class="som-modal-overlay" style="display: none;">
 			<div class="som-modal-content" style="max-width: 760px;">
 				<div class="som-modal-header">
-					<h3>&#128221; <?php esc_html_e( 'My Product Requests', 'shop-onboarding-manager' ); ?></h3>
+					<h3>&#128221; <?php esc_html_e( 'My Product Requests', 'nearmart' ); ?></h3>
 					<button type="button" class="som-modal-close" onclick="document.getElementById('som_my_requests_modal').style.display='none';">&times;</button>
 				</div>
 
@@ -704,7 +704,7 @@ class SOM_Merchant_Catalog {
 		<div id="som_fulfill_request_modal" class="som-modal-overlay" style="display: none;">
 			<div class="som-modal-content" style="max-width: 600px;">
 				<div class="som-modal-header">
-					<h3>&#10133; <?php esc_html_e( 'Add Approved Product to My Catalog', 'shop-onboarding-manager' ); ?></h3>
+					<h3>&#10133; <?php esc_html_e( 'Add Approved Product to My Catalog', 'nearmart' ); ?></h3>
 					<button type="button" class="som-modal-close" onclick="document.getElementById('som_fulfill_request_modal').style.display='none';">&times;</button>
 				</div>
 
@@ -718,36 +718,36 @@ class SOM_Merchant_Catalog {
 
 					<div class="som-form-row">
 						<div class="som-form-group">
-							<label for="som_fulfill_price" class="som-label required"><?php esc_html_e( 'Shop Price (₹)', 'shop-onboarding-manager' ); ?></label>
+							<label for="som_fulfill_price" class="som-label required"><?php esc_html_e( 'Shop Price (₹)', 'nearmart' ); ?></label>
 							<input type="number" step="0.01" id="som_fulfill_price" name="price" class="som-input" required placeholder="0.00" />
 						</div>
 						<div class="som-form-group">
-							<label for="som_fulfill_sale_price" class="som-label"><?php esc_html_e( 'Sale Price (₹)', 'shop-onboarding-manager' ); ?></label>
+							<label for="som_fulfill_sale_price" class="som-label"><?php esc_html_e( 'Sale Price (₹)', 'nearmart' ); ?></label>
 							<input type="number" step="0.01" id="som_fulfill_sale_price" name="sale_price" class="som-input" placeholder="Optional" />
 						</div>
 					</div>
 
 					<div class="som-form-row">
 						<div class="som-form-group">
-							<label for="som_fulfill_stock_status" class="som-label"><?php esc_html_e( 'Availability', 'shop-onboarding-manager' ); ?></label>
+							<label for="som_fulfill_stock_status" class="som-label"><?php esc_html_e( 'Availability', 'nearmart' ); ?></label>
 							<select id="som_fulfill_stock_status" name="stock_status" class="som-select">
-								<option value="instock"><?php esc_html_e( 'Available', 'shop-onboarding-manager' ); ?></option>
-								<option value="outofstock"><?php esc_html_e( 'Unavailable', 'shop-onboarding-manager' ); ?></option>
+								<option value="instock"><?php esc_html_e( 'Available', 'nearmart' ); ?></option>
+								<option value="outofstock"><?php esc_html_e( 'Unavailable', 'nearmart' ); ?></option>
 							</select>
 						</div>
 						<div class="som-form-group">
-							<label for="som_fulfill_stock_quantity" class="som-label"><?php esc_html_e( 'Stock Qty', 'shop-onboarding-manager' ); ?></label>
+							<label for="som_fulfill_stock_quantity" class="som-label"><?php esc_html_e( 'Stock Qty', 'nearmart' ); ?></label>
 							<input type="number" id="som_fulfill_stock_quantity" name="stock_quantity" class="som-input" placeholder="Optional" />
 						</div>
 					</div>
 
 					<div class="som-form-group" style="margin-bottom: 16px;">
-						<label for="som_fulfill_shop_sku" class="som-label"><?php esc_html_e( 'Shop SKU (Optional)', 'shop-onboarding-manager' ); ?></label>
+						<label for="som_fulfill_shop_sku" class="som-label"><?php esc_html_e( 'Shop SKU (Optional)', 'nearmart' ); ?></label>
 						<input type="text" id="som_fulfill_shop_sku" name="shop_sku" class="som-input" placeholder="e.g. STORE-ITEM-01" />
 					</div>
 
 					<button type="submit" id="som_btn_save_fulfill" class="som-submit-btn">
-						&#128190; <?php esc_html_e( 'Add Product to My Catalog', 'shop-onboarding-manager' ); ?>
+						&#128190; <?php esc_html_e( 'Add Product to My Catalog', 'nearmart' ); ?>
 					</button>
 				</form>
 			</div>
@@ -1014,7 +1014,7 @@ class SOM_Merchant_Catalog {
 					if (!m) return;
 
 					if (m.in_catalog) {
-						alert('This product is already in your catalog!');
+						alert('<?php echo esc_js( __( 'This product is already in your catalog!', 'nearmart' ) ); ?>');
 						return;
 					}
 
@@ -1123,7 +1123,7 @@ class SOM_Merchant_Catalog {
 						},
 						error: function() {
 							$btn.prop('disabled', false).html('&#128190; Save to My Catalog');
-							alert('Server error adding product. Please try again.');
+							alert('<?php echo esc_js( __( 'Server error adding product. Please try again.', 'nearmart' ) ); ?>');
 						}
 					});
 				});
@@ -1166,7 +1166,7 @@ class SOM_Merchant_Catalog {
 						},
 						error: function() {
 							$btn.prop('disabled', false).html('&#128190; Save New Product');
-							alert('Server error adding product. Please try again.');
+							alert('<?php echo esc_js( __( 'Server error adding product. Please try again.', 'nearmart' ) ); ?>');
 						}
 					});
 				});
@@ -1261,7 +1261,7 @@ class SOM_Merchant_Catalog {
 						},
 						error: function() {
 							$btn.prop('disabled', false).html('&#128190; Update Product');
-							alert('Server error updating product. Please try again.');
+							alert('<?php echo esc_js( __( 'Server error updating product. Please try again.', 'nearmart' ) ); ?>');
 						}
 					});
 				});
@@ -1289,7 +1289,7 @@ class SOM_Merchant_Catalog {
 							}
 						},
 						error: function() {
-							alert('Server error removing product. Please try again.');
+							alert('<?php echo esc_js( __( 'Server error removing product. Please try again.', 'nearmart' ) ); ?>');
 						}
 					});
 				});
@@ -1482,7 +1482,7 @@ class SOM_Merchant_Catalog {
 						},
 						error: function() {
 							$btn.prop('disabled', false).html('&#128190; Add Product to My Catalog');
-							alert('Server error adding product. Please try again.');
+							alert('<?php echo esc_js( __( 'Server error adding product. Please try again.', 'nearmart' ) ); ?>');
 						}
 					});
 				});

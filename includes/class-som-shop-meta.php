@@ -89,7 +89,7 @@ class SOM_Shop_Meta {
 	public static function add_shop_meta_box() {
 		add_meta_box(
 			'som_shop_details_meta_box',
-			__( 'Shop Details & Merchant Status', 'shop-onboarding-manager' ),
+			__( 'Shop Details & Merchant Status', 'nearmart' ),
 			array( __CLASS__, 'render_shop_meta_box' ),
 			'shop',
 			'normal',
@@ -141,14 +141,14 @@ class SOM_Shop_Meta {
 		$photo_url = $photo_id ? wp_get_attachment_image_url( $photo_id, 'medium' ) : '';
 
 		$shop_types = array(
-			'Supermarket'        => __( 'Supermarket', 'shop-onboarding-manager' ),
-			'Grocery'            => __( 'Grocery Store', 'shop-onboarding-manager' ),
-			'Convenience Store'  => __( 'Convenience Store', 'shop-onboarding-manager' ),
-			'Bakery'             => __( 'Bakery', 'shop-onboarding-manager' ),
-			'Butchery'           => __( 'Butchery', 'shop-onboarding-manager' ),
-			'Fruit & Vegetable'  => __( 'Fruit & Vegetable Market', 'shop-onboarding-manager' ),
-			'Specialty Store'    => __( 'Specialty Store', 'shop-onboarding-manager' ),
-			'Other'              => __( 'Other', 'shop-onboarding-manager' ),
+			'Supermarket'        => __( 'Supermarket', 'nearmart' ),
+			'Grocery'            => __( 'Grocery Store', 'nearmart' ),
+			'Convenience Store'  => __( 'Convenience Store', 'nearmart' ),
+			'Bakery'             => __( 'Bakery', 'nearmart' ),
+			'Butchery'           => __( 'Butchery', 'nearmart' ),
+			'Fruit & Vegetable'  => __( 'Fruit & Vegetable Market', 'nearmart' ),
+			'Specialty Store'    => __( 'Specialty Store', 'nearmart' ),
+			'Other'              => __( 'Other', 'nearmart' ),
 		);
 
 		$merchants = get_users(
@@ -175,22 +175,22 @@ class SOM_Shop_Meta {
 
 		<!-- Verification & Agreement Status -->
 		<div class="som-status-card-box">
-			<h4 style="margin:0 0 8px 0;"><?php esc_html_e( 'Verification & Agreement Status', 'shop-onboarding-manager' ); ?></h4>
+			<h4 style="margin:0 0 8px 0;"><?php esc_html_e( 'Verification & Agreement Status', 'nearmart' ); ?></h4>
 			<p style="margin:2px 0;">
-				<strong><?php esc_html_e( 'Verified by Admin:', 'shop-onboarding-manager' ); ?></strong>
-				<?php echo $is_verified ? '✅ ' . sprintf( __( 'Verified on %s by User #%d', 'shop-onboarding-manager' ), esc_html( $verified_at ), $verified_by ) : '❌ ' . __( 'Not Verified', 'shop-onboarding-manager' ); ?>
+				<strong><?php esc_html_e( 'Verified by Admin:', 'nearmart' ); ?></strong>
+				<?php echo $is_verified ? '✅ ' . sprintf( __( 'Verified on %s by User #%d', 'nearmart' ), esc_html( $verified_at ), $verified_by ) : '❌ ' . __( 'Not Verified', 'nearmart' ); ?>
 			</p>
 			<p style="margin:2px 0;">
-				<strong><?php esc_html_e( 'Details Confirmed by Merchant:', 'shop-onboarding-manager' ); ?></strong>
-				<?php echo $details_confirmed ? '✅ ' . sprintf( __( 'Confirmed on %s', 'shop-onboarding-manager' ), esc_html( $confirmed_at ) ) : '❌ ' . __( 'No', 'shop-onboarding-manager' ); ?>
+				<strong><?php esc_html_e( 'Details Confirmed by Merchant:', 'nearmart' ); ?></strong>
+				<?php echo $details_confirmed ? '✅ ' . sprintf( __( 'Confirmed on %s', 'nearmart' ), esc_html( $confirmed_at ) ) : '❌ ' . __( 'No', 'nearmart' ); ?>
 			</p>
 			<p style="margin:2px 0;">
-				<strong><?php esc_html_e( 'Participation Agreement:', 'shop-onboarding-manager' ); ?></strong>
-				<?php echo $agreement_accepted ? '✅ ' . sprintf( __( 'Accepted (%s on %s)', 'shop-onboarding-manager' ), esc_html( $agreement_version ), esc_html( $agreement_at ) ) : '❌ ' . __( 'Pending', 'shop-onboarding-manager' ); ?>
+				<strong><?php esc_html_e( 'Participation Agreement:', 'nearmart' ); ?></strong>
+				<?php echo $agreement_accepted ? '✅ ' . sprintf( __( 'Accepted (%s on %s)', 'nearmart' ), esc_html( $agreement_version ), esc_html( $agreement_at ) ) : '❌ ' . __( 'Pending', 'nearmart' ); ?>
 			</p>
 			<?php if ( $rejection_reason ) : ?>
 				<p style="margin:2px 0; color:#dc2626;">
-					<strong><?php esc_html_e( 'Rejection Reason:', 'shop-onboarding-manager' ); ?></strong>
+					<strong><?php esc_html_e( 'Rejection Reason:', 'nearmart' ); ?></strong>
 					<?php echo esc_html( $rejection_reason ); ?>
 				</p>
 			<?php endif; ?>
@@ -199,7 +199,7 @@ class SOM_Shop_Meta {
 		<!-- Pending Change Requests Box -->
 		<?php if ( ! empty( $pending_requests ) ) : ?>
 			<div class="som-status-card-box" style="background:#fffbebf5; border-color:#f59e0b;">
-				<h4 style="margin:0 0 8px 0; color:#b45309;"><?php esc_html_e( 'Pending Correction Requests from Merchant', 'shop-onboarding-manager' ); ?></h4>
+				<h4 style="margin:0 0 8px 0; color:#b45309;"><?php esc_html_e( 'Pending Correction Requests from Merchant', 'nearmart' ); ?></h4>
 				<ul style="margin:0; padding-left:18px;">
 					<?php foreach ( $pending_requests as $req ) : ?>
 						<li style="margin-bottom:6px;">
@@ -214,24 +214,24 @@ class SOM_Shop_Meta {
 
 		<div class="som-meta-grid">
 			<div class="som-meta-field">
-				<label for="som_owner_name"><?php esc_html_e( 'Owner Name', 'shop-onboarding-manager' ); ?></label>
+				<label for="som_owner_name"><?php esc_html_e( 'Owner Name', 'nearmart' ); ?></label>
 				<input type="text" id="som_owner_name" name="som_owner_name" value="<?php echo esc_attr( $owner_name ); ?>" />
 			</div>
 
 			<div class="som-meta-field">
-				<label for="som_phone_number"><?php esc_html_e( 'Phone Number', 'shop-onboarding-manager' ); ?></label>
+				<label for="som_phone_number"><?php esc_html_e( 'Phone Number', 'nearmart' ); ?></label>
 				<input type="text" id="som_phone_number" name="som_phone_number" value="<?php echo esc_attr( $phone_number ); ?>" />
 			</div>
 
 			<div class="som-meta-field full-width">
-				<label for="som_address"><?php esc_html_e( 'Address', 'shop-onboarding-manager' ); ?></label>
+				<label for="som_address"><?php esc_html_e( 'Address', 'nearmart' ); ?></label>
 				<textarea id="som_address" name="som_address" rows="3"><?php echo esc_textarea( $address ); ?></textarea>
 			</div>
 
 			<div class="som-meta-field">
-				<label for="som_shop_type"><?php esc_html_e( 'Shop Type', 'shop-onboarding-manager' ); ?></label>
+				<label for="som_shop_type"><?php esc_html_e( 'Shop Type', 'nearmart' ); ?></label>
 				<select id="som_shop_type" name="som_shop_type">
-					<option value=""><?php esc_html_e( '-- Select Shop Type --', 'shop-onboarding-manager' ); ?></option>
+					<option value=""><?php esc_html_e( '-- Select Shop Type --', 'nearmart' ); ?></option>
 					<?php foreach ( $shop_types as $value => $label ) : ?>
 						<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $shop_type, $value ); ?>>
 							<?php echo esc_html( $label ); ?>
@@ -241,9 +241,9 @@ class SOM_Shop_Meta {
 			</div>
 
 			<div class="som-meta-field">
-				<label for="som_merchant_user_id"><?php esc_html_e( 'Merchant User', 'shop-onboarding-manager' ); ?></label>
+				<label for="som_merchant_user_id"><?php esc_html_e( 'Merchant User', 'nearmart' ); ?></label>
 				<select id="som_merchant_user_id" name="som_merchant_user_id">
-					<option value=""><?php esc_html_e( '-- Select Merchant User --', 'shop-onboarding-manager' ); ?></option>
+					<option value=""><?php esc_html_e( '-- Select Merchant User --', 'nearmart' ); ?></option>
 					<?php foreach ( $merchants as $merchant ) : ?>
 						<option value="<?php echo esc_attr( $merchant->ID ); ?>" <?php selected( $merchant_user_id, $merchant->ID ); ?>>
 							<?php echo esc_html( $merchant->display_name . ' (' . $merchant->user_login . ')' ); ?>
@@ -253,46 +253,46 @@ class SOM_Shop_Meta {
 			</div>
 
 			<div class="som-meta-field">
-				<label for="som_latitude"><?php esc_html_e( 'Latitude', 'shop-onboarding-manager' ); ?></label>
+				<label for="som_latitude"><?php esc_html_e( 'Latitude', 'nearmart' ); ?></label>
 				<input type="number" step="any" id="som_latitude" name="som_latitude" value="<?php echo esc_attr( $latitude ); ?>" placeholder="e.g. 12.971598" />
 			</div>
 
 			<div class="som-meta-field">
-				<label for="som_longitude"><?php esc_html_e( 'Longitude', 'shop-onboarding-manager' ); ?></label>
+				<label for="som_longitude"><?php esc_html_e( 'Longitude', 'nearmart' ); ?></label>
 				<input type="number" step="any" id="som_longitude" name="som_longitude" value="<?php echo esc_attr( $longitude ); ?>" placeholder="e.g. 77.594566" />
 			</div>
 
 			<div class="som-meta-field">
-				<label for="som_gps_accuracy"><?php esc_html_e( 'GPS Accuracy (meters)', 'shop-onboarding-manager' ); ?></label>
+				<label for="som_gps_accuracy"><?php esc_html_e( 'GPS Accuracy (meters)', 'nearmart' ); ?></label>
 				<input type="number" step="any" id="som_gps_accuracy" name="som_gps_accuracy" value="<?php echo esc_attr( $gps_accuracy ); ?>" placeholder="e.g. 5.2" />
 			</div>
 
 			<div class="som-meta-field">
-				<label for="som_followup_date"><?php esc_html_e( 'Follow-up Date', 'shop-onboarding-manager' ); ?></label>
+				<label for="som_followup_date"><?php esc_html_e( 'Follow-up Date', 'nearmart' ); ?></label>
 				<input type="date" id="som_followup_date" name="som_followup_date" value="<?php echo esc_attr( $followup_date ); ?>" />
 			</div>
 
 			<div class="som-meta-field full-width">
-				<label for="som_notes"><?php esc_html_e( 'Field Notes', 'shop-onboarding-manager' ); ?></label>
+				<label for="som_notes"><?php esc_html_e( 'Field Notes', 'nearmart' ); ?></label>
 				<textarea id="som_notes" name="som_notes" rows="2"><?php echo esc_textarea( $notes ); ?></textarea>
 			</div>
 
 			<div class="som-meta-field full-width">
-				<label for="som_concerns"><?php esc_html_e( 'Shopkeeper Concerns', 'shop-onboarding-manager' ); ?></label>
+				<label for="som_concerns"><?php esc_html_e( 'Shopkeeper Concerns', 'nearmart' ); ?></label>
 				<textarea id="som_concerns" name="som_concerns" rows="2"><?php echo esc_textarea( $concerns ); ?></textarea>
 			</div>
 
 			<div class="som-meta-field full-width">
-				<label><?php esc_html_e( 'Shop Photo', 'shop-onboarding-manager' ); ?></label>
+				<label><?php esc_html_e( 'Shop Photo', 'nearmart' ); ?></label>
 				<input type="hidden" id="som_shop_photo_id" name="som_shop_photo_id" value="<?php echo esc_attr( $photo_id ); ?>" />
 				<div class="som-photo-preview-wrap">
-					<img id="som_shop_photo_preview" src="<?php echo esc_url( $photo_url ); ?>" style="<?php echo $photo_url ? '' : 'display:none;'; ?>" alt="<?php esc_attr_e( 'Shop Photo Preview', 'shop-onboarding-manager' ); ?>" />
+					<img id="som_shop_photo_preview" src="<?php echo esc_url( $photo_url ); ?>" style="<?php echo $photo_url ? '' : 'display:none;'; ?>" alt="<?php esc_attr_e( 'Shop Photo Preview', 'nearmart' ); ?>" />
 				</div>
 				<button type="button" class="button button-secondary" id="som_select_photo_btn">
-					<?php echo $photo_id ? esc_html__( 'Change Photo', 'shop-onboarding-manager' ) : esc_html__( 'Select Photo', 'shop-onboarding-manager' ); ?>
+					<?php echo $photo_id ? esc_html__( 'Change Photo', 'nearmart' ) : esc_html__( 'Select Photo', 'nearmart' ); ?>
 				</button>
 				<button type="button" class="button button-link-delete" id="som_remove_photo_btn" style="<?php echo $photo_id ? '' : 'display:none;'; ?>">
-					<?php esc_html_e( 'Remove Photo', 'shop-onboarding-manager' ); ?>
+					<?php esc_html_e( 'Remove Photo', 'nearmart' ); ?>
 				</button>
 			</div>
 		</div>
@@ -326,8 +326,8 @@ class SOM_Shop_Meta {
 					return;
 				}
 				mediaUploader = wp.media.frames.file_frame = wp.media({
-					title: '" . esc_js( __( 'Select Shop Photo', 'shop-onboarding-manager' ) ) . "',
-					button: { text: '" . esc_js( __( 'Use Photo', 'shop-onboarding-manager' ) ) . "' },
+					title: '" . esc_js( __( 'Select Shop Photo', 'nearmart' ) ) . "',
+					button: { text: '" . esc_js( __( 'Use Photo', 'nearmart' ) ) . "' },
 					multiple: false
 				});
 				mediaUploader.on('select', function() {
@@ -336,7 +336,7 @@ class SOM_Shop_Meta {
 					var url = attachment.sizes && attachment.sizes.medium ? attachment.sizes.medium.url : attachment.url;
 					$('#som_shop_photo_preview').attr('src', url).show();
 					$('#som_remove_photo_btn').show();
-					$('#som_select_photo_btn').text('" . esc_js( __( 'Change Photo', 'shop-onboarding-manager' ) ) . "');
+					$('#som_select_photo_btn').text('" . esc_js( __( 'Change Photo', 'nearmart' ) ) . "');
 				});
 				mediaUploader.open();
 			});
@@ -346,7 +346,7 @@ class SOM_Shop_Meta {
 				$('#som_shop_photo_id').val('');
 				$('#som_shop_photo_preview').attr('src', '').hide();
 				$(this).hide();
-				$('#som_select_photo_btn').text('" . esc_js( __( 'Select Photo', 'shop-onboarding-manager' ) ) . "');
+				$('#som_select_photo_btn').text('" . esc_js( __( 'Select Photo', 'nearmart' ) ) . "');
 			});
 		});
 		";

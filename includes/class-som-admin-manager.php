@@ -38,8 +38,8 @@ class SOM_Admin_Manager {
 	 */
 	public static function register_admin_menu() {
 		add_menu_page(
-			__( 'Shop Onboarding', 'shop-onboarding-manager' ),
-			__( 'Shop Onboarding', 'shop-onboarding-manager' ),
+			__( 'Shop Onboarding', 'nearmart' ),
+			__( 'Shop Onboarding', 'nearmart' ),
 			'manage_options',
 			'som-admin',
 			array( __CLASS__, 'render_admin_page' ),
@@ -193,27 +193,27 @@ class SOM_Admin_Manager {
 		$stats      = self::get_dashboard_stats();
 		?>
 		<div class="wrap">
-			<h1 class="wp-heading-inline">🏪 <?php esc_html_e( 'Shop Onboarding Management System', 'shop-onboarding-manager' ); ?></h1>
+			<h1 class="wp-heading-inline">🏪 <?php esc_html_e( 'Shop Onboarding Management System', 'nearmart' ); ?></h1>
 			<hr class="wp-header-end">
 
 			<?php if ( isset( $_GET['msg'] ) ) : ?>
 				<div class="notice notice-success is-dismissible">
-					<p><?php esc_html_e( 'Action completed successfully.', 'shop-onboarding-manager' ); ?></p>
+					<p><?php esc_html_e( 'Action completed successfully.', 'nearmart' ); ?></p>
 				</div>
 			<?php endif; ?>
 
 			<nav class="nav-tab-wrapper">
 				<a href="?page=som-admin&tab=dashboard" class="nav-tab <?php echo 'dashboard' === $active_tab ? 'nav-tab-active' : ''; ?>">
-					📊 <?php esc_html_e( 'Dashboard', 'shop-onboarding-manager' ); ?>
+					📊 <?php esc_html_e( 'Dashboard', 'nearmart' ); ?>
 				</a>
 				<a href="?page=som-admin&tab=tracker" class="nav-tab <?php echo 'tracker' === $active_tab ? 'nav-tab-active' : ''; ?>">
-					📋 <?php esc_html_e( 'Shop Tracker', 'shop-onboarding-manager' ); ?>
+					📋 <?php esc_html_e( 'Shop Tracker', 'nearmart' ); ?>
 				</a>
 				<a href="?page=som-admin&tab=followups" class="nav-tab <?php echo 'followups' === $active_tab ? 'nav-tab-active' : ''; ?>">
-					📅 <?php esc_html_e( 'Follow-ups', 'shop-onboarding-manager' ); ?>
+					📅 <?php esc_html_e( 'Follow-ups', 'nearmart' ); ?>
 				</a>
 				<a href="?page=som-admin&tab=change_requests" class="nav-tab <?php echo 'change_requests' === $active_tab ? 'nav-tab-active' : ''; ?>">
-					🔧 <?php esc_html_e( 'Change Requests', 'shop-onboarding-manager' ); ?>
+					🔧 <?php esc_html_e( 'Change Requests', 'nearmart' ); ?>
 				</a>
 			</nav>
 
@@ -262,38 +262,38 @@ class SOM_Admin_Manager {
 
 		<div class="som-stats-grid">
 			<div class="som-stat-card total">
-				<div class="som-stat-label"><?php esc_html_e( 'Total Approached', 'shop-onboarding-manager' ); ?></div>
+				<div class="som-stat-label"><?php esc_html_e( 'Total Approached', 'nearmart' ); ?></div>
 				<div class="som-stat-num"><?php echo esc_html( $stats['total'] ); ?></div>
 			</div>
 			<div class="som-stat-card contacted">
-				<div class="som-stat-label"><?php esc_html_e( 'Contacted', 'shop-onboarding-manager' ); ?></div>
+				<div class="som-stat-label"><?php esc_html_e( 'Contacted', 'nearmart' ); ?></div>
 				<div class="som-stat-num"><?php echo esc_html( $stats['contacted'] ); ?></div>
 			</div>
 			<div class="som-stat-card interested">
-				<div class="som-stat-label"><?php esc_html_e( 'Interested', 'shop-onboarding-manager' ); ?></div>
+				<div class="som-stat-label"><?php esc_html_e( 'Interested', 'nearmart' ); ?></div>
 				<div class="som-stat-num"><?php echo esc_html( $stats['interested'] ); ?></div>
 			</div>
 			<div class="som-stat-card verified">
-				<div class="som-stat-label"><?php esc_html_e( 'Verified', 'shop-onboarding-manager' ); ?></div>
+				<div class="som-stat-label"><?php esc_html_e( 'Verified', 'nearmart' ); ?></div>
 				<div class="som-stat-num"><?php echo esc_html( $stats['verified'] ); ?></div>
 			</div>
 			<div class="som-stat-card committed">
-				<div class="som-stat-label"><?php esc_html_e( 'Committed', 'shop-onboarding-manager' ); ?></div>
+				<div class="som-stat-label"><?php esc_html_e( 'Committed', 'nearmart' ); ?></div>
 				<div class="som-stat-num"><?php echo esc_html( $stats['committed'] ); ?></div>
 			</div>
 			<div class="som-stat-card rejected">
-				<div class="som-stat-label"><?php esc_html_e( 'Rejected', 'shop-onboarding-manager' ); ?></div>
+				<div class="som-stat-label"><?php esc_html_e( 'Rejected', 'nearmart' ); ?></div>
 				<div class="som-stat-num"><?php echo esc_html( $stats['rejected'] ); ?></div>
 			</div>
 		</div>
 
 		<div class="postbox" style="padding: 20px; background:#fff;">
-			<h2>📌 <?php esc_html_e( 'Quick System Overview', 'shop-onboarding-manager' ); ?></h2>
-			<p><?php esc_html_e( 'All statistics above are computed dynamically from live shop post and taxonomy data.', 'shop-onboarding-manager' ); ?></p>
+			<h2>📌 <?php esc_html_e( 'Quick System Overview', 'nearmart' ); ?></h2>
+			<p><?php esc_html_e( 'All statistics above are computed dynamically from live shop post and taxonomy data.', 'nearmart' ); ?></p>
 			<ul>
-				<li><strong><?php esc_html_e( 'Shop Tracker Tab:', 'shop-onboarding-manager' ); ?></strong> <?php esc_html_e( 'Search, filter, verify, or reject shops.', 'shop-onboarding-manager' ); ?></li>
-				<li><strong><?php esc_html_e( 'Follow-ups Tab:', 'shop-onboarding-manager' ); ?></strong> <?php esc_html_e( 'View upcoming and overdue field team follow-ups.', 'shop-onboarding-manager' ); ?></li>
-				<li><strong><?php esc_html_e( 'Change Requests Tab:', 'shop-onboarding-manager' ); ?></strong> <?php esc_html_e( 'Review and approve merchant correction requests.', 'shop-onboarding-manager' ); ?></li>
+				<li><strong><?php esc_html_e( 'Shop Tracker Tab:', 'nearmart' ); ?></strong> <?php esc_html_e( 'Search, filter, verify, or reject shops.', 'nearmart' ); ?></li>
+				<li><strong><?php esc_html_e( 'Follow-ups Tab:', 'nearmart' ); ?></strong> <?php esc_html_e( 'View upcoming and overdue field team follow-ups.', 'nearmart' ); ?></li>
+				<li><strong><?php esc_html_e( 'Change Requests Tab:', 'nearmart' ); ?></strong> <?php esc_html_e( 'Review and approve merchant correction requests.', 'nearmart' ); ?></li>
 			</ul>
 		</div>
 		<?php
@@ -339,11 +339,11 @@ class SOM_Admin_Manager {
 		$query = new WP_Query( $args );
 
 		$statuses = array(
-			'contacted'  => __( 'Contacted', 'shop-onboarding-manager' ),
-			'interested' => __( 'Interested', 'shop-onboarding-manager' ),
-			'verified'   => __( 'Verified', 'shop-onboarding-manager' ),
-			'committed'  => __( 'Committed', 'shop-onboarding-manager' ),
-			'rejected'   => __( 'Rejected', 'shop-onboarding-manager' ),
+			'contacted'  => __( 'Contacted', 'nearmart' ),
+			'interested' => __( 'Interested', 'nearmart' ),
+			'verified'   => __( 'Verified', 'nearmart' ),
+			'committed'  => __( 'Committed', 'nearmart' ),
+			'rejected'   => __( 'Rejected', 'nearmart' ),
 		);
 
 		$shop_types = array( 'Supermarket', 'Grocery', 'Convenience Store', 'Bakery', 'Butchery', 'Fruit & Vegetable', 'Specialty Store', 'Other' );
@@ -352,42 +352,42 @@ class SOM_Admin_Manager {
 			<input type="hidden" name="page" value="som-admin" />
 			<input type="hidden" name="tab" value="tracker" />
 
-			<input type="search" name="s" value="<?php echo esc_attr( $search ); ?>" placeholder="<?php esc_attr_e( 'Search shop, owner, phone...', 'shop-onboarding-manager' ); ?>" style="width: 220px;" />
+			<input type="search" name="s" value="<?php echo esc_attr( $search ); ?>" placeholder="<?php esc_attr_e( 'Search shop, owner, phone...', 'nearmart' ); ?>" style="width: 220px;" />
 
 			<select name="status_filter">
-				<option value=""><?php esc_html_e( '-- Filter Status --', 'shop-onboarding-manager' ); ?></option>
+				<option value=""><?php esc_html_e( '-- Filter Status --', 'nearmart' ); ?></option>
 				<?php foreach ( $statuses as $slug => $label ) : ?>
 					<option value="<?php echo esc_attr( $slug ); ?>" <?php selected( $status_filter, $slug ); ?>><?php echo esc_html( $label ); ?></option>
 				<?php endforeach; ?>
 			</select>
 
 			<select name="type_filter">
-				<option value=""><?php esc_html_e( '-- Filter Shop Type --', 'shop-onboarding-manager' ); ?></option>
+				<option value=""><?php esc_html_e( '-- Filter Shop Type --', 'nearmart' ); ?></option>
 				<?php foreach ( $shop_types as $t ) : ?>
 					<option value="<?php echo esc_attr( $t ); ?>" <?php selected( $type_filter, $t ); ?>><?php echo esc_html( $t ); ?></option>
 				<?php endforeach; ?>
 			</select>
 
-			<input type="submit" class="button" value="<?php esc_attr_e( 'Filter', 'shop-onboarding-manager' ); ?>" />
+			<input type="submit" class="button" value="<?php esc_attr_e( 'Filter', 'nearmart' ); ?>" />
 			<?php if ( $search || $status_filter || $type_filter ) : ?>
-				<a href="?page=som-admin&tab=tracker" class="button button-link"><?php esc_html_e( 'Reset Filters', 'shop-onboarding-manager' ); ?></a>
+				<a href="?page=som-admin&tab=tracker" class="button button-link"><?php esc_html_e( 'Reset Filters', 'nearmart' ); ?></a>
 			<?php endif; ?>
 		</form>
 
 		<table class="wp-list-table widefat fixed striped table-view-list">
 			<thead>
 				<tr>
-					<th><?php esc_html_e( 'Shop Name', 'shop-onboarding-manager' ); ?></th>
-					<th><?php esc_html_e( 'Owner', 'shop-onboarding-manager' ); ?></th>
-					<th><?php esc_html_e( 'Phone', 'shop-onboarding-manager' ); ?></th>
-					<th><?php esc_html_e( 'Type', 'shop-onboarding-manager' ); ?></th>
-					<th><?php esc_html_e( 'Status', 'shop-onboarding-manager' ); ?></th>
-					<th><?php esc_html_e( 'Verified', 'shop-onboarding-manager' ); ?></th>
-					<th><?php esc_html_e( 'Participation', 'shop-onboarding-manager' ); ?></th>
-					<th><?php esc_html_e( 'Follow-up Date', 'shop-onboarding-manager' ); ?></th>
-					<th><?php esc_html_e( 'Onboarded By', 'shop-onboarding-manager' ); ?></th>
-					<th><?php esc_html_e( 'Date Added', 'shop-onboarding-manager' ); ?></th>
-					<th style="width: 220px;"><?php esc_html_e( 'Actions', 'shop-onboarding-manager' ); ?></th>
+					<th><?php esc_html_e( 'Shop Name', 'nearmart' ); ?></th>
+					<th><?php esc_html_e( 'Owner', 'nearmart' ); ?></th>
+					<th><?php esc_html_e( 'Phone', 'nearmart' ); ?></th>
+					<th><?php esc_html_e( 'Type', 'nearmart' ); ?></th>
+					<th><?php esc_html_e( 'Status', 'nearmart' ); ?></th>
+					<th><?php esc_html_e( 'Verified', 'nearmart' ); ?></th>
+					<th><?php esc_html_e( 'Participation', 'nearmart' ); ?></th>
+					<th><?php esc_html_e( 'Follow-up Date', 'nearmart' ); ?></th>
+					<th><?php esc_html_e( 'Onboarded By', 'nearmart' ); ?></th>
+					<th><?php esc_html_e( 'Date Added', 'nearmart' ); ?></th>
+					<th style="width: 220px;"><?php esc_html_e( 'Actions', 'nearmart' ); ?></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -423,12 +423,12 @@ class SOM_Admin_Manager {
 											<?php wp_nonce_field( 'som_admin_action_nonce', 'som_nonce' ); ?>
 											<input type="hidden" name="som_admin_action" value="verify_shop" />
 											<input type="hidden" name="shop_id" value="<?php echo esc_attr( $id ); ?>" />
-											<input type="submit" class="button button-small button-primary" value="<?php esc_attr_e( 'Verify', 'shop-onboarding-manager' ); ?>" />
+											<input type="submit" class="button button-small button-primary" value="<?php esc_attr_e( 'Verify', 'nearmart' ); ?>" />
 										</form>
 									<?php endif; ?>
 
 									<button type="button" class="button button-small som-reject-toggle" data-target="reject_form_<?php echo esc_attr( $id ); ?>">
-										<?php esc_html_e( 'Reject', 'shop-onboarding-manager' ); ?>
+										<?php esc_html_e( 'Reject', 'nearmart' ); ?>
 									</button>
 								</div>
 
@@ -438,21 +438,21 @@ class SOM_Admin_Manager {
 										<?php wp_nonce_field( 'som_admin_action_nonce', 'som_nonce' ); ?>
 										<input type="hidden" name="som_admin_action" value="reject_shop" />
 										<input type="hidden" name="shop_id" value="<?php echo esc_attr( $id ); ?>" />
-										<label style="display:block; font-size:11px; font-weight:600;"><?php esc_html_e( 'Rejection Reason:', 'shop-onboarding-manager' ); ?></label>
+										<label style="display:block; font-size:11px; font-weight:600;"><?php esc_html_e( 'Rejection Reason:', 'nearmart' ); ?></label>
 										<select name="rejection_reason" style="width:100%; font-size:12px; margin-bottom:6px;" required>
 											<?php foreach ( self::REJECTION_REASONS as $key => $lbl ) : ?>
 												<option value="<?php echo esc_attr( $lbl ); ?>"><?php echo esc_html( $lbl ); ?></option>
 											<?php endforeach; ?>
 										</select>
-										<textarea name="rejection_notes" rows="2" style="width:100%; font-size:11px;" placeholder="<?php esc_attr_e( 'Notes...', 'shop-onboarding-manager' ); ?>"></textarea>
-										<input type="submit" class="button button-small button-link-delete" value="<?php esc_attr_e( 'Confirm Reject', 'shop-onboarding-manager' ); ?>" style="margin-top:4px;" />
+										<textarea name="rejection_notes" rows="2" style="width:100%; font-size:11px;" placeholder="<?php esc_attr_e( 'Notes...', 'nearmart' ); ?>"></textarea>
+										<input type="submit" class="button button-small button-link-delete" value="<?php esc_attr_e( 'Confirm Reject', 'nearmart' ); ?>" style="margin-top:4px;" />
 									</form>
 								</div>
 							</td>
 						</tr>
 					<?php endwhile; wp_reset_postdata(); ?>
 				<?php else : ?>
-					<tr><td colspan="11"><?php esc_html_e( 'No shops found.', 'shop-onboarding-manager' ); ?></td></tr>
+					<tr><td colspan="11"><?php esc_html_e( 'No shops found.', 'nearmart' ); ?></td></tr>
 				<?php endif; ?>
 			</tbody>
 		</table>
@@ -513,18 +513,18 @@ class SOM_Admin_Manager {
 			.som-overdue-badge { background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 11px; }
 		</style>
 
-		<h2>📅 <?php esc_html_e( 'Field Follow-ups Schedule', 'shop-onboarding-manager' ); ?></h2>
-		<p><?php esc_html_e( 'Overdue follow-ups are highlighted in red.', 'shop-onboarding-manager' ); ?></p>
+		<h2>📅 <?php esc_html_e( 'Field Follow-ups Schedule', 'nearmart' ); ?></h2>
+		<p><?php esc_html_e( 'Overdue follow-ups are highlighted in red.', 'nearmart' ); ?></p>
 
 		<table class="wp-list-table widefat fixed striped table-view-list">
 			<thead>
 				<tr>
-					<th><?php esc_html_e( 'Follow-up Date', 'shop-onboarding-manager' ); ?></th>
-					<th><?php esc_html_e( 'Shop Name', 'shop-onboarding-manager' ); ?></th>
-					<th><?php esc_html_e( 'Owner', 'shop-onboarding-manager' ); ?></th>
-					<th><?php esc_html_e( 'Phone', 'shop-onboarding-manager' ); ?></th>
-					<th><?php esc_html_e( 'Field Notes', 'shop-onboarding-manager' ); ?></th>
-					<th><?php esc_html_e( 'Shopkeeper Concerns', 'shop-onboarding-manager' ); ?></th>
+					<th><?php esc_html_e( 'Follow-up Date', 'nearmart' ); ?></th>
+					<th><?php esc_html_e( 'Shop Name', 'nearmart' ); ?></th>
+					<th><?php esc_html_e( 'Owner', 'nearmart' ); ?></th>
+					<th><?php esc_html_e( 'Phone', 'nearmart' ); ?></th>
+					<th><?php esc_html_e( 'Field Notes', 'nearmart' ); ?></th>
+					<th><?php esc_html_e( 'Shopkeeper Concerns', 'nearmart' ); ?></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -542,7 +542,7 @@ class SOM_Admin_Manager {
 							<td>
 								<strong><?php echo esc_html( $date ); ?></strong>
 								<?php if ( $is_overdue ) : ?>
-									<span class="som-overdue-badge"><?php esc_html_e( 'OVERDUE', 'shop-onboarding-manager' ); ?></span>
+									<span class="som-overdue-badge"><?php esc_html_e( 'OVERDUE', 'nearmart' ); ?></span>
 								<?php endif; ?>
 							</td>
 							<td><strong><a href="<?php echo esc_url( get_edit_post_link( $id ) ); ?>"><?php the_title(); ?></a></strong></td>
@@ -553,7 +553,7 @@ class SOM_Admin_Manager {
 						</tr>
 					<?php endwhile; wp_reset_postdata(); ?>
 				<?php else : ?>
-					<tr><td colspan="6"><?php esc_html_e( 'No scheduled follow-ups found.', 'shop-onboarding-manager' ); ?></td></tr>
+					<tr><td colspan="6"><?php esc_html_e( 'No scheduled follow-ups found.', 'nearmart' ); ?></td></tr>
 				<?php endif; ?>
 			</tbody>
 		</table>
@@ -594,17 +594,17 @@ class SOM_Admin_Manager {
 			return strtotime( $b['created_at'] ) - strtotime( $a['created_at'] );
 		} );
 		?>
-		<h2>🔧 <?php esc_html_e( 'Merchant Change & Correction Requests', 'shop-onboarding-manager' ); ?></h2>
+		<h2>🔧 <?php esc_html_e( 'Merchant Change & Correction Requests', 'nearmart' ); ?></h2>
 
 		<table class="wp-list-table widefat fixed striped table-view-list">
 			<thead>
 				<tr>
-					<th><?php esc_html_e( 'Submitted Date', 'shop-onboarding-manager' ); ?></th>
-					<th><?php esc_html_e( 'Shop Name', 'shop-onboarding-manager' ); ?></th>
-					<th><?php esc_html_e( 'Requested Field', 'shop-onboarding-manager' ); ?></th>
-					<th><?php esc_html_e( 'Description', 'shop-onboarding-manager' ); ?></th>
-					<th><?php esc_html_e( 'Status', 'shop-onboarding-manager' ); ?></th>
-					<th style="width: 160px;"><?php esc_html_e( 'Action', 'shop-onboarding-manager' ); ?></th>
+					<th><?php esc_html_e( 'Submitted Date', 'nearmart' ); ?></th>
+					<th><?php esc_html_e( 'Shop Name', 'nearmart' ); ?></th>
+					<th><?php esc_html_e( 'Requested Field', 'nearmart' ); ?></th>
+					<th><?php esc_html_e( 'Description', 'nearmart' ); ?></th>
+					<th><?php esc_html_e( 'Status', 'nearmart' ); ?></th>
+					<th style="width: 160px;"><?php esc_html_e( 'Action', 'nearmart' ); ?></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -628,7 +628,7 @@ class SOM_Admin_Manager {
 										<input type="hidden" name="shop_id" value="<?php echo esc_attr( $req['shop_id'] ); ?>" />
 										<input type="hidden" name="request_id" value="<?php echo esc_attr( $req['id'] ); ?>" />
 										<input type="hidden" name="request_status" value="approved" />
-										<input type="submit" class="button button-small button-primary" value="<?php esc_attr_e( 'Approve', 'shop-onboarding-manager' ); ?>" />
+										<input type="submit" class="button button-small button-primary" value="<?php esc_attr_e( 'Approve', 'nearmart' ); ?>" />
 									</form>
 									<form method="post" style="display:inline;">
 										<?php wp_nonce_field( 'som_admin_action_nonce', 'som_nonce' ); ?>
@@ -636,16 +636,16 @@ class SOM_Admin_Manager {
 										<input type="hidden" name="shop_id" value="<?php echo esc_attr( $req['shop_id'] ); ?>" />
 										<input type="hidden" name="request_id" value="<?php echo esc_attr( $req['id'] ); ?>" />
 										<input type="hidden" name="request_status" value="dismissed" />
-										<input type="submit" class="button button-small button-secondary" value="<?php esc_attr_e( 'Dismiss', 'shop-onboarding-manager' ); ?>" />
+										<input type="submit" class="button button-small button-secondary" value="<?php esc_attr_e( 'Dismiss', 'nearmart' ); ?>" />
 									</form>
 								<?php else : ?>
-									<span class="description"><?php esc_html_e( 'Resolved', 'shop-onboarding-manager' ); ?></span>
+									<span class="description"><?php esc_html_e( 'Resolved', 'nearmart' ); ?></span>
 								<?php endif; ?>
 							</td>
 						</tr>
 					<?php endforeach; ?>
 				<?php else : ?>
-					<tr><td colspan="6"><?php esc_html_e( 'No change requests found.', 'shop-onboarding-manager' ); ?></td></tr>
+					<tr><td colspan="6"><?php esc_html_e( 'No change requests found.', 'nearmart' ); ?></td></tr>
 				<?php endif; ?>
 			</tbody>
 		</table>

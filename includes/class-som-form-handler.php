@@ -59,12 +59,12 @@ class SOM_Form_Handler {
 				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
 				'nonce'   => wp_create_nonce( 'som_frontend_onboard_nonce' ),
 				'i18n'    => array(
-					'locationFetching' => __( 'Fetching GPS location...', 'shop-onboarding-manager' ),
-					'locationSuccess'  => __( 'GPS Location Captured', 'shop-onboarding-manager' ),
-					'locationError'    => __( 'Unable to auto-get location. (Browser requires HTTPS for location API). You can manually enter coordinates below.', 'shop-onboarding-manager' ),
-					'duplicateWarning' => __( 'A shop with this phone number or name & address already exists.', 'shop-onboarding-manager' ),
-					'submitting'       => __( 'Registering Shop...', 'shop-onboarding-manager' ),
-					'successMessage'   => __( 'Shop successfully registered!', 'shop-onboarding-manager' ),
+					'locationFetching' => __( 'Fetching GPS location...', 'nearmart' ),
+					'locationSuccess'  => __( 'GPS Location Captured', 'nearmart' ),
+					'locationError'    => __( 'Unable to auto-get location. (Browser requires HTTPS for location API). You can manually enter coordinates below.', 'nearmart' ),
+					'duplicateWarning' => __( 'A shop with this phone number or name & address already exists.', 'nearmart' ),
+					'submitting'       => __( 'Registering Shop...', 'nearmart' ),
+					'successMessage'   => __( 'Shop successfully registered!', 'nearmart' ),
 				),
 			)
 		);
@@ -77,7 +77,7 @@ class SOM_Form_Handler {
 		check_ajax_referer( 'som_frontend_onboard_nonce', 'nonce' );
 
 		if ( ! is_user_logged_in() || ! current_user_can( 'edit_posts' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'nearmart' ) ) );
 		}
 
 		$phone     = isset( $_POST['phone'] ) ? sanitize_text_field( wp_unslash( $_POST['phone'] ) ) : '';
@@ -110,7 +110,7 @@ class SOM_Form_Handler {
 						'title'  => get_the_title( $p->ID ),
 						'owner'  => get_post_meta( $p->ID, 'som_owner_name', true ),
 						'phone'  => get_post_meta( $p->ID, 'som_phone_number', true ),
-						'reason' => __( 'Matched by phone number', 'shop-onboarding-manager' ),
+						'reason' => __( 'Matched by phone number', 'nearmart' ),
 					);
 				}
 			}
@@ -135,7 +135,7 @@ class SOM_Form_Handler {
 							'title'  => get_the_title( $p->ID ),
 							'owner'  => get_post_meta( $p->ID, 'som_owner_name', true ),
 							'phone'  => get_post_meta( $p->ID, 'som_phone_number', true ),
-							'reason' => __( 'Matched by shop name', 'shop-onboarding-manager' ),
+							'reason' => __( 'Matched by shop name', 'nearmart' ),
 						);
 					}
 				}
@@ -162,7 +162,7 @@ class SOM_Form_Handler {
 
 		// Permission check: User must be logged in and capable of editing posts.
 		if ( ! is_user_logged_in() || ! current_user_can( 'edit_posts' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'nearmart' ) ) );
 		}
 
 		// Extract & Sanitize fields.
@@ -185,7 +185,7 @@ class SOM_Form_Handler {
 
 		// Basic validation.
 		if ( empty( $shop_name ) ) {
-			wp_send_json_error( array( 'message' => __( 'Shop name is required.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Shop name is required.', 'nearmart' ) ) );
 		}
 
 		// Insert CPT post.
@@ -199,7 +199,7 @@ class SOM_Form_Handler {
 		$post_id = wp_insert_post( $post_data );
 
 		if ( is_wp_error( $post_id ) || 0 === $post_id ) {
-			wp_send_json_error( array( 'message' => __( 'Failed to create shop post.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Failed to create shop post.', 'nearmart' ) ) );
 		}
 
 		// Handle Merchant Account Creation if requested.
@@ -251,7 +251,7 @@ class SOM_Form_Handler {
 
 		wp_send_json_success(
 			array(
-				'message' => __( 'Shop registered successfully!', 'shop-onboarding-manager' ),
+				'message' => __( 'Shop registered successfully!', 'nearmart' ),
 				'shop_id' => $post_id,
 			)
 		);
@@ -266,32 +266,32 @@ class SOM_Form_Handler {
 		if ( ! is_user_logged_in() || ! current_user_can( 'edit_posts' ) ) {
 			$staff_login_url = wp_login_url( home_url( '/onboard-shop/' ) );
 			return '<div class="som-onboarding-card" style="text-align:center; padding: 40px 20px;">' .
-				'<h2 style="margin-top:0; color:#0f172a;">🔒 ' . esc_html__( 'Internal Field Team Page', 'shop-onboarding-manager' ) . '</h2>' .
-				'<p style="color:#64748b; margin-bottom:24px;">' . esc_html__( 'Access to this registration form is restricted to authorized NearMart onboarding staff and administrators.', 'shop-onboarding-manager' ) . '</p>' .
+				'<h2 style="margin-top:0; color:#0f172a;">🔒 ' . esc_html__( 'Internal Field Team Page', 'nearmart' ) . '</h2>' .
+				'<p style="color:#64748b; margin-bottom:24px;">' . esc_html__( 'Access to this registration form is restricted to authorized NearMart onboarding staff and administrators.', 'nearmart' ) . '</p>' .
 				'<div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">' .
-				'<a href="' . esc_url( $staff_login_url ) . '" class="som-submit-btn som-btn-secondary" style="text-decoration:none; width:auto; padding:12px 24px;">🔑 ' . esc_html__( 'Field Agent Login', 'shop-onboarding-manager' ) . '</a>' .
-				'<a href="' . esc_url( home_url( '/join-nearmart/' ) ) . '" class="som-submit-btn som-btn-outline" style="text-decoration:none; width:auto; padding:12px 24px; color:#475569; border:1px solid #cbd5e1;">' . esc_html__( 'Are you a shop owner? Learn how to join NearMart →', 'shop-onboarding-manager' ) . '</a>' .
+				'<a href="' . esc_url( $staff_login_url ) . '" class="som-submit-btn som-btn-secondary" style="text-decoration:none; width:auto; padding:12px 24px;">🔑 ' . esc_html__( 'Field Agent Login', 'nearmart' ) . '</a>' .
+				'<a href="' . esc_url( home_url( '/join-nearmart/' ) ) . '" class="som-submit-btn som-btn-outline" style="text-decoration:none; width:auto; padding:12px 24px; color:#475569; border:1px solid #cbd5e1;">' . esc_html__( 'Are you a shop owner? Learn how to join NearMart →', 'nearmart' ) . '</a>' .
 				'</div>' .
 				'</div>';
 		}
 
 		$shop_types = array(
-			'Supermarket'       => __( 'Supermarket', 'shop-onboarding-manager' ),
-			'Grocery'           => __( 'Grocery Store', 'shop-onboarding-manager' ),
-			'Convenience Store' => __( 'Convenience Store', 'shop-onboarding-manager' ),
-			'Bakery'            => __( 'Bakery', 'shop-onboarding-manager' ),
-			'Butchery'          => __( 'Butchery', 'shop-onboarding-manager' ),
-			'Fruit & Vegetable' => __( 'Fruit & Vegetable Market', 'shop-onboarding-manager' ),
-			'Specialty Store'   => __( 'Specialty Store', 'shop-onboarding-manager' ),
-			'Other'             => __( 'Other', 'shop-onboarding-manager' ),
+			'Supermarket'       => __( 'Supermarket', 'nearmart' ),
+			'Grocery'           => __( 'Grocery Store', 'nearmart' ),
+			'Convenience Store' => __( 'Convenience Store', 'nearmart' ),
+			'Bakery'            => __( 'Bakery', 'nearmart' ),
+			'Butchery'          => __( 'Butchery', 'nearmart' ),
+			'Fruit & Vegetable' => __( 'Fruit & Vegetable Market', 'nearmart' ),
+			'Specialty Store'   => __( 'Specialty Store', 'nearmart' ),
+			'Other'             => __( 'Other', 'nearmart' ),
 		);
 
 		$statuses = array(
-			'contacted'  => __( 'Contacted', 'shop-onboarding-manager' ),
-			'interested' => __( 'Interested', 'shop-onboarding-manager' ),
-			'verified'   => __( 'Verified', 'shop-onboarding-manager' ),
-			'committed'  => __( 'Committed', 'shop-onboarding-manager' ),
-			'rejected'   => __( 'Rejected', 'shop-onboarding-manager' ),
+			'contacted'  => __( 'Contacted', 'nearmart' ),
+			'interested' => __( 'Interested', 'nearmart' ),
+			'verified'   => __( 'Verified', 'nearmart' ),
+			'committed'  => __( 'Committed', 'nearmart' ),
+			'rejected'   => __( 'Rejected', 'nearmart' ),
 		);
 
 		$merchants = get_users(
@@ -306,49 +306,49 @@ class SOM_Form_Handler {
 		?>
 		<div class="som-onboarding-card">
 			<div class="som-card-header">
-				<h2><?php esc_html_e( 'Shop Onboarding Form', 'shop-onboarding-manager' ); ?></h2>
-				<p><?php esc_html_e( 'Register a new supermarket or grocery store', 'shop-onboarding-manager' ); ?></p>
+				<h2><?php esc_html_e( 'Shop Onboarding Form', 'nearmart' ); ?></h2>
+				<p><?php esc_html_e( 'Register a new supermarket or grocery store', 'nearmart' ); ?></p>
 			</div>
 
 			<!-- Duplicate Warning Banner -->
 			<div id="som_duplicate_warning" class="som-duplicate-banner" style="display: none;">
 				<div class="som-duplicate-header">
 					<span class="som-icon-warning">⚠️</span>
-					<strong><?php esc_html_e( 'Possible Duplicate Detected', 'shop-onboarding-manager' ); ?></strong>
+					<strong><?php esc_html_e( 'Possible Duplicate Detected', 'nearmart' ); ?></strong>
 				</div>
 				<div id="som_duplicate_list" class="som-duplicate-list"></div>
-				<p class="som-duplicate-note"><?php esc_html_e( 'You can still proceed if this is a distinct business.', 'shop-onboarding-manager' ); ?></p>
+				<p class="som-duplicate-note"><?php esc_html_e( 'You can still proceed if this is a distinct business.', 'nearmart' ); ?></p>
 			</div>
 
 			<form id="som_onboarding_form" enctype="multipart/form-data">
 				<!-- Section 1: Basic Info -->
 				<div class="som-form-group">
-					<label for="som_f_shop_name" class="som-label required"><?php esc_html_e( 'Shop Name', 'shop-onboarding-manager' ); ?></label>
+					<label for="som_f_shop_name" class="som-label required"><?php esc_html_e( 'Shop Name', 'nearmart' ); ?></label>
 					<input type="text" id="som_f_shop_name" name="shop_name" class="som-input" required placeholder="e.g. Nearmart Fresh Supermarket" />
 				</div>
 
 				<div class="som-form-row">
 					<div class="som-form-group">
-						<label for="som_f_owner_name" class="som-label"><?php esc_html_e( 'Owner Name', 'shop-onboarding-manager' ); ?></label>
+						<label for="som_f_owner_name" class="som-label"><?php esc_html_e( 'Owner Name', 'nearmart' ); ?></label>
 						<input type="text" id="som_f_owner_name" name="owner_name" class="som-input" placeholder="e.g. Ramesh Kumar" />
 					</div>
 
 					<div class="som-form-group">
-						<label for="som_f_phone" class="som-label"><?php esc_html_e( 'Phone Number', 'shop-onboarding-manager' ); ?></label>
+						<label for="som_f_phone" class="som-label"><?php esc_html_e( 'Phone Number', 'nearmart' ); ?></label>
 						<input type="tel" id="som_f_phone" name="phone" class="som-input" placeholder="e.g. 9876543210" />
 					</div>
 				</div>
 
 				<div class="som-form-group">
-					<label for="som_f_address" class="som-label"><?php esc_html_e( 'Address', 'shop-onboarding-manager' ); ?></label>
+					<label for="som_f_address" class="som-label"><?php esc_html_e( 'Address', 'nearmart' ); ?></label>
 					<textarea id="som_f_address" name="address" class="som-textarea" rows="3" placeholder="Full street address, area, landmark"></textarea>
 				</div>
 
 				<div class="som-form-row">
 					<div class="som-form-group">
-						<label for="som_f_shop_type" class="som-label"><?php esc_html_e( 'Shop Type', 'shop-onboarding-manager' ); ?></label>
+						<label for="som_f_shop_type" class="som-label"><?php esc_html_e( 'Shop Type', 'nearmart' ); ?></label>
 						<select id="som_f_shop_type" name="shop_type" class="som-select">
-							<option value=""><?php esc_html_e( '-- Select Type --', 'shop-onboarding-manager' ); ?></option>
+							<option value=""><?php esc_html_e( '-- Select Type --', 'nearmart' ); ?></option>
 							<?php foreach ( $shop_types as $val => $lbl ) : ?>
 								<option value="<?php echo esc_attr( $val ); ?>"><?php echo esc_html( $lbl ); ?></option>
 							<?php endforeach; ?>
@@ -356,7 +356,7 @@ class SOM_Form_Handler {
 					</div>
 
 					<div class="som-form-group">
-						<label for="som_f_shop_status" class="som-label"><?php esc_html_e( 'Status', 'shop-onboarding-manager' ); ?></label>
+						<label for="som_f_shop_status" class="som-label"><?php esc_html_e( 'Status', 'nearmart' ); ?></label>
 						<select id="som_f_shop_status" name="shop_status" class="som-select">
 							<?php foreach ( $statuses as $val => $lbl ) : ?>
 								<option value="<?php echo esc_attr( $val ); ?>"><?php echo esc_html( $lbl ); ?></option>
@@ -367,11 +367,11 @@ class SOM_Form_Handler {
 
 				<!-- Section 2: Photo Capture -->
 				<div class="som-form-group">
-					<label class="som-label"><?php esc_html_e( 'Shop Photo', 'shop-onboarding-manager' ); ?></label>
+					<label class="som-label"><?php esc_html_e( 'Shop Photo', 'nearmart' ); ?></label>
 					<div class="som-file-uploader">
 						<input type="file" id="som_f_shop_photo" name="shop_photo" accept="image/*" capture="environment" class="som-file-input" />
 						<label for="som_f_shop_photo" class="som-file-btn">
-							📷 <?php esc_html_e( 'Take / Upload Photo', 'shop-onboarding-manager' ); ?>
+							📷 <?php esc_html_e( 'Take / Upload Photo', 'nearmart' ); ?>
 						</label>
 						<div id="som_photo_preview_container" class="som-photo-preview" style="display: none;">
 							<img id="som_photo_img" src="" alt="Preview" />
@@ -383,24 +383,24 @@ class SOM_Form_Handler {
 				<!-- Section 3: GPS Coordinates -->
 				<div class="som-form-group som-gps-box">
 					<div class="som-gps-header">
-						<label class="som-label"><?php esc_html_e( 'GPS Location', 'shop-onboarding-manager' ); ?></label>
+						<label class="som-label"><?php esc_html_e( 'GPS Location', 'nearmart' ); ?></label>
 						<button type="button" id="som_btn_get_location" class="som-gps-btn">
-							📍 <?php esc_html_e( 'Capture GPS', 'shop-onboarding-manager' ); ?>
+							📍 <?php esc_html_e( 'Capture GPS', 'nearmart' ); ?>
 						</button>
 					</div>
 					<div id="som_gps_status_msg" class="som-gps-status"></div>
 
 					<div class="som-form-row som-gps-fields">
 						<div class="som-form-group">
-							<label for="som_f_latitude" class="som-sublabel"><?php esc_html_e( 'Latitude', 'shop-onboarding-manager' ); ?></label>
+							<label for="som_f_latitude" class="som-sublabel"><?php esc_html_e( 'Latitude', 'nearmart' ); ?></label>
 							<input type="number" step="any" id="som_f_latitude" name="latitude" class="som-input" placeholder="e.g. 12.971598" />
 						</div>
 						<div class="som-form-group">
-							<label for="som_f_longitude" class="som-sublabel"><?php esc_html_e( 'Longitude', 'shop-onboarding-manager' ); ?></label>
+							<label for="som_f_longitude" class="som-sublabel"><?php esc_html_e( 'Longitude', 'nearmart' ); ?></label>
 							<input type="number" step="any" id="som_f_longitude" name="longitude" class="som-input" placeholder="e.g. 77.594566" />
 						</div>
 						<div class="som-form-group">
-							<label for="som_f_gps_accuracy" class="som-sublabel"><?php esc_html_e( 'Accuracy (m)', 'shop-onboarding-manager' ); ?></label>
+							<label for="som_f_gps_accuracy" class="som-sublabel"><?php esc_html_e( 'Accuracy (m)', 'nearmart' ); ?></label>
 							<input type="number" step="any" id="som_f_gps_accuracy" name="gps_accuracy" class="som-input" placeholder="Meters" />
 						</div>
 					</div>
@@ -409,14 +409,14 @@ class SOM_Form_Handler {
 				<!-- Section 4: Onboarding Details -->
 				<div class="som-form-row">
 					<div class="som-form-group">
-						<label for="som_f_followup_date" class="som-label"><?php esc_html_e( 'Follow-up Date', 'shop-onboarding-manager' ); ?></label>
+						<label for="som_f_followup_date" class="som-label"><?php esc_html_e( 'Follow-up Date', 'nearmart' ); ?></label>
 						<input type="date" id="som_f_followup_date" name="followup_date" class="som-input" />
 					</div>
 
 					<div class="som-form-group">
-						<label for="som_f_merchant_user_id" class="som-label"><?php esc_html_e( 'Assign Existing Merchant', 'shop-onboarding-manager' ); ?></label>
+						<label for="som_f_merchant_user_id" class="som-label"><?php esc_html_e( 'Assign Existing Merchant', 'nearmart' ); ?></label>
 						<select id="som_f_merchant_user_id" name="merchant_user_id" class="som-select">
-							<option value=""><?php esc_html_e( '-- Select Merchant --', 'shop-onboarding-manager' ); ?></option>
+							<option value=""><?php esc_html_e( '-- Select Merchant --', 'nearmart' ); ?></option>
 							<?php foreach ( $merchants as $m ) : ?>
 								<option value="<?php echo esc_attr( $m->ID ); ?>">
 									<?php echo esc_html( $m->display_name . ' (' . $m->user_login . ')' ); ?>
@@ -430,35 +430,35 @@ class SOM_Form_Handler {
 				<div class="som-form-group som-merchant-creation-box">
 					<label class="som-checkbox-label">
 						<input type="checkbox" id="som_toggle_create_merchant" name="create_merchant_account" value="1" />
-						<strong><?php esc_html_e( 'Create New Merchant Login Account', 'shop-onboarding-manager' ); ?></strong>
+						<strong><?php esc_html_e( 'Create New Merchant Login Account', 'nearmart' ); ?></strong>
 					</label>
 
 					<div id="som_merchant_account_fields" class="som-form-row" style="display: none; margin-top: 10px;">
 						<div class="som-form-group">
-							<label for="som_f_merchant_username" class="som-sublabel"><?php esc_html_e( 'Merchant Username', 'shop-onboarding-manager' ); ?></label>
+							<label for="som_f_merchant_username" class="som-sublabel"><?php esc_html_e( 'Merchant Username', 'nearmart' ); ?></label>
 							<input type="text" id="som_f_merchant_username" name="merchant_username" class="som-input" placeholder="e.g. shopowner123" />
 						</div>
 						<div class="som-form-group">
-							<label for="som_f_merchant_password" class="som-sublabel"><?php esc_html_e( 'Merchant Password', 'shop-onboarding-manager' ); ?></label>
+							<label for="som_f_merchant_password" class="som-sublabel"><?php esc_html_e( 'Merchant Password', 'nearmart' ); ?></label>
 							<input type="password" id="som_f_merchant_password" name="merchant_password" class="som-input" placeholder="Set secure password" />
 						</div>
 					</div>
 				</div>
 
 				<div class="som-form-group">
-					<label for="som_f_notes" class="som-label"><?php esc_html_e( 'Field Notes', 'shop-onboarding-manager' ); ?></label>
+					<label for="som_f_notes" class="som-label"><?php esc_html_e( 'Field Notes', 'nearmart' ); ?></label>
 					<textarea id="som_f_notes" name="notes" class="som-textarea" rows="2" placeholder="Observations, store size, traffic..."></textarea>
 				</div>
 
 				<div class="som-form-group">
-					<label for="som_f_concerns" class="som-label"><?php esc_html_e( 'Shopkeeper Concerns', 'shop-onboarding-manager' ); ?></label>
+					<label for="som_f_concerns" class="som-label"><?php esc_html_e( 'Shopkeeper Concerns', 'nearmart' ); ?></label>
 					<textarea id="som_f_concerns" name="concerns" class="som-textarea" rows="2" placeholder="Commission rate, delivery timing, payment terms..."></textarea>
 				</div>
 
 				<!-- Submit Button -->
 				<div class="som-form-actions">
 					<button type="submit" id="som_btn_submit" class="som-submit-btn">
-						🚀 <?php esc_html_e( 'Register Shop', 'shop-onboarding-manager' ); ?>
+						🚀 <?php esc_html_e( 'Register Shop', 'nearmart' ); ?>
 					</button>
 				</div>
 

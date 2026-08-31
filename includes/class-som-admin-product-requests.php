@@ -33,8 +33,8 @@ class SOM_Admin_Product_Requests {
 	public static function register_admin_menu() {
 		add_submenu_page(
 			'som-admin',
-			__( 'Product Requests', 'shop-onboarding-manager' ),
-			__( 'Product Requests', 'shop-onboarding-manager' ),
+			__( 'Product Requests', 'nearmart' ),
+			__( 'Product Requests', 'nearmart' ),
 			'manage_options',
 			'som-product-requests',
 			array( __CLASS__, 'render_admin_requests_page' )
@@ -61,7 +61,7 @@ class SOM_Admin_Product_Requests {
 		check_ajax_referer( 'som_admin_requests_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'nearmart' ) ), 403 );
 		}
 
 		$status   = isset( $_POST['status'] ) ? sanitize_key( $_POST['status'] ) : 'all';
@@ -145,7 +145,7 @@ class SOM_Admin_Product_Requests {
 		check_ajax_referer( 'som_admin_requests_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'nearmart' ) ), 403 );
 		}
 
 		$request_id  = isset( $_POST['request_id'] ) ? absint( $_POST['request_id'] ) : 0;
@@ -158,12 +158,12 @@ class SOM_Admin_Product_Requests {
 		$admin_notes = isset( $_POST['admin_notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['admin_notes'] ) ) : '';
 
 		if ( ! $request_id || empty( $title ) ) {
-			wp_send_json_error( array( 'message' => __( 'Request ID and Master Product Title are required.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Request ID and Master Product Title are required.', 'nearmart' ) ) );
 		}
 
 		$req = SOM_Product_Request_Repository::get_request_by_id( $request_id );
 		if ( ! $req ) {
-			wp_send_json_error( array( 'message' => __( 'Product request not found.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Product request not found.', 'nearmart' ) ) );
 		}
 
 		// Create WooCommerce Master Product Post
@@ -177,7 +177,7 @@ class SOM_Admin_Product_Requests {
 		);
 
 		if ( is_wp_error( $post_id ) || ! $post_id ) {
-			wp_send_json_error( array( 'message' => __( 'Failed to create WooCommerce master product.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Failed to create WooCommerce master product.', 'nearmart' ) ) );
 		}
 
 		// Update product meta specs
@@ -203,14 +203,14 @@ class SOM_Admin_Product_Requests {
 		$updated = SOM_Product_Request_Repository::update_request_status( $request_id, 'approved', $admin_notes, $post_id );
 
 		if ( ! $updated ) {
-			wp_send_json_error( array( 'message' => __( 'Master product created, but failed to update request status.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Master product created, but failed to update request status.', 'nearmart' ) ) );
 		}
 
 		$edit_url = admin_url( 'post.php?post=' . $post_id . '&action=edit' );
 
 		wp_send_json_success(
 			array(
-				'message'      => __( 'Master product created! Request approved and ready for merchant setup.', 'shop-onboarding-manager' ),
+				'message'      => __( 'Master product created! Request approved and ready for merchant setup.', 'nearmart' ),
 				'product_id'   => $post_id,
 				'product_name' => $title,
 				'edit_url'     => $edit_url,
@@ -225,7 +225,7 @@ class SOM_Admin_Product_Requests {
 		check_ajax_referer( 'som_admin_requests_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'shop-onboarding-manager' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'nearmart' ) ), 403 );
 		}
 
 		$request_id        = isset( $_POST['request_id'] ) ? absint( $_POST['request_id'] ) : 0;
@@ -234,23 +234,23 @@ class SOM_Admin_Product_Requests {
 		$master_product_id = isset( $_POST['master_product_id'] ) && '' !== $_POST['master_product_id'] ? absint( $_POST['master_product_id'] ) : null;
 
 		if ( ! $request_id ) {
-			wp_send_json_error( array( 'message' => __( 'Invalid request ID.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Invalid request ID.', 'nearmart' ) ) );
 		}
 
 		$req = SOM_Product_Request_Repository::get_request_by_id( $request_id );
 		if ( ! $req ) {
-			wp_send_json_error( array( 'message' => __( 'Product request not found.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Product request not found.', 'nearmart' ) ) );
 		}
 
 		// Validation Rule: Cannot set status to approved or completed without a linked master product
 		if ( in_array( $status, array( 'approved', 'completed' ), true ) && empty( $master_product_id ) ) {
-			wp_send_json_error( array( 'message' => __( 'A master product must be created or linked before approving or completing a request.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'A master product must be created or linked before approving or completing a request.', 'nearmart' ) ) );
 		}
 
 		if ( $master_product_id ) {
 			$p = get_post( $master_product_id );
 			if ( ! $p || 'product' !== $p->post_type ) {
-				wp_send_json_error( array( 'message' => __( 'Invalid WooCommerce master product ID.', 'shop-onboarding-manager' ) ) );
+				wp_send_json_error( array( 'message' => __( 'Invalid WooCommerce master product ID.', 'nearmart' ) ) );
 			}
 			self::ensure_pending_shop_product( $req->shop_id, $master_product_id );
 		}
@@ -258,10 +258,10 @@ class SOM_Admin_Product_Requests {
 		$updated = SOM_Product_Request_Repository::update_request_status( $request_id, $status, $admin_notes, $master_product_id );
 
 		if ( ! $updated ) {
-			wp_send_json_error( array( 'message' => __( 'Failed to update request status.', 'shop-onboarding-manager' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Failed to update request status.', 'nearmart' ) ) );
 		}
 
-		wp_send_json_success( array( 'message' => __( 'Product request updated successfully!', 'shop-onboarding-manager' ) ) );
+		wp_send_json_success( array( 'message' => __( 'Product request updated successfully!', 'nearmart' ) ) );
 	}
 
 	/**
@@ -269,7 +269,7 @@ class SOM_Admin_Product_Requests {
 	 */
 	public static function render_admin_requests_page() {
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'shop-onboarding-manager' ) );
+			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'nearmart' ) );
 		}
 
 		wp_enqueue_script( 'jquery' );
@@ -280,10 +280,10 @@ class SOM_Admin_Product_Requests {
 		?>
 		<div class="wrap som-admin-wrap" style="max-width: 1200px; margin-top: 20px;">
 			<h1 class="wp-heading-inline" style="font-size: 1.8rem; font-weight: 800; color: #0f172a; margin-bottom: 16px;">
-				&#128221; <?php esc_html_e( 'Merchant Product Requests', 'shop-onboarding-manager' ); ?>
+				&#128221; <?php esc_html_e( 'Merchant Product Requests', 'nearmart' ); ?>
 			</h1>
 			<p style="color: #64748b; font-size: 0.95rem; margin-top: 4px; margin-bottom: 24px;">
-				<?php esc_html_e( 'Review merchant product requests. Create or link a master product to approve requests. Merchants will then configure price & stock in their catalog.', 'shop-onboarding-manager' ); ?>
+				<?php esc_html_e( 'Review merchant product requests. Create or link a master product to approve requests. Merchants will then configure price & stock in their catalog.', 'nearmart' ); ?>
 			</p>
 
 			<!-- Filter Bar -->
@@ -294,12 +294,12 @@ class SOM_Admin_Product_Requests {
 					</div>
 					<div style="display: flex; gap: 10px;">
 						<select id="som_req_status_filter" class="postform" style="height: 40px; border-radius: 6px;">
-							<option value="all"><?php esc_html_e( 'All Statuses', 'shop-onboarding-manager' ); ?></option>
-							<option value="pending"><?php esc_html_e( 'Pending Review', 'shop-onboarding-manager' ); ?></option>
-							<option value="reviewed"><?php esc_html_e( 'Under Review', 'shop-onboarding-manager' ); ?></option>
-							<option value="approved"><?php esc_html_e( 'Approved – Ready to Add', 'shop-onboarding-manager' ); ?></option>
-							<option value="completed"><?php esc_html_e( 'Added to Catalog', 'shop-onboarding-manager' ); ?></option>
-							<option value="rejected"><?php esc_html_e( 'Rejected', 'shop-onboarding-manager' ); ?></option>
+							<option value="all"><?php esc_html_e( 'All Statuses', 'nearmart' ); ?></option>
+							<option value="pending"><?php esc_html_e( 'Pending Review', 'nearmart' ); ?></option>
+							<option value="reviewed"><?php esc_html_e( 'Under Review', 'nearmart' ); ?></option>
+							<option value="approved"><?php esc_html_e( 'Approved – Ready to Add', 'nearmart' ); ?></option>
+							<option value="completed"><?php esc_html_e( 'Added to Catalog', 'nearmart' ); ?></option>
+							<option value="rejected"><?php esc_html_e( 'Rejected', 'nearmart' ); ?></option>
 						</select>
 					</div>
 				</div>
@@ -311,18 +311,18 @@ class SOM_Admin_Product_Requests {
 					<thead>
 						<tr>
 							<th style="width: 60px;">ID</th>
-							<th><?php esc_html_e( 'Shop & Merchant', 'shop-onboarding-manager' ); ?></th>
-							<th><?php esc_html_e( 'Requested Product & Specs', 'shop-onboarding-manager' ); ?></th>
-							<th><?php esc_html_e( 'Category', 'shop-onboarding-manager' ); ?></th>
-							<th><?php esc_html_e( 'Date', 'shop-onboarding-manager' ); ?></th>
-							<th><?php esc_html_e( 'Status', 'shop-onboarding-manager' ); ?></th>
-							<th style="width: 110px; text-align: right;"><?php esc_html_e( 'Actions', 'shop-onboarding-manager' ); ?></th>
+							<th><?php esc_html_e( 'Shop & Merchant', 'nearmart' ); ?></th>
+							<th><?php esc_html_e( 'Requested Product & Specs', 'nearmart' ); ?></th>
+							<th><?php esc_html_e( 'Category', 'nearmart' ); ?></th>
+							<th><?php esc_html_e( 'Date', 'nearmart' ); ?></th>
+							<th><?php esc_html_e( 'Status', 'nearmart' ); ?></th>
+							<th style="width: 110px; text-align: right;"><?php esc_html_e( 'Actions', 'nearmart' ); ?></th>
 						</tr>
 					</thead>
 					<tbody id="som_admin_requests_tbody">
 						<tr>
 							<td colspan="7" style="text-align: center; padding: 24px; color: #64748b;">
-								&#128259; <?php esc_html_e( 'Loading product requests...', 'shop-onboarding-manager' ); ?>
+								&#128259; <?php esc_html_e( 'Loading product requests...', 'nearmart' ); ?>
 							</td>
 						</tr>
 					</tbody>
@@ -334,7 +334,7 @@ class SOM_Admin_Product_Requests {
 		<div id="som_admin_request_modal" class="som-modal-overlay" style="display: none;">
 			<div class="som-modal-content" style="max-width: 680px;">
 				<div class="som-modal-header">
-					<h3>&#128221; <?php esc_html_e( 'Review & Fulfill Product Request', 'shop-onboarding-manager' ); ?></h3>
+					<h3>&#128221; <?php esc_html_e( 'Review & Fulfill Product Request', 'nearmart' ); ?></h3>
 					<button type="button" class="som-modal-close" onclick="document.getElementById('som_admin_request_modal').style.display='none';">&times;</button>
 				</div>
 
@@ -347,10 +347,10 @@ class SOM_Admin_Product_Requests {
 				<!-- Action Mode Selector -->
 				<div style="display: flex; gap: 8px; border-bottom: 2px solid #e2e8f0; margin-bottom: 16px;">
 					<button type="button" id="som_req_tab_create" class="button button-primary" style="font-weight: 700;">
-						&#10133; <?php esc_html_e( 'Create New Master Product', 'shop-onboarding-manager' ); ?>
+						&#10133; <?php esc_html_e( 'Create New Master Product', 'nearmart' ); ?>
 					</button>
 					<button type="button" id="som_req_tab_link" class="button button-secondary" style="font-weight: 700;">
-						&#128279; <?php esc_html_e( 'Link Existing Master / Update Status', 'shop-onboarding-manager' ); ?>
+						&#128279; <?php esc_html_e( 'Link Existing Master / Update Status', 'nearmart' ); ?>
 					</button>
 				</div>
 
@@ -359,44 +359,44 @@ class SOM_Admin_Product_Requests {
 					<input type="hidden" id="som_create_req_id" value="" />
 
 					<div class="som-form-group" style="margin-bottom: 12px;">
-						<label for="som_create_title" class="som-label required"><?php esc_html_e( 'Master Product Name *', 'shop-onboarding-manager' ); ?></label>
+						<label for="som_create_title" class="som-label required"><?php esc_html_e( 'Master Product Name *', 'nearmart' ); ?></label>
 						<input type="text" id="som_create_title" class="som-input" required />
 					</div>
 
 					<div class="som-form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
 						<div>
-							<label for="som_create_category" class="som-label"><?php esc_html_e( 'Category', 'shop-onboarding-manager' ); ?></label>
+							<label for="som_create_category" class="som-label"><?php esc_html_e( 'Category', 'nearmart' ); ?></label>
 							<input type="text" id="som_create_category" class="som-input" />
 						</div>
 						<div>
-							<label for="som_create_brand" class="som-label"><?php esc_html_e( 'Brand', 'shop-onboarding-manager' ); ?></label>
+							<label for="som_create_brand" class="som-label"><?php esc_html_e( 'Brand', 'nearmart' ); ?></label>
 							<input type="text" id="som_create_brand" class="som-input" />
 						</div>
 					</div>
 
 					<div class="som-form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
 						<div>
-							<label for="som_create_unit" class="som-label"><?php esc_html_e( 'Unit / Size', 'shop-onboarding-manager' ); ?></label>
+							<label for="som_create_unit" class="som-label"><?php esc_html_e( 'Unit / Size', 'nearmart' ); ?></label>
 							<input type="text" id="som_create_unit" class="som-input" />
 						</div>
 						<div>
-							<label for="som_create_barcode" class="som-label"><?php esc_html_e( 'Barcode / SKU', 'shop-onboarding-manager' ); ?></label>
+							<label for="som_create_barcode" class="som-label"><?php esc_html_e( 'Barcode / SKU', 'nearmart' ); ?></label>
 							<input type="text" id="som_create_barcode" class="som-input" />
 						</div>
 					</div>
 
 					<div class="som-form-group" style="margin-bottom: 12px;">
-						<label for="som_create_desc" class="som-label"><?php esc_html_e( 'Description / Notes', 'shop-onboarding-manager' ); ?></label>
+						<label for="som_create_desc" class="som-label"><?php esc_html_e( 'Description / Notes', 'nearmart' ); ?></label>
 						<textarea id="som_create_desc" class="som-input" rows="2"></textarea>
 					</div>
 
 					<div class="som-form-group" style="margin-bottom: 16px;">
-						<label for="som_create_admin_notes" class="som-label"><?php esc_html_e( 'Admin Note to Merchant (Optional)', 'shop-onboarding-manager' ); ?></label>
+						<label for="som_create_admin_notes" class="som-label"><?php esc_html_e( 'Admin Note to Merchant (Optional)', 'nearmart' ); ?></label>
 						<input type="text" id="som_create_admin_notes" class="som-input" placeholder="e.g. Approved – Ready to add to your catalog." />
 					</div>
 
 					<button type="submit" id="som_btn_create_master" class="button button-primary button-large" style="width: 100%;">
-						&#10133; <?php esc_html_e( 'Create Master Product & Approve Request', 'shop-onboarding-manager' ); ?>
+						&#10133; <?php esc_html_e( 'Create Master Product & Approve Request', 'nearmart' ); ?>
 					</button>
 				</form>
 
@@ -410,28 +410,28 @@ class SOM_Admin_Product_Requests {
 					</div>
 
 					<div class="som-form-group" style="margin-bottom: 14px;">
-						<label for="som_req_status" class="som-label required"><?php esc_html_e( 'Request Status', 'shop-onboarding-manager' ); ?></label>
+						<label for="som_req_status" class="som-label required"><?php esc_html_e( 'Request Status', 'nearmart' ); ?></label>
 						<select id="som_req_status" name="status" class="som-select" required>
-							<option value="pending"><?php esc_html_e( 'Pending Review', 'shop-onboarding-manager' ); ?></option>
-							<option value="reviewed"><?php esc_html_e( 'Under Review', 'shop-onboarding-manager' ); ?></option>
-							<option value="approved"><?php esc_html_e( 'Approved – Ready to Add', 'shop-onboarding-manager' ); ?></option>
-							<option value="completed"><?php esc_html_e( 'Added to Catalog', 'shop-onboarding-manager' ); ?></option>
-							<option value="rejected"><?php esc_html_e( 'Rejected', 'shop-onboarding-manager' ); ?></option>
+							<option value="pending"><?php esc_html_e( 'Pending Review', 'nearmart' ); ?></option>
+							<option value="reviewed"><?php esc_html_e( 'Under Review', 'nearmart' ); ?></option>
+							<option value="approved"><?php esc_html_e( 'Approved – Ready to Add', 'nearmart' ); ?></option>
+							<option value="completed"><?php esc_html_e( 'Added to Catalog', 'nearmart' ); ?></option>
+							<option value="rejected"><?php esc_html_e( 'Rejected', 'nearmart' ); ?></option>
 						</select>
 					</div>
 
 					<div class="som-form-group" style="margin-bottom: 14px;">
-						<label for="som_req_master_id" class="som-label"><?php esc_html_e( 'Linked Master Product ID (WooCommerce Post ID)', 'shop-onboarding-manager' ); ?></label>
+						<label for="som_req_master_id" class="som-label"><?php esc_html_e( 'Linked Master Product ID (WooCommerce Post ID)', 'nearmart' ); ?></label>
 						<input type="number" id="som_req_master_id" name="master_product_id" class="som-input" placeholder="e.g. 35 (Enter WooCommerce Post ID to link)" />
 					</div>
 
 					<div class="som-form-group" style="margin-bottom: 18px;">
-						<label for="som_req_admin_notes" class="som-label"><?php esc_html_e( 'Admin Notes / Message for Merchant', 'shop-onboarding-manager' ); ?></label>
+						<label for="som_req_admin_notes" class="som-label"><?php esc_html_e( 'Admin Notes / Message for Merchant', 'nearmart' ); ?></label>
 						<textarea id="som_req_admin_notes" name="admin_notes" class="som-input" rows="3" placeholder="Add notes or instructions for the merchant..."></textarea>
 					</div>
 
 					<button type="submit" id="som_req_btn_save" class="button button-primary button-large" style="width: 100%;">
-						&#128190; <?php esc_html_e( 'Save Status & Master Link', 'shop-onboarding-manager' ); ?>
+						&#128190; <?php esc_html_e( 'Save Status & Master Link', 'nearmart' ); ?>
 					</button>
 				</form>
 			</div>
@@ -647,7 +647,7 @@ class SOM_Admin_Product_Requests {
 						},
 						error: function() {
 							$btn.prop('disabled', false).html('&#10133; Create Master Product & Approve Request');
-							alert('Server error creating master product.');
+							alert('<?php echo esc_js( __( 'Server error creating master product.', 'nearmart' ) ); ?>');
 						}
 					});
 				});
@@ -681,7 +681,7 @@ class SOM_Admin_Product_Requests {
 						},
 						error: function() {
 							$btn.prop('disabled', false).html('&#128190; Save Status & Master Link');
-							alert('Server error updating request.');
+							alert('<?php echo esc_js( __( 'Server error updating request.', 'nearmart' ) ); ?>');
 						}
 					});
 				});

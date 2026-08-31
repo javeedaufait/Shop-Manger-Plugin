@@ -26,15 +26,15 @@ class SOM_Taxonomies {
 	 */
 	public static function register_taxonomies() {
 		$labels = array(
-			'name'              => _x( 'Shop Statuses', 'taxonomy general name', 'shop-onboarding-manager' ),
-			'singular_name'     => _x( 'Shop Status', 'taxonomy singular name', 'shop-onboarding-manager' ),
-			'search_items'      => __( 'Search Shop Statuses', 'shop-onboarding-manager' ),
-			'all_items'         => __( 'All Shop Statuses', 'shop-onboarding-manager' ),
-			'edit_item'         => __( 'Edit Shop Status', 'shop-onboarding-manager' ),
-			'update_item'       => __( 'Update Shop Status', 'shop-onboarding-manager' ),
-			'add_new_item'      => __( 'Add New Shop Status', 'shop-onboarding-manager' ),
-			'new_item_name'     => __( 'New Shop Status Name', 'shop-onboarding-manager' ),
-			'menu_name'         => __( 'Statuses', 'shop-onboarding-manager' ),
+			'name'              => _x( 'Shop Statuses', 'taxonomy general name', 'nearmart' ),
+			'singular_name'     => _x( 'Shop Status', 'taxonomy singular name', 'nearmart' ),
+			'search_items'      => __( 'Search Shop Statuses', 'nearmart' ),
+			'all_items'         => __( 'All Shop Statuses', 'nearmart' ),
+			'edit_item'         => __( 'Edit Shop Status', 'nearmart' ),
+			'update_item'       => __( 'Update Shop Status', 'nearmart' ),
+			'add_new_item'      => __( 'Add New Shop Status', 'nearmart' ),
+			'new_item_name'     => __( 'New Shop Status Name', 'nearmart' ),
+			'menu_name'         => __( 'Statuses', 'nearmart' ),
 		);
 
 		$args = array(

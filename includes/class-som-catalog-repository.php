@@ -594,7 +594,7 @@ class SOM_Catalog_Repository {
 			if ( $master_post && 'product' === $master_post->post_type ) {
 				$title = $master_post->post_title;
 				$cats  = wp_get_post_terms( $row->product_id, 'product_cat', array( 'fields' => 'names' ) );
-				$category = ! empty( $cats ) ? $cats[0] : __( 'Uncategorized', 'shop-onboarding-manager' );
+				$category = ! empty( $cats ) ? $cats[0] : __( 'Uncategorized', 'nearmart' );
 				$specs = nearmart_get_master_product_specs( $row->product_id );
 				$brand = $specs['brand_name'] ? $specs['brand_name'] : '';
 				$unit = $specs['unit'] ? $specs['unit'] : '';
@@ -606,10 +606,10 @@ class SOM_Catalog_Repository {
 
 		// Fallback to custom fields for standalone or missing master posts
 		if ( empty( $title ) ) {
-			$title = ! empty( $row->custom_name ) ? $row->custom_name : __( 'Unnamed Product', 'shop-onboarding-manager' );
+			$title = ! empty( $row->custom_name ) ? $row->custom_name : __( 'Unnamed Product', 'nearmart' );
 		}
 		if ( empty( $category ) ) {
-			$category = ! empty( $row->custom_category ) ? $row->custom_category : __( 'Uncategorized', 'shop-onboarding-manager' );
+			$category = ! empty( $row->custom_category ) ? $row->custom_category : __( 'Uncategorized', 'nearmart' );
 		}
 		if ( empty( $brand ) ) {
 			$brand = ! empty( $row->custom_brand ) ? $row->custom_brand : '';

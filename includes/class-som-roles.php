@@ -69,7 +69,7 @@ class SOM_Roles {
 		// 1. Merchant Role (Frontend portal access only).
 		add_role(
 			self::MERCHANT_ROLE,
-			__( 'Merchant', 'shop-onboarding-manager' ),
+			__( 'Merchant', 'nearmart' ),
 			array(
 				'read'         => true,
 				'upload_files' => true,
@@ -79,7 +79,7 @@ class SOM_Roles {
 		// 2. Field Agent Role (Field team onboarding staff).
 		add_role(
 			self::FIELD_AGENT_ROLE,
-			__( 'Field Agent', 'shop-onboarding-manager' ),
+			__( 'Field Agent', 'nearmart' ),
 			array(
 				'read'          => true,
 				'edit_posts'    => true,

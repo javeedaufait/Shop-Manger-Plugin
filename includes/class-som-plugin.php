@@ -44,6 +44,7 @@ class SOM_Plugin {
 	 * Register actions and hooks.
 	 */
 	private function init_hooks() {
+		add_action( 'init', array( __CLASS__, 'load_textdomain' ) );
 		SOM_Post_Types::init();
 		SOM_Taxonomies::init();
 		SOM_Roles::init();
@@ -62,6 +63,13 @@ class SOM_Plugin {
 		SOM_Catalog_Permissions::init();
 
 		add_action( 'init', array( __CLASS__, 'register_catalog_rewrites' ) );
+	}
+
+		/**
+	 * Load plugin textdomain for i18n support.
+	 */
+	public static function load_textdomain() {
+		load_plugin_textdomain( 'nearmart', false, dirname( plugin_basename( SOM_PLUGIN_FILE ) ) . '/languages' );
 	}
 
 	/**

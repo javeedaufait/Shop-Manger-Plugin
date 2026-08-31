@@ -139,7 +139,7 @@ class SOM_Catalog_Permissions {
 		if ( ! $user_id ) {
 			return new WP_Error(
 				'unauthorized',
-				__( 'Authentication required to manage shop catalog.', 'shop-onboarding-manager' ),
+				__( 'Authentication required to manage shop catalog.', 'nearmart' ),
 				array( 'status' => 401 )
 			);
 		}
@@ -152,7 +152,7 @@ class SOM_Catalog_Permissions {
 		if ( ! $shop_id ) {
 			return new WP_Error(
 				'no_linked_shop',
-				__( 'No active shop linked to this account.', 'shop-onboarding-manager' ),
+				__( 'No active shop linked to this account.', 'nearmart' ),
 				array( 'status' => 403 )
 			);
 		}
@@ -160,7 +160,7 @@ class SOM_Catalog_Permissions {
 		if ( ! self::user_can_manage_shop( $user_id, $shop_id ) ) {
 			return new WP_Error(
 				'forbidden_shop_access',
-				__( 'Access denied. You can only manage your own shop catalog.', 'shop-onboarding-manager' ),
+				__( 'Access denied. You can only manage your own shop catalog.', 'nearmart' ),
 				array( 'status' => 403 )
 			);
 		}
@@ -179,7 +179,7 @@ class SOM_Catalog_Permissions {
 		if ( ! $user_id ) {
 			return new WP_Error(
 				'rest_not_logged_in',
-				__( 'You must be logged in to access catalog endpoints.', 'shop-onboarding-manager' ),
+				__( 'You must be logged in to access catalog endpoints.', 'nearmart' ),
 				array( 'status' => 401 )
 			);
 		}
@@ -194,7 +194,7 @@ class SOM_Catalog_Permissions {
 			if ( $requested_shop_id && $requested_shop_id !== $merchant_shop_id ) {
 				return new WP_Error(
 					'rest_forbidden_merchant_isolation',
-					__( 'Merchants are restricted to their own shop catalog.', 'shop-onboarding-manager' ),
+					__( 'Merchants are restricted to their own shop catalog.', 'nearmart' ),
 					array( 'status' => 403 )
 				);
 			}
@@ -207,7 +207,7 @@ class SOM_Catalog_Permissions {
 			}
 			return new WP_Error(
 				'rest_missing_shop_id',
-				__( 'Valid shop_id is required.', 'shop-onboarding-manager' ),
+				__( 'Valid shop_id is required.', 'nearmart' ),
 				array( 'status' => 400 )
 			);
 		}
@@ -215,7 +215,7 @@ class SOM_Catalog_Permissions {
 		if ( ! self::user_can_manage_shop( $user_id, $requested_shop_id ) ) {
 			return new WP_Error(
 				'rest_forbidden',
-				__( 'You do not have permission to manage this shop catalog.', 'shop-onboarding-manager' ),
+				__( 'You do not have permission to manage this shop catalog.', 'nearmart' ),
 				array( 'status' => 403 )
 			);
 		}

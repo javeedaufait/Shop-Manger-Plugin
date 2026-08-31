@@ -51,17 +51,17 @@ class SOM_Master_Product {
 		}
 
 		$labels = array(
-			'name'              => __( 'Brands', 'shop-onboarding-manager' ),
-			'singular_name'     => __( 'Brand', 'shop-onboarding-manager' ),
-			'search_items'      => __( 'Search Brands', 'shop-onboarding-manager' ),
-			'all_items'         => __( 'All Brands', 'shop-onboarding-manager' ),
-			'parent_item'       => __( 'Parent Brand', 'shop-onboarding-manager' ),
-			'parent_item_colon' => __( 'Parent Brand:', 'shop-onboarding-manager' ),
-			'edit_item'         => __( 'Edit Brand', 'shop-onboarding-manager' ),
-			'update_item'       => __( 'Update Brand', 'shop-onboarding-manager' ),
-			'add_new_item'      => __( 'Add New Brand', 'shop-onboarding-manager' ),
-			'new_item_name'     => __( 'New Brand Name', 'shop-onboarding-manager' ),
-			'menu_name'         => __( 'Brands', 'shop-onboarding-manager' ),
+			'name'              => __( 'Brands', 'nearmart' ),
+			'singular_name'     => __( 'Brand', 'nearmart' ),
+			'search_items'      => __( 'Search Brands', 'nearmart' ),
+			'all_items'         => __( 'All Brands', 'nearmart' ),
+			'parent_item'       => __( 'Parent Brand', 'nearmart' ),
+			'parent_item_colon' => __( 'Parent Brand:', 'nearmart' ),
+			'edit_item'         => __( 'Edit Brand', 'nearmart' ),
+			'update_item'       => __( 'Update Brand', 'nearmart' ),
+			'add_new_item'      => __( 'Add New Brand', 'nearmart' ),
+			'new_item_name'     => __( 'New Brand Name', 'nearmart' ),
+			'menu_name'         => __( 'Brands', 'nearmart' ),
 		);
 
 		$args = array(
@@ -83,7 +83,7 @@ class SOM_Master_Product {
 	public static function add_master_product_metabox() {
 		add_meta_box(
 			'nearmart_master_product_specs',
-			__( '📦 NearMart Master Product Specifications', 'shop-onboarding-manager' ),
+			__( '📦 NearMart Master Product Specifications', 'nearmart' ),
 			array( __CLASS__, 'render_master_product_metabox' ),
 			'product',
 			'normal',
@@ -130,15 +130,15 @@ class SOM_Master_Product {
 		</style>
 		<div class="nearmart-specs-grid">
 			<div class="nearmart-spec-field">
-				<label for="_nearmart_unit"><?php esc_html_e( 'Unit / Pack Size', 'shop-onboarding-manager' ); ?></label>
-				<input type="text" id="_nearmart_unit" name="_nearmart_unit" value="<?php echo esc_attr( $unit ); ?>" placeholder="<?php esc_attr_e( 'e.g. 1 kg, 500 ml, 750g, Pack of 6', 'shop-onboarding-manager' ); ?>" />
-				<div class="nearmart-spec-desc"><?php esc_html_e( 'Master unit of measurement for this product.', 'shop-onboarding-manager' ); ?></div>
+				<label for="_nearmart_unit"><?php esc_html_e( 'Unit / Pack Size', 'nearmart' ); ?></label>
+				<input type="text" id="_nearmart_unit" name="_nearmart_unit" value="<?php echo esc_attr( $unit ); ?>" placeholder="<?php esc_attr_e( 'e.g. 1 kg, 500 ml, 750g, Pack of 6', 'nearmart' ); ?>" />
+				<div class="nearmart-spec-desc"><?php esc_html_e( 'Master unit of measurement for this product.', 'nearmart' ); ?></div>
 			</div>
 
 			<div class="nearmart-spec-field">
-				<label for="_nearmart_barcode"><?php esc_html_e( 'Barcode / EAN / UPC', 'shop-onboarding-manager' ); ?></label>
-				<input type="text" id="_nearmart_barcode" name="_nearmart_barcode" value="<?php echo esc_attr( $barcode ); ?>" placeholder="<?php esc_attr_e( 'e.g. 8901030345123', 'shop-onboarding-manager' ); ?>" />
-				<div class="nearmart-spec-desc"><?php esc_html_e( 'Global Trade Item Number / GTIN / Barcode.', 'shop-onboarding-manager' ); ?></div>
+				<label for="_nearmart_barcode"><?php esc_html_e( 'Barcode / EAN / UPC', 'nearmart' ); ?></label>
+				<input type="text" id="_nearmart_barcode" name="_nearmart_barcode" value="<?php echo esc_attr( $barcode ); ?>" placeholder="<?php esc_attr_e( 'e.g. 8901030345123', 'nearmart' ); ?>" />
+				<div class="nearmart-spec-desc"><?php esc_html_e( 'Global Trade Item Number / GTIN / Barcode.', 'nearmart' ); ?></div>
 			</div>
 		</div>
 		<?php

@@ -251,7 +251,7 @@ class SOM_REST_API {
 		$shop    = self::format_shop( $shop_id );
 
 		if ( ! $shop ) {
-			return self::format_error_response( 'shop_not_found', __( 'Shop not found or unavailable.', 'shop-onboarding-manager' ), 404 );
+			return self::format_error_response( 'shop_not_found', __( 'Shop not found or unavailable.', 'nearmart' ), 404 );
 		}
 
 		return new WP_REST_Response(
@@ -281,7 +281,7 @@ class SOM_REST_API {
 		// Validate Shop Exists
 		$shop = self::format_shop( $shop_id );
 		if ( ! $shop ) {
-			return self::format_error_response( 'shop_not_found', __( 'Shop not found or unavailable.', 'shop-onboarding-manager' ), 404 );
+			return self::format_error_response( 'shop_not_found', __( 'Shop not found or unavailable.', 'nearmart' ), 404 );
 		}
 
 		$offset     = ( $page - 1 ) * $limit;
@@ -396,7 +396,7 @@ class SOM_REST_API {
 				'id'              => (int) $product_id,
 				'name'            => get_the_title( $product_id ),
 				'image'           => $thumb_url ? (string) $thumb_url : null,
-				'category'        => ! empty( $cats ) ? $cats[0] : __( 'Uncategorized', 'shop-onboarding-manager' ),
+				'category'        => ! empty( $cats ) ? $cats[0] : __( 'Uncategorized', 'nearmart' ),
 				'brand'           => $specs['brand_name'] ? (string) $specs['brand_name'] : null,
 				'unit'            => $specs['unit'] ? (string) $specs['unit'] : null,
 				'barcode'         => $specs['barcode'] ? (string) $specs['barcode'] : null,
@@ -459,6 +459,6 @@ class SOM_REST_API {
 			}
 		}
 
-		return self::format_error_response( 'product_not_found', __( 'Product not found or unavailable.', 'shop-onboarding-manager' ), 404 );
+		return self::format_error_response( 'product_not_found', __( 'Product not found or unavailable.', 'nearmart' ), 404 );
 	}
 }
