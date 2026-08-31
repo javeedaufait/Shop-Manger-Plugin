@@ -316,7 +316,7 @@ class SOM_Master_Product {
 			}
 		}
 
-		return $post->post_title;
+		return html_entity_decode( $post->post_title, ENT_QUOTES, 'UTF-8' );
 	}
 
 	/**
@@ -344,7 +344,7 @@ class SOM_Master_Product {
 			}
 		}
 
-		return $post->post_content;
+		return html_entity_decode( $post->post_content, ENT_QUOTES, 'UTF-8' );
 	}
 
 	/**
@@ -374,7 +374,7 @@ class SOM_Master_Product {
 			}
 		}
 
-		return $term->name;
+		return html_entity_decode( $term->name, ENT_QUOTES, 'UTF-8' );
 	}
 
 	/**

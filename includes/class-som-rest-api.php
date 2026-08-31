@@ -30,6 +30,29 @@ class SOM_REST_API {
 	}
 
 	/**
+	 * Sanitize 'lang' REST request parameter ('en' or 'ml', default 'en').
+	 *
+	 * @param string $param Raw parameter string.
+	 * @return string Sanitized language code ('en' or 'ml').
+	 */
+	public static function sanitize_lang_param( $param ) {
+		$param = sanitize_key( $param );
+		return in_array( $param, array( 'en', 'ml' ), true ) ? $param : 'en';
+	}
+
+	/**
+	 * Get standard 'lang' REST route argument definition.
+	 *
+	 * @return array
+	 */
+	public static function get_lang_arg_definition() {
+		return array(
+			'default'           => 'en',
+			'sanitize_callback' => array( __CLASS__, 'sanitize_lang_param' ),
+		);
+	}
+
+	/**
 	 * Register REST API routes for Customer App.
 	 */
 	public static function register_routes() {
@@ -54,6 +77,7 @@ class SOM_REST_API {
 						'default'           => '',
 						'sanitize_callback' => 'sanitize_text_field',
 					),
+					'lang'   => self::get_lang_arg_definition(),
 				),
 			)
 		);
@@ -71,6 +95,7 @@ class SOM_REST_API {
 						'required'          => true,
 						'sanitize_callback' => 'absint',
 					),
+					'lang'    => self::get_lang_arg_definition(),
 				),
 			)
 		);
@@ -104,6 +129,7 @@ class SOM_REST_API {
 						'default'           => '',
 						'sanitize_callback' => 'sanitize_text_field',
 					),
+					'lang'     => self::get_lang_arg_definition(),
 				),
 			)
 		);
@@ -125,6 +151,7 @@ class SOM_REST_API {
 						'default'           => 0,
 						'sanitize_callback' => 'absint',
 					),
+					'lang'       => self::get_lang_arg_definition(),
 				),
 			)
 		);
@@ -277,6 +304,7 @@ class SOM_REST_API {
 		$limit    = min( 100, max( 1, $request->get_param( 'limit' ) ) );
 		$search   = $request->get_param( 'search' );
 		$category = $request->get_param( 'category' );
+		$lang     = self::sanitize_lang_param( $request->get_param( 'lang' ) );
 
 		// Validate Shop Exists
 		$shop = self::format_shop( $shop_id );
@@ -307,8 +335,18 @@ class SOM_REST_API {
 				continue;
 			}
 
-			$title    = $item['title'];
-			$cat_name = $item['category'];
+			$title       = $item['title'];
+			$description = '';
+			$cat_name    = $item['category'];
+
+			if ( ! empty( $p->product_id ) ) {
+				$title       = SOM_Master_Product::get_localized_title( $p->product_id, $lang );
+				$description = SOM_Master_Product::get_localized_description( $p->product_id, $lang );
+				$cat_terms   = wp_get_post_terms( $p->product_id, 'product_cat' );
+				if ( ! is_wp_error( $cat_terms ) && ! empty( $cat_terms ) ) {
+					$cat_name = SOM_Master_Product::get_localized_category_name( $cat_terms[0], $lang );
+				}
+			}
 
 			// Filter by search
 			if ( ! empty( $search ) ) {
@@ -330,6 +368,7 @@ class SOM_REST_API {
 			$products[] = array(
 				'id'             => (int) $item['id'],
 				'name'           => $title,
+				'description'    => $description,
 				'image'          => $item['thumb_url'] ? (string) $item['thumb_url'] : null,
 				'category'       => $cat_name,
 				'brand'          => $item['brand'] ? (string) $item['brand'] : null,
@@ -379,12 +418,16 @@ class SOM_REST_API {
 	public static function get_product( WP_REST_Request $request ) {
 		$product_id = $request->get_param( 'product_id' );
 		$shop_id    = $request->get_param( 'shop_id' );
+		$lang       = self::sanitize_lang_param( $request->get_param( 'lang' ) );
 
 		$post = get_post( $product_id );
 		if ( $post && 'product' === $post->post_type && 'publish' === $post->post_status ) {
-			$specs     = nearmart_get_master_product_specs( $product_id );
-			$cats      = wp_get_post_terms( $product_id, 'product_cat', array( 'fields' => 'names' ) );
-			$thumb_url = get_the_post_thumbnail_url( $product_id, 'full' );
+			$specs       = nearmart_get_master_product_specs( $product_id );
+			$cat_terms   = wp_get_post_terms( $product_id, 'product_cat' );
+			$cat_name    = ! empty( $cat_terms ) && ! is_wp_error( $cat_terms ) ? SOM_Master_Product::get_localized_category_name( $cat_terms[0], $lang ) : __( 'Uncategorized', 'nearmart' );
+			$thumb_url   = get_the_post_thumbnail_url( $product_id, 'full' );
+			$name        = SOM_Master_Product::get_localized_title( $product_id, $lang );
+			$description = SOM_Master_Product::get_localized_description( $product_id, $lang );
 
 			$reg_price = get_post_meta( $product_id, '_regular_price', true );
 			if ( '' === $reg_price || null === $reg_price ) {
@@ -394,9 +437,10 @@ class SOM_REST_API {
 
 			$product_data = array(
 				'id'              => (int) $product_id,
-				'name'            => get_the_title( $product_id ),
+				'name'            => $name,
+				'description'     => $description,
 				'image'           => $thumb_url ? (string) $thumb_url : null,
-				'category'        => ! empty( $cats ) ? $cats[0] : __( 'Uncategorized', 'nearmart' ),
+				'category'        => $cat_name,
 				'brand'           => $specs['brand_name'] ? (string) $specs['brand_name'] : null,
 				'unit'            => $specs['unit'] ? (string) $specs['unit'] : null,
 				'barcode'         => $specs['barcode'] ? (string) $specs['barcode'] : null,
@@ -441,6 +485,7 @@ class SOM_REST_API {
 							'product' => array(
 								'id'             => (int) $item['id'],
 								'name'           => $item['title'],
+								'description'    => '',
 								'image'          => $item['thumb_url'] ? (string) $item['thumb_url'] : null,
 								'category'       => $item['category'],
 								'brand'          => $item['brand'] ? (string) $item['brand'] : null,
