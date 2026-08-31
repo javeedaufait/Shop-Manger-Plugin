@@ -150,6 +150,7 @@ class SOM_Admin_Product_Requests {
 
 		$request_id  = isset( $_POST['request_id'] ) ? absint( $_POST['request_id'] ) : 0;
 		$title       = isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash( $_POST['title'] ) ) : '';
+		$title_ml    = isset( $_POST['title_ml'] ) ? sanitize_text_field( wp_unslash( $_POST['title_ml'] ) ) : '';
 		$category    = isset( $_POST['category'] ) ? sanitize_text_field( wp_unslash( $_POST['category'] ) ) : '';
 		$brand       = isset( $_POST['brand'] ) ? sanitize_text_field( wp_unslash( $_POST['brand'] ) ) : '';
 		$unit        = isset( $_POST['unit'] ) ? sanitize_text_field( wp_unslash( $_POST['unit'] ) ) : '';
@@ -189,6 +190,9 @@ class SOM_Admin_Product_Requests {
 		}
 		if ( ! empty( $barcode ) ) {
 			update_post_meta( $post_id, '_nearmart_barcode', $barcode );
+		}
+		if ( ! empty( $title_ml ) ) {
+			update_post_meta( $post_id, '_nearmart_name_ml', $title_ml );
 		}
 
 		// Assign taxonomy term if category provided
@@ -359,8 +363,12 @@ class SOM_Admin_Product_Requests {
 					<input type="hidden" id="som_create_req_id" value="" />
 
 					<div class="som-form-group" style="margin-bottom: 12px;">
-						<label for="som_create_title" class="som-label required"><?php esc_html_e( 'Master Product Name *', 'nearmart' ); ?></label>
+						<label for="som_create_title" class="som-label required"><?php esc_html_e( 'Master Product Name (English) *', 'nearmart' ); ?></label>
 						<input type="text" id="som_create_title" class="som-input" required />
+					</div>
+					<div class="som-form-group" style="margin-bottom: 12px;">
+						<label for="som_create_title_ml" class="som-label"><?php esc_html_e( 'Malayalam Product Name (Optional Display Override)', 'nearmart' ); ?></label>
+						<input type="text" id="som_create_title_ml" class="som-input" placeholder="e.g. ഓർഗാനിക് മൾട്ടിഗ്രെയിൻ ആട്ട 5kg" />
 					</div>
 
 					<div class="som-form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
@@ -628,6 +636,7 @@ class SOM_Admin_Product_Requests {
 							nonce: nonce,
 							request_id: $('#som_create_req_id').val(),
 							title: $('#som_create_title').val(),
+							title_ml: $('#som_create_title_ml').val(),
 							category: $('#som_create_category').val(),
 							brand: $('#som_create_brand').val(),
 							unit: $('#som_create_unit').val(),

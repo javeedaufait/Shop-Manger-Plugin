@@ -214,18 +214,20 @@ class SOM_Merchant_Dashboard {
 		$sql = "SELECT DISTINCT p.ID FROM {$wpdb->posts} p
 			LEFT JOIN {$wpdb->postmeta} pm_sku ON (p.ID = pm_sku.post_id AND pm_sku.meta_key = '_sku')
 			LEFT JOIN {$wpdb->postmeta} pm_barcode ON (p.ID = pm_barcode.post_id AND pm_barcode.meta_key = '_nearmart_barcode')
+			LEFT JOIN {$wpdb->postmeta} pm_ml ON (p.ID = pm_ml.post_id AND pm_ml.meta_key = '_nearmart_name_ml')
 			WHERE p.post_type = 'product'
 			AND p.post_status = 'publish'
 			AND (
 				p.post_title LIKE %s
 				OR pm_sku.meta_value LIKE %s
 				OR pm_barcode.meta_value LIKE %s
+				OR pm_ml.meta_value LIKE %s
 			)
 			ORDER BY p.post_title ASC
 			LIMIT 20";
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$product_ids = $wpdb->get_col( $wpdb->prepare( $sql, $search_like, $search_like, $search_like ) );
+		$product_ids = $wpdb->get_col( $wpdb->prepare( $sql, $search_like, $search_like, $search_like, $search_like ) );
 		$results     = array();
 
 		if ( ! empty( $product_ids ) ) {
@@ -242,10 +244,13 @@ class SOM_Merchant_Dashboard {
 				}
 				$sug_price = ( '' !== $reg_price && null !== $reg_price && is_numeric( $reg_price ) ) ? number_format( (float) $reg_price, 2, '.', '' ) : '';
 
+				$cat_terms = wp_get_post_terms( $pid, 'product_cat' );
+				$category  = ! empty( $cat_terms ) && ! is_wp_error( $cat_terms ) ? SOM_Master_Product::get_localized_category_name( $cat_terms[0] ) : __( 'Uncategorized', 'nearmart' );
+
 				$results[] = array(
 					'product_id'      => $pid,
-					'title'           => get_the_title( $pid ),
-					'category'        => ! empty( $cats ) ? $cats[0] : __( 'Uncategorized', 'nearmart' ),
+					'title'           => SOM_Master_Product::get_localized_title( $pid ),
+					'category'        => $category,
 					'brand'           => $specs['brand_name'],
 					'unit'            => $specs['unit'],
 					'barcode'         => $specs['barcode'],
@@ -393,15 +398,19 @@ class SOM_Merchant_Dashboard {
 		global $wpdb;
 		$search_like = '%' . $wpdb->esc_like( trim( $name ) ) . '%';
 
-		$sql = "SELECT p.ID, p.post_title FROM {$wpdb->posts} p
+		$sql = "SELECT DISTINCT p.ID, p.post_title FROM {$wpdb->posts} p
+			LEFT JOIN {$wpdb->postmeta} pm_ml ON (p.ID = pm_ml.post_id AND pm_ml.meta_key = '_nearmart_name_ml')
 			WHERE p.post_type = 'product'
 			AND p.post_status = 'publish'
-			AND p.post_title LIKE %s
+			AND (
+				p.post_title LIKE %s
+				OR pm_ml.meta_value LIKE %s
+			)
 			ORDER BY p.post_title ASC
 			LIMIT 3";
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$posts       = $wpdb->get_results( $wpdb->prepare( $sql, $search_like ) );
+		$posts       = $wpdb->get_results( $wpdb->prepare( $sql, $search_like, $search_like ) );
 		$suggestions = array();
 
 		if ( ! empty( $posts ) ) {
@@ -417,7 +426,7 @@ class SOM_Merchant_Dashboard {
 
 				$suggestions[] = array(
 					'product_id'      => $p->ID,
-					'title'           => $p->post_title,
+					'title'           => SOM_Master_Product::get_localized_title( $p->ID ),
 					'category'        => ! empty( $cats ) ? $cats[0] : '',
 					'brand'           => $specs['brand_name'],
 					'unit'            => $specs['unit'],

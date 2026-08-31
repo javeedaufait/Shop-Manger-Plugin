@@ -25,8 +25,10 @@ class SOM_Master_Product {
 	/**
 	 * Meta keys for Master Product specifications.
 	 */
-	const META_UNIT    = '_nearmart_unit';
-	const META_BARCODE = '_nearmart_barcode';
+	const META_UNIT           = '_nearmart_unit';
+	const META_BARCODE        = '_nearmart_barcode';
+	const META_NAME_ML        = '_nearmart_name_ml';
+	const META_DESCRIPTION_ML = '_nearmart_description_ml';
 
 	/**
 	 * Initialize module hooks.
@@ -99,8 +101,10 @@ class SOM_Master_Product {
 	public static function render_master_product_metabox( $post ) {
 		wp_nonce_field( 'nearmart_master_product_nonce', 'nearmart_master_product_nonce_field' );
 
-		$unit    = get_post_meta( $post->ID, self::META_UNIT, true );
-		$barcode = get_post_meta( $post->ID, self::META_BARCODE, true );
+		$unit        = get_post_meta( $post->ID, self::META_UNIT, true );
+		$barcode     = get_post_meta( $post->ID, self::META_BARCODE, true );
+		$name_ml     = get_post_meta( $post->ID, self::META_NAME_ML, true );
+		$desc_ml     = get_post_meta( $post->ID, self::META_DESCRIPTION_ML, true );
 		?>
 		<style>
 			.nearmart-specs-grid {
@@ -115,7 +119,7 @@ class SOM_Master_Product {
 				margin-bottom: 4px;
 				color: #1e293b;
 			}
-			.nearmart-spec-field input {
+			.nearmart-spec-field input, .nearmart-spec-field textarea {
 				width: 100%;
 				padding: 8px 12px;
 				font-size: 0.95rem;
@@ -139,6 +143,18 @@ class SOM_Master_Product {
 				<label for="_nearmart_barcode"><?php esc_html_e( 'Barcode / EAN / UPC', 'nearmart' ); ?></label>
 				<input type="text" id="_nearmart_barcode" name="_nearmart_barcode" value="<?php echo esc_attr( $barcode ); ?>" placeholder="<?php esc_attr_e( 'e.g. 8901030345123', 'nearmart' ); ?>" />
 				<div class="nearmart-spec-desc"><?php esc_html_e( 'Global Trade Item Number / GTIN / Barcode.', 'nearmart' ); ?></div>
+			</div>
+
+			<div class="nearmart-spec-field" style="grid-column: span 2;">
+				<label for="_nearmart_name_ml"><?php esc_html_e( 'Malayalam Product Name (Optional Display Override)', 'nearmart' ); ?></label>
+				<input type="text" id="_nearmart_name_ml" name="_nearmart_name_ml" value="<?php echo esc_attr( $name_ml ); ?>" placeholder="<?php esc_attr_e( 'e.g. ഹാർലിക്സ് ഹെൽത്ത് ഡ്രിങ്ക് 500g', 'nearmart' ); ?>" />
+				<div class="nearmart-spec-desc"><?php esc_html_e( 'Optional Malayalam localized display name for NearMart merchant portal and customer view.', 'nearmart' ); ?></div>
+			</div>
+
+			<div class="nearmart-spec-field" style="grid-column: span 2;">
+				<label for="_nearmart_description_ml"><?php esc_html_e( 'Malayalam Description (Optional Display Override)', 'nearmart' ); ?></label>
+				<textarea id="_nearmart_description_ml" name="_nearmart_description_ml" rows="3"><?php echo esc_textarea( $desc_ml ); ?></textarea>
+				<div class="nearmart-spec-desc"><?php esc_html_e( 'Optional Malayalam localized description.', 'nearmart' ); ?></div>
 			</div>
 		</div>
 		<?php
@@ -169,6 +185,14 @@ class SOM_Master_Product {
 
 		if ( isset( $_POST['_nearmart_barcode'] ) ) {
 			update_post_meta( $post_id, self::META_BARCODE, sanitize_text_field( wp_unslash( $_POST['_nearmart_barcode'] ) ) );
+		}
+
+		if ( isset( $_POST['_nearmart_name_ml'] ) ) {
+			update_post_meta( $post_id, self::META_NAME_ML, sanitize_text_field( wp_unslash( $_POST['_nearmart_name_ml'] ) ) );
+		}
+
+		if ( isset( $_POST['_nearmart_description_ml'] ) ) {
+			update_post_meta( $post_id, self::META_DESCRIPTION_ML, sanitize_textarea_field( wp_unslash( $_POST['_nearmart_description_ml'] ) ) );
 		}
 	}
 
@@ -268,6 +292,92 @@ class SOM_Master_Product {
 	}
 
 	/**
+	 * Get localized Master Product Title based on current user language preference.
+	 *
+	 * @param int|WP_Post $product Product ID or Post object.
+	 * @param string|null $lang Optional language code ('en' or 'ml').
+	 * @return string Localized title or canonical English title.
+	 */
+	public static function get_localized_title( $product, $lang = null ) {
+		$post = get_post( $product );
+		if ( ! $post ) {
+			return '';
+		}
+
+		if ( null === $lang ) {
+			$user_id = get_current_user_id();
+			$lang    = $user_id ? get_user_meta( $user_id, 'nm_preferred_language', true ) : 'en';
+		}
+
+		if ( 'ml' === $lang ) {
+			$ml_title = get_post_meta( $post->ID, self::META_NAME_ML, true );
+			if ( ! empty( $ml_title ) ) {
+				return $ml_title;
+			}
+		}
+
+		return $post->post_title;
+	}
+
+	/**
+	 * Get localized Master Product Description based on current user language preference.
+	 *
+	 * @param int|WP_Post $product Product ID or Post object.
+	 * @param string|null $lang Optional language code ('en' or 'ml').
+	 * @return string Localized description or canonical English description.
+	 */
+	public static function get_localized_description( $product, $lang = null ) {
+		$post = get_post( $product );
+		if ( ! $post ) {
+			return '';
+		}
+
+		if ( null === $lang ) {
+			$user_id = get_current_user_id();
+			$lang    = $user_id ? get_user_meta( $user_id, 'nm_preferred_language', true ) : 'en';
+		}
+
+		if ( 'ml' === $lang ) {
+			$ml_desc = get_post_meta( $post->ID, self::META_DESCRIPTION_ML, true );
+			if ( ! empty( $ml_desc ) ) {
+				return $ml_desc;
+			}
+		}
+
+		return $post->post_content;
+	}
+
+	/**
+	 * Get localized Product Category Name based on current user language preference.
+	 *
+	 * @param int|WP_Term $term Term ID or WP_Term object.
+	 * @param string|null $lang Optional language code.
+	 * @return string Localized category name or canonical English name.
+	 */
+	public static function get_localized_category_name( $term, $lang = null ) {
+		if ( is_numeric( $term ) ) {
+			$term = get_term( $term, 'product_cat' );
+		}
+		if ( ! $term || is_wp_error( $term ) ) {
+			return '';
+		}
+
+		if ( null === $lang ) {
+			$user_id = get_current_user_id();
+			$lang    = $user_id ? get_user_meta( $user_id, 'nm_preferred_language', true ) : 'en';
+		}
+
+		if ( 'ml' === $lang ) {
+			$ml_cat_name = get_term_meta( $term->term_id, '_nearmart_name_ml', true );
+			if ( ! empty( $ml_cat_name ) ) {
+				return $ml_cat_name;
+			}
+		}
+
+		return $term->name;
+	}
+
+	/**
 	 * Update master product specifications for a given product ID.
 	 *
 	 * @param int   $product_id WooCommerce product ID.
@@ -324,5 +434,22 @@ if ( ! function_exists( 'nearmart_update_master_product_specs' ) ) {
 	 */
 	function nearmart_update_master_product_specs( $product_id, $specs = array() ) {
 		return SOM_Master_Product::update_master_product_specs( $product_id, $specs );
+	}
+}
+if ( ! function_exists( 'nearmart_get_localized_master_title' ) ) {
+	/**
+	 * Helper function to get localized master product title.
+	 */
+	function nearmart_get_localized_master_title( $product_id, $lang = null ) {
+		return SOM_Master_Product::get_localized_title( $product_id, $lang );
+	}
+}
+
+if ( ! function_exists( 'nearmart_get_localized_category_name' ) ) {
+	/**
+	 * Helper function to get localized category name.
+	 */
+	function nearmart_get_localized_category_name( $term, $lang = null ) {
+		return SOM_Master_Product::get_localized_category_name( $term, $lang );
 	}
 }

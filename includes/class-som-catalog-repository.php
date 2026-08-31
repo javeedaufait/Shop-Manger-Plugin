@@ -592,15 +592,19 @@ class SOM_Catalog_Repository {
 		if ( ! $is_standalone ) {
 			$master_post = get_post( $row->product_id );
 			if ( $master_post && 'product' === $master_post->post_type ) {
-				$title = $master_post->post_title;
-				$cats  = wp_get_post_terms( $row->product_id, 'product_cat', array( 'fields' => 'names' ) );
-				$category = ! empty( $cats ) ? $cats[0] : __( 'Uncategorized', 'nearmart' );
-				$specs = nearmart_get_master_product_specs( $row->product_id );
-				$brand = $specs['brand_name'] ? $specs['brand_name'] : '';
-				$unit = $specs['unit'] ? $specs['unit'] : '';
-				$barcode = $specs['barcode'] ? $specs['barcode'] : '';
+				$title     = SOM_Master_Product::get_localized_title( $row->product_id );
+				$cat_terms = wp_get_post_terms( $row->product_id, 'product_cat' );
+				if ( ! is_wp_error( $cat_terms ) && ! empty( $cat_terms ) ) {
+					$category = SOM_Master_Product::get_localized_category_name( $cat_terms[0] );
+				} else {
+					$category = __( 'Uncategorized', 'nearmart' );
+				}
+				$specs      = nearmart_get_master_product_specs( $row->product_id );
+				$brand      = $specs['brand_name'] ? $specs['brand_name'] : '';
+				$unit       = $specs['unit'] ? $specs['unit'] : '';
+				$barcode    = $specs['barcode'] ? $specs['barcode'] : '';
 				$master_sku = $specs['sku'] ? $specs['sku'] : '';
-				$thumb_url = get_the_post_thumbnail_url( $row->product_id, 'thumbnail' );
+				$thumb_url  = get_the_post_thumbnail_url( $row->product_id, 'thumbnail' );
 			}
 		}
 
