@@ -1,6 +1,6 @@
 <?php
 /**
- * Dedicated Merchant Catalog Module (Exclusion & Auto-Sync Bugfixes).
+ * Dedicated Merchant Catalog Module (Phase ML-2 Multilingual Support Upgrade).
  *
  * @package Shop_Onboarding_Manager
  */
@@ -20,10 +20,37 @@ class SOM_Merchant_Catalog {
 	public static function init() {
 		add_shortcode( 'som_merchant_catalog', array( __CLASS__, 'render_catalog_shortcode' ) );
 
-		// AJAX Endpoints for Product Requests
+		// AJAX Endpoints for Product Requests & Language Preference
 		add_action( 'wp_ajax_som_merchant_request_new_product', array( __CLASS__, 'ajax_request_new_product' ) );
 		add_action( 'wp_ajax_som_merchant_get_product_requests', array( __CLASS__, 'ajax_get_merchant_product_requests' ) );
 		add_action( 'wp_ajax_som_merchant_fulfill_approved_request', array( __CLASS__, 'ajax_fulfill_approved_request' ) );
+		add_action( 'wp_ajax_som_merchant_set_language', array( __CLASS__, 'ajax_set_language' ) );
+	}
+
+	/**
+	 * AJAX endpoint: Merchant Set Preferred Language (Phase ML-2).
+	 */
+	public static function ajax_set_language() {
+		check_ajax_referer( 'som_merchant_dashboard_nonce', 'nonce' );
+
+		$user_id = get_current_user_id();
+		if ( ! $user_id || ! nearmart_user_can_manage_shop_catalog( $user_id ) ) {
+			wp_send_json_error( array( 'message' => __( 'Unauthorized access.', 'nearmart' ) ), 403 );
+		}
+
+		$lang = isset( $_POST['lang'] ) ? sanitize_key( $_POST['lang'] ) : 'en';
+		if ( ! in_array( $lang, array( 'en', 'ml' ), true ) ) {
+			$lang = 'en';
+		}
+
+		update_user_meta( $user_id, 'nm_preferred_language', $lang );
+
+		wp_send_json_success(
+			array(
+				'message'  => __( 'Language updated successfully!', 'nearmart' ),
+				'language' => $lang,
+			)
+		);
 	}
 
 	/**
@@ -205,7 +232,7 @@ class SOM_Merchant_Catalog {
 	}
 
 	/**
-	 * Render portal navigation header bar.
+	 * Render portal navigation header bar with Language Switcher (Phase ML-2).
 	 *
 	 * @param string $active_tab 'dashboard' or 'catalog'.
 	 * @return string HTML content.
@@ -215,8 +242,13 @@ class SOM_Merchant_Catalog {
 		$catalog_url   = home_url( '/merchant-catalog/' );
 		$logout_url    = wp_logout_url( home_url( '/merchant-login/' ) );
 
+		$user_id      = get_current_user_id();
+		$current_lang = get_user_meta( $user_id, 'nm_preferred_language', true );
+		$current_lang = in_array( $current_lang, array( 'en', 'ml' ), true ) ? $current_lang : 'en';
+
 		$dash_active = 'dashboard' === $active_tab ? ' active' : '';
 		$cat_active  = 'catalog' === $active_tab ? ' active' : '';
+		$nonce       = wp_create_nonce( 'som_merchant_dashboard_nonce' );
 
 		ob_start();
 		?>
@@ -234,11 +266,47 @@ class SOM_Merchant_Catalog {
 				<a href="#" id="som_btn_open_my_requests" class="som-nav-link">
 					&#128221; <?php esc_html_e( 'My Product Requests', 'nearmart' ); ?>
 				</a>
+
+				<!-- Phase ML-2 Language Switcher Dropdown (With Scalable Min-Width & Line-Height) -->
+				<div class="som-lang-switcher" style="display:inline-flex; align-items:center; margin-right:4px;">
+					<select id="som_merchant_lang_select" class="som-select" style="min-width:115px; height:36px; padding:4px 10px; font-size:0.88rem; font-weight:600; line-height:1.4; border-radius:6px; border:1px solid #cbd5e1; cursor:pointer; background:#ffffff; color:#1e293b; vertical-align:middle;">
+						<option value="en" <?php selected( $current_lang, 'en' ); ?>>English</option>
+						<option value="ml" <?php selected( $current_lang, 'ml' ); ?>>മലയാളം</option>
+					</select>
+				</div>
+
 				<a href="<?php echo esc_url( $logout_url ); ?>" class="som-nav-link logout">
 					&#128682; <?php esc_html_e( 'Log Out', 'nearmart' ); ?>
 				</a>
 			</div>
 		</div>
+
+		<!-- Universal Portal Header Language Change JS Handler -->
+		<script>
+		if (typeof jQuery !== 'undefined') {
+			jQuery(document).ready(function($) {
+				$(document).off('change.somLang').on('change.somLang', '#som_merchant_lang_select', function() {
+					var langVal = $(this).val();
+					var ajaxUrl = '<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>';
+					var nonceVal = '<?php echo esc_js( $nonce ); ?>';
+					$.ajax({
+						url: ajaxUrl,
+						type: 'POST',
+						data: {
+							action: 'som_merchant_set_language',
+							nonce: nonceVal,
+							lang: langVal
+						},
+						success: function(res) {
+							if (res && res.success) {
+								window.location.reload();
+							}
+						}
+					});
+				});
+			});
+		}
+		</script>
 		<?php
 		return ob_get_clean();
 	}
@@ -293,7 +361,7 @@ class SOM_Merchant_Catalog {
 				<!-- Compact Scalable Search & Filter Bar -->
 				<div class="som-catalog-bar" style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:16px;">
 					<div class="som-catalog-search-wrap" style="flex:1; min-width:260px;">
-						<input type="text" id="som_cat_search" class="som-input" placeholder="Search by product name, brand, SKU or barcode..." style="width:100%; min-height:42px;" />
+						<input type="text" id="som_cat_search" class="som-input" placeholder="<?php esc_attr_e( 'Search by product name, brand, SKU or barcode...', 'nearmart' ); ?>" style="width:100%; min-height:42px;" />
 					</div>
 					<div class="som-catalog-filters" style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
 						<select id="som_cat_category_filter" class="som-select" style="min-height: 42px; min-width:140px;">
@@ -337,10 +405,10 @@ class SOM_Merchant_Catalog {
 
 				<!-- Scalable Pagination Bar -->
 				<div class="som-catalog-pagination" style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; flex-wrap:wrap; gap:12px;">
-					<span id="som_catalog_info" style="color: #64748b; font-size: 0.88rem; font-weight: 500;">Showing 0 products</span>
+					<span id="som_catalog_info" style="color: #64748b; font-size: 0.88rem; font-weight: 500;"><?php esc_html_e( 'Showing 0 products', 'nearmart' ); ?></span>
 					<div class="som-pagination-btns" style="display:flex; gap:8px;">
-						<button type="button" id="som_cat_prev_btn" class="som-btn-icon" disabled>&larr; Previous</button>
-						<button type="button" id="som_cat_next_btn" class="som-btn-icon" disabled>Next &rarr;</button>
+						<button type="button" id="som_cat_prev_btn" class="som-btn-icon" disabled>&larr; <?php esc_html_e( 'Previous', 'nearmart' ); ?></button>
+						<button type="button" id="som_cat_next_btn" class="som-btn-icon" disabled><?php esc_html_e( 'Next', 'nearmart' ); ?> &rarr;</button>
 					</div>
 				</div>
 			</div>
@@ -695,7 +763,7 @@ class SOM_Merchant_Catalog {
 				</div>
 
 				<div id="som_my_requests_list_wrap" style="max-height: 440px; overflow-y: auto;">
-					<p style="padding:20px; text-align:center; color:#64748b;">&#128259; Loading your requests...</p>
+					<p style="padding:20px; text-align:center; color:#64748b;">&#128259; <?php esc_html_e( 'Loading your requests...', 'nearmart' ); ?></p>
 				</div>
 			</div>
 		</div>
@@ -769,7 +837,7 @@ class SOM_Merchant_Catalog {
 				function loadCatalog(page) {
 					currentPage = page || 1;
 					var $tbody = $('#som_catalog_tbody');
-					$tbody.html('<tr><td colspan="6" style="text-align:center; padding: 20px; color:#64748b;">&#128259; Loading catalog...</td></tr>');
+					$tbody.html('<tr><td colspan="6" style="text-align:center; padding: 20px; color:#64748b;">&#128259; <?php echo esc_js( __( 'Loading catalog items...', 'nearmart' ) ); ?></td></tr>');
 
 					var perPage = parseInt($('#som_cat_per_page').val(), 10) || 25;
 
@@ -794,7 +862,7 @@ class SOM_Merchant_Catalog {
 								// Populate dynamic categories dropdown if returned
 								if (res.data.categories && res.data.categories.length > 0) {
 									var currentCat = $('#som_cat_category_filter').val();
-									var catHtml = '<option value="all">All Categories</option>';
+									var catHtml = '<option value="all"><?php echo esc_js( __( 'All Categories', 'nearmart' ) ); ?></option>';
 									$.each(res.data.categories, function(idx, catName) {
 										var sel = (catName === currentCat) ? ' selected' : '';
 										catHtml += '<option value="' + escapeHtml(catName) + '"' + sel + '>' + escapeHtml(catName) + '</option>';
@@ -804,7 +872,7 @@ class SOM_Merchant_Catalog {
 
 								if (!items || items.length === 0) {
 									$tbody.html('<tr><td colspan="6" style="text-align:center; padding: 24px; color:#64748b;">No products found matching your filters. Click <strong>"Add Product to Catalog"</strong> to add items!</td></tr>');
-									$('#som_catalog_info').text('Showing 0 products');
+									$('#som_catalog_info').text('<?php echo esc_js( __( 'Showing 0 products', 'nearmart' ) ); ?>');
 									$('#som_cat_prev_btn, #som_cat_next_btn').prop('disabled', true);
 									return;
 								}
@@ -826,14 +894,14 @@ class SOM_Merchant_Catalog {
 									html += '<strong style="display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; font-size:0.92rem; color:#1e293b;" title="' + escapeHtml(item.title) + '">' + escapeHtml(item.title) + '</strong>';
 									html += '<div style="margin-top:3px; font-size:0.78rem; color:#64748b; display:flex; align-items:center; gap:6px; flex-wrap:wrap;">';
 									if (item.is_standalone) {
-										html += '<span style="font-size:0.68rem; color:#0369a1; background:#e0f2fe; padding:1px 6px; border-radius:4px; font-weight:700;">Shop Product</span>';
+										html += '<span style="font-size:0.68rem; color:#0369a1; background:#e0f2fe; padding:1px 6px; border-radius:4px; font-weight:700;"><?php echo esc_js( __( 'Shop Product', 'nearmart' ) ); ?></span>';
 									} else {
-										html += '<span style="font-size:0.68rem; color:#15803d; background:#dcfce7; padding:1px 6px; border-radius:4px; font-weight:700;">Catalog Product</span>';
+										html += '<span style="font-size:0.68rem; color:#15803d; background:#dcfce7; padding:1px 6px; border-radius:4px; font-weight:700;"><?php echo esc_js( __( 'Catalog Product', 'nearmart' ) ); ?></span>';
 									}
 									var metaArr = [];
-									if (item.brand) metaArr.push('Brand: ' + escapeHtml(item.brand));
-									if (item.unit) metaArr.push('Unit: ' + escapeHtml(item.unit));
-									if (item.shop_sku) metaArr.push('SKU: ' + escapeHtml(item.shop_sku));
+									if (item.brand) metaArr.push('<?php echo esc_js( __( 'Brand', 'nearmart' ) ); ?>: ' + escapeHtml(item.brand));
+									if (item.unit) metaArr.push('<?php echo esc_js( __( 'Unit', 'nearmart' ) ); ?>: ' + escapeHtml(item.unit));
+									if (item.shop_sku) metaArr.push('<?php echo esc_js( __( 'SKU', 'nearmart' ) ); ?>: ' + escapeHtml(item.shop_sku));
 									if (metaArr.length > 0) {
 										html += '<span>' + metaArr.join(' &bull; ') + '</span>';
 									}
@@ -849,13 +917,13 @@ class SOM_Merchant_Catalog {
 									}
 									html += '</span></td>';
 
-									var availLabel = item.stock_status === 'instock' ? 'Available' : 'Unavailable';
+									var availLabel = item.stock_status === 'instock' ? '<?php echo esc_js( __( 'Available', 'nearmart' ) ); ?>' : '<?php echo esc_js( __( 'Unavailable', 'nearmart' ) ); ?>';
 									var availColor = item.stock_status === 'instock' ? '#16a34a' : '#dc2626';
 									var availBg = item.stock_status === 'instock' ? '#f0fdf4' : '#fef2f2';
 									html += '<td style="padding:8px 12px;"><span style="font-size:0.78rem; font-weight:700; color:' + availColor + '; background:' + availBg + '; padding:3px 8px; border-radius:12px;">' + availLabel + '</span></td>';
 
 									html += '<td style="padding:8px 12px; text-align:right;"><div class="som-cat-actions" style="display:flex; justify-content:flex-end; gap:4px;">';
-									html += '<button type="button" class="som-btn-icon som-btn-edit-item" data-item=\'' + JSON.stringify(item) + '\' style="padding:4px 8px; font-size:0.8rem;">&#9998; Edit</button>';
+									html += '<button type="button" class="som-btn-icon som-btn-edit-item" data-item=\'' + JSON.stringify(item) + '\' style="padding:4px 8px; font-size:0.8rem;">&#9998; <?php echo esc_js( __( 'Edit', 'nearmart' ) ); ?></button>';
 									html += '<button type="button" class="som-btn-icon danger som-btn-remove-item" data-id="' + item.id + '" data-title="' + escapeHtml(item.title) + '" style="padding:4px 8px; font-size:0.8rem;">&#128465;</button>';
 									html += '</div></td>';
 									html += '</tr>';
@@ -921,10 +989,10 @@ class SOM_Merchant_Catalog {
 
 				function renderMasterSearchPrompt() {
 					var html = '<div style="text-align:center; padding:18px 12px 14px 12px;">';
-					html += '<strong style="font-size:0.95rem; color:#1e293b; display:block; margin-bottom:8px;">Can\'t find what you\'re looking for?</strong>';
+					html += '<strong style="font-size:0.95rem; color:#1e293b; display:block; margin-bottom:8px;"><?php echo esc_js( __( 'Can\'t find what you\'re looking for?', 'nearmart' ) ); ?></strong>';
 					html += '<div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:8px;">';
-					html += '<button type="button" class="som-submit-btn som-btn-secondary som-btn-trigger-req" style="width:auto; padding:8px 16px; font-size:0.85rem;">&#128221; Request Product</button>';
-					html += '<button type="button" class="som-submit-btn som-btn-trigger-add-new" style="width:auto; padding:8px 16px; font-size:0.85rem;">&#10133; Add New Product</button>';
+					html += '<button type="button" class="som-submit-btn som-btn-secondary som-btn-trigger-req" style="width:auto; padding:8px 16px; font-size:0.85rem;">&#128221; <?php echo esc_js( __( 'Request Product', 'nearmart' ) ); ?></button>';
+					html += '<button type="button" class="som-submit-btn som-btn-trigger-add-new" style="width:auto; padding:8px 16px; font-size:0.85rem;">&#10133; <?php echo esc_js( __( 'Add New Product', 'nearmart' ) ); ?></button>';
 					html += '</div></div>';
 					$('#som_master_results').html(html);
 				}
@@ -948,7 +1016,7 @@ class SOM_Merchant_Catalog {
 
 				function performMasterSearch(queryStr) {
 					if (!queryStr || queryStr.length < 2) return;
-					$('#som_master_results').html('<p style="padding:14px; color:#64748b; margin:0; text-align:center;">&#128259; Searching products...</p>');
+					$('#som_master_results').html('<p style="padding:14px; color:#64748b; margin:0; text-align:center;">&#128259; <?php echo esc_js( __( 'Searching products...', 'nearmart' ) ); ?></p>');
 
 					$.ajax({
 						url: ajaxUrl,
@@ -988,19 +1056,19 @@ class SOM_Merchant_Catalog {
 								});
 
 								html += '<div style="text-align:center; padding: 14px 0 6px 0; border-top:1px solid #f1f5f9;">';
-								html += '<strong style="font-size:0.9rem; color:#1e293b; display:block; margin-bottom:6px;">Can\'t find what you\'re looking for?</strong>';
+								html += '<strong style="font-size:0.9rem; color:#1e293b; display:block; margin-bottom:6px;"><?php echo esc_js( __( 'Can\'t find what you\'re looking for?', 'nearmart' ) ); ?></strong>';
 								html += '<div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:6px;">';
-								html += '<button type="button" class="som-submit-btn som-btn-secondary som-btn-trigger-req" style="width:auto; padding:6px 14px; font-size:0.82rem;">&#128221; Request Product</button>';
-								html += '<button type="button" class="som-submit-btn som-btn-trigger-add-new" style="width:auto; padding:6px 14px; font-size:0.82rem;">&#10133; Add New Product</button>';
+								html += '<button type="button" class="som-submit-btn som-btn-secondary som-btn-trigger-req" style="width:auto; padding:6px 14px; font-size:0.82rem;">&#128221; <?php echo esc_js( __( 'Request Product', 'nearmart' ) ); ?></button>';
+								html += '<button type="button" class="som-submit-btn som-btn-trigger-add-new" style="width:auto; padding:6px 14px; font-size:0.82rem;">&#10133; <?php echo esc_js( __( 'Add New Product', 'nearmart' ) ); ?></button>';
 								html += '</div></div>';
 								$('#som_master_results').html(html);
 							} else {
 								var html = '<div style="text-align:center; padding:18px 12px 14px 12px;">';
 								html += '<p style="color:#64748b; margin:0 0 10px 0;">No existing products found matching your search.</p>';
-								html += '<strong style="font-size:0.95rem; color:#1e293b; display:block; margin-bottom:8px;">Can\'t find what you\'re looking for?</strong>';
+								html += '<strong style="font-size:0.95rem; color:#1e293b; display:block; margin-bottom:8px;"><?php echo esc_js( __( 'Can\'t find what you\'re looking for?', 'nearmart' ) ); ?></strong>';
 								html += '<div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:8px;">';
-								html += '<button type="button" class="som-submit-btn som-btn-secondary som-btn-trigger-req" style="width:auto; padding:8px 16px; font-size:0.85rem;">&#128221; Request Product</button>';
-								html += '<button type="button" class="som-submit-btn som-btn-trigger-add-new" style="width:auto; padding:8px 16px; font-size:0.85rem;">&#10133; Add New Product</button>';
+								html += '<button type="button" class="som-submit-btn som-btn-secondary som-btn-trigger-req" style="width:auto; padding:8px 16px; font-size:0.85rem;">&#128221; <?php echo esc_js( __( 'Request Product', 'nearmart' ) ); ?></button>';
+								html += '<button type="button" class="som-submit-btn som-btn-trigger-add-new" style="width:auto; padding:8px 16px; font-size:0.85rem;">&#10133; <?php echo esc_js( __( 'Add New Product', 'nearmart' ) ); ?></button>';
 								html += '</div></div>';
 								$('#som_master_results').html(html);
 							}
@@ -1110,9 +1178,9 @@ class SOM_Merchant_Catalog {
 							status: $('#som_add_status').val()
 						},
 						success: function(res) {
-							$btn.prop('disabled', false).html('&#128190; Save to My Catalog');
+							$btn.prop('disabled', false).html('&#128190; <?php echo esc_js( __( 'Save to My Catalog', 'nearmart' ) ); ?>');
 							if (res.success) {
-								alert(res.data.message || 'Product added to your shop catalog successfully!');
+								alert(res.data.message || '<?php echo esc_js( __( 'Product added to your shop catalog successfully!', 'nearmart' ) ); ?>');
 								$('#som_add_product_modal').hide();
 								$('#som_form_add_catalog_product')[0].reset();
 								$('#som_form_add_catalog_product').hide();
@@ -1122,7 +1190,7 @@ class SOM_Merchant_Catalog {
 							}
 						},
 						error: function() {
-							$btn.prop('disabled', false).html('&#128190; Save to My Catalog');
+							$btn.prop('disabled', false).html('&#128190; <?php echo esc_js( __( 'Save to My Catalog', 'nearmart' ) ); ?>');
 							alert('<?php echo esc_js( __( 'Server error adding product. Please try again.', 'nearmart' ) ); ?>');
 						}
 					});
@@ -1153,7 +1221,7 @@ class SOM_Merchant_Catalog {
 							status: $('#som_st_status').val()
 						},
 						success: function(res) {
-							$btn.prop('disabled', false).html('&#128190; Save New Product');
+							$btn.prop('disabled', false).html('&#128190; <?php echo esc_js( __( 'Save New Product', 'nearmart' ) ); ?>');
 							if (res.success) {
 								alert(res.data.message || 'New product added successfully!');
 								$('#som_add_product_modal').hide();
@@ -1165,7 +1233,7 @@ class SOM_Merchant_Catalog {
 							}
 						},
 						error: function() {
-							$btn.prop('disabled', false).html('&#128190; Save New Product');
+							$btn.prop('disabled', false).html('&#128190; <?php echo esc_js( __( 'Save New Product', 'nearmart' ) ); ?>');
 							alert('<?php echo esc_js( __( 'Server error adding product. Please try again.', 'nearmart' ) ); ?>');
 						}
 					});
@@ -1250,9 +1318,9 @@ class SOM_Merchant_Catalog {
 						type: 'POST',
 						data: postData,
 						success: function(res) {
-							$btn.prop('disabled', false).html('&#128190; Update Product');
+							$btn.prop('disabled', false).html('&#128190; <?php echo esc_js( __( 'Update Product', 'nearmart' ) ); ?>');
 							if (res.success) {
-								alert(res.data.message || 'Product updated successfully!');
+								alert(res.data.message || '<?php echo esc_js( __( 'Product updated successfully!', 'nearmart' ) ); ?>');
 								$('#som_edit_product_modal').hide();
 								loadCatalog(currentPage);
 							} else {
@@ -1260,7 +1328,7 @@ class SOM_Merchant_Catalog {
 							}
 						},
 						error: function() {
-							$btn.prop('disabled', false).html('&#128190; Update Product');
+							$btn.prop('disabled', false).html('&#128190; <?php echo esc_js( __( 'Update Product', 'nearmart' ) ); ?>');
 							alert('<?php echo esc_js( __( 'Server error updating product. Please try again.', 'nearmart' ) ); ?>');
 						}
 					});
@@ -1282,7 +1350,7 @@ class SOM_Merchant_Catalog {
 						data: { action: 'som_merchant_remove_catalog_product', nonce: nonce, id: itemId },
 						success: function(res) {
 							if (res.success) {
-								alert(res.data.message || 'Product removed from your shop catalog.');
+								alert(res.data.message || '<?php echo esc_js( __( 'Product removed from your shop catalog.', 'nearmart' ) ); ?>');
 								loadCatalog(currentPage);
 							} else {
 								alert(res.data.message || 'Error removing product.');
@@ -1322,9 +1390,9 @@ class SOM_Merchant_Catalog {
 							notes: $('#som_req_notes').val()
 						},
 						success: function(res) {
-							$btn.prop('disabled', false).html('&#128238; Submit Request');
+							$btn.prop('disabled', false).html('&#128238; <?php echo esc_js( __( 'Submit Request', 'nearmart' ) ); ?>');
 							if (res.success) {
-								alert(res.data.message || 'Request submitted successfully!');
+								alert(res.data.message || '<?php echo esc_js( __( 'Your product request has been submitted successfully! Admin will review it shortly.', 'nearmart' ) ); ?>');
 								$('#som_request_product_modal').hide();
 								$('#som_form_request_new_product')[0].reset();
 								loadMyProductRequests();
@@ -1348,24 +1416,24 @@ class SOM_Merchant_Catalog {
 					var style = 'background:#f1f5f9; color:#475569;';
 
 					if (status === 'pending') {
-						label = 'Pending Review';
+						label = '<?php echo esc_js( __( 'Pending Review', 'nearmart' ) ); ?>';
 						style = 'background:#fef3c7; color:#92400e;';
 					} else if (status === 'reviewed') {
-						label = 'Under Review';
+						label = '<?php echo esc_js( __( 'Under Review', 'nearmart' ) ); ?>';
 						style = 'background:#e0f2fe; color:#075985;';
 					} else if (status === 'approved') {
 						if (isInCatalog) {
-							label = 'Added to Catalog';
+							label = '<?php echo esc_js( __( 'Added to Catalog', 'nearmart' ) ); ?>';
 							style = 'background:#d1fae5; color:#065f46; font-weight:700;';
 						} else {
-							label = 'Approved – Ready to Add';
+							label = '<?php echo esc_js( __( 'Approved – Ready to Add', 'nearmart' ) ); ?>';
 							style = 'background:#dcfce7; color:#15803d; font-weight:700;';
 						}
 					} else if (status === 'completed') {
-						label = 'Added to Catalog';
+						label = '<?php echo esc_js( __( 'Added to Catalog', 'nearmart' ) ); ?>';
 						style = 'background:#d1fae5; color:#065f46;';
 					} else if (status === 'rejected') {
-						label = 'Rejected';
+						label = '<?php echo esc_js( __( 'Rejected', 'nearmart' ) ); ?>';
 						style = 'background:#fee2e2; color:#991b1b;';
 					}
 
@@ -1374,7 +1442,7 @@ class SOM_Merchant_Catalog {
 
 				function loadMyProductRequests() {
 					var $wrap = $('#som_my_requests_list_wrap');
-					$wrap.html('<p style="padding:20px; text-align:center; color:#64748b;">&#128259; Loading your requests...</p>');
+					$wrap.html('<p style="padding:20px; text-align:center; color:#64748b;">&#128259; <?php echo esc_js( __( 'Loading your requests...', 'nearmart' ) ); ?></p>');
 
 					$.ajax({
 						url: ajaxUrl,
@@ -1388,15 +1456,15 @@ class SOM_Merchant_Catalog {
 									return;
 								}
 
-								var html = '<table class="som-catalog-table" style="width:100%;"><thead><tr><th>Product Name</th><th>Details</th><th>Status</th><th style="text-align:right;">Action</th></tr></thead><tbody>';
+								var html = '<table class="som-catalog-table" style="width:100%;"><thead><tr><th><?php echo esc_js( __( 'Product Name', 'nearmart' ) ); ?></th><th><?php echo esc_js( __( 'Details', 'nearmart' ) ); ?></th><th><?php echo esc_js( __( 'Status', 'nearmart' ) ); ?></th><th style="text-align:right;"><?php echo esc_js( __( 'Action', 'nearmart' ) ); ?></th></tr></thead><tbody>';
 								$.each(list, function(i, r) {
 									html += '<tr>';
 									html += '<td><strong>' + escapeHtml(r.product_name) + '</strong></td>';
 
 									var meta = [];
-									if (r.brand) meta.push('Brand: ' + escapeHtml(r.brand));
-									if (r.unit) meta.push('Unit: ' + escapeHtml(r.unit));
-									if (r.barcode) meta.push('Barcode: ' + escapeHtml(r.barcode));
+									if (r.brand) meta.push('<?php echo esc_js( __( 'Brand', 'nearmart' ) ); ?>: ' + escapeHtml(r.brand));
+									if (r.unit) meta.push('<?php echo esc_js( __( 'Unit', 'nearmart' ) ); ?>: ' + escapeHtml(r.unit));
+									if (r.barcode) meta.push('<?php echo esc_js( __( 'Barcode', 'nearmart' ) ); ?>: ' + escapeHtml(r.barcode));
 									html += '<td><span style="font-size:0.78rem; color:#64748b;">' + meta.join(' &bull; ') + '</span>';
 									if (r.admin_notes) {
 										html += '<br /><span style="font-size:0.75rem; color:#2563eb;">Admin Note: ' + escapeHtml(r.admin_notes) + '</span>';
@@ -1407,9 +1475,9 @@ class SOM_Merchant_Catalog {
 
 									html += '<td style="text-align:right;">';
 									if (r.status === 'approved' && !r.is_in_catalog) {
-										html += '<button type="button" class="som-submit-btn som-btn-open-fulfill" data-req=\'' + JSON.stringify(r) + '\' style="width:auto; padding:6px 12px; font-size:0.8rem; font-weight:700; background:#16a34a;">&#10133; Add to My Catalog</button>';
+										html += '<button type="button" class="som-submit-btn som-btn-open-fulfill" data-req=\'' + JSON.stringify(r) + '\' style="width:auto; padding:6px 12px; font-size:0.8rem; font-weight:700; background:#16a34a;">&#10133; <?php echo esc_js( __( 'Add to My Catalog', 'nearmart' ) ); ?></button>';
 									} else if (r.status === 'completed' || r.is_in_catalog) {
-										html += '<span style="font-size:0.8rem; color:#16a34a; font-weight:600;">&#10003; Added to Catalog</span>';
+										html += '<span style="font-size:0.8rem; color:#16a34a; font-weight:600;">&#10003; <?php echo esc_js( __( 'Added to Catalog', 'nearmart' ) ); ?></span>';
 									} else {
 										html += '<span style="font-size:0.8rem; color:#94a3b8;">' + r.created_at + '</span>';
 									}
@@ -1471,9 +1539,9 @@ class SOM_Merchant_Catalog {
 							shop_sku: $('#som_fulfill_shop_sku').val()
 						},
 						success: function(res) {
-							$btn.prop('disabled', false).html('&#128190; Add Product to My Catalog');
+							$btn.prop('disabled', false).html('&#128190; <?php echo esc_js( __( 'Add Product to My Catalog', 'nearmart' ) ); ?>');
 							if (res.success) {
-								alert(res.data.message || 'Product added to your shop catalog successfully!');
+								alert(res.data.message || '<?php echo esc_js( __( 'Product added to your shop catalog successfully!', 'nearmart' ) ); ?>');
 								$('#som_fulfill_request_modal').hide();
 								loadCatalog(1);
 							} else {
@@ -1481,7 +1549,7 @@ class SOM_Merchant_Catalog {
 							}
 						},
 						error: function() {
-							$btn.prop('disabled', false).html('&#128190; Add Product to My Catalog');
+							$btn.prop('disabled', false).html('&#128190; <?php echo esc_js( __( 'Add Product to My Catalog', 'nearmart' ) ); ?>');
 							alert('<?php echo esc_js( __( 'Server error adding product. Please try again.', 'nearmart' ) ); ?>');
 						}
 					});

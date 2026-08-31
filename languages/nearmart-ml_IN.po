@@ -1,0 +1,307 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: NearMart 1.3.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-31 10:00+0000\n"
+"PO-Revision-Date: 2026-08-31 10:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: Malayalam\n"
+"Language: ml_IN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Merchant Portal"
+msgstr "മെർച്ചന്റ് പോർട്ടൽ"
+
+msgid "Dashboard"
+msgstr "ഡാഷ്ബോർഡ്"
+
+msgid "My Catalog"
+msgstr "എന്റെ കാറ്റലോഗ്"
+
+msgid "My Product Requests"
+msgstr "എന്റെ ഉൽപ്പന്ന അഭ്യർത്ഥനകൾ"
+
+msgid "Log Out"
+msgstr "ലോഗ് ഔട്ട്"
+
+msgid "Welcome, %s"
+msgstr "സ്വാഗതം, %s"
+
+msgid "Manage prices, availability, and products for your store catalog."
+msgstr "നിങ്ങളുടെ സ്റ്റോർ കാറ്റലോഗിനായുള്ള വിലകളും ലഭ്യതയും ഉൽപ്പന്നങ്ങളും കൈകാര്യം ചെയ്യുക."
+
+msgid "Total Products"
+msgstr "ആകെ ഉൽപ്പന്നങ്ങൾ"
+
+msgid "Active Products"
+msgstr "സജീവ ഉൽപ്പന്നങ്ങൾ"
+
+msgid "Out of Stock"
+msgstr "സ്റ്റോക്കില്ല"
+
+msgid "Pending Requests"
+msgstr "തീർപ്പുകൽപ്പിക്കാത്ത അഭ്യർത്ഥനകൾ"
+
+msgid "Recent Activity"
+msgstr "സമീപകാല പ്രവർത്തനങ്ങൾ"
+
+msgid "Shop Details"
+msgstr "കടയുടെ വിവരങ്ങൾ"
+
+msgid "Merchant Account"
+msgstr "മെർച്ചന്റ് അക്കൗണ്ട്"
+
+msgid "Store Name"
+msgstr "കടയുടെ പേര്"
+
+msgid "Store Address"
+msgstr "കടയുടെ വിലാസം"
+
+msgid "Contact Phone"
+msgstr "ബന്ധപ്പെടേണ്ട ഫോൺ നമ്പർ"
+
+msgid "My Shop Catalog — %s"
+msgstr "എന്റെ കടയുടെ കാറ്റലോഗ് — %s"
+
+msgid "Add Product to Catalog"
+msgstr "കാറ്റലോഗിലേക്ക് ഉൽപ്പന്നം ചേർക്കുക"
+
+msgid "Search by product name, brand, SKU or barcode..."
+msgstr "ഉൽപ്പന്നത്തിന്റെ പേര്, ബ്രാൻഡ്, എസ്‌കെയു അല്ലെങ്കിൽ ബാർകോഡ് ഉപയോഗിച്ച് തിരയുക..."
+
+msgid "Search Product (Name, Brand, SKU, or Barcode)"
+msgstr "ഉൽപ്പന്നം തിരയുക (പേര്, ബ്രാൻഡ്, എസ്‌കെയു, അല്ലെങ്കിൽ ബാർകോഡ്)"
+
+msgid "All Categories"
+msgstr "എല്ലാ വിഭാഗങ്ങളും"
+
+msgid "All Availability"
+msgstr "എല്ലാ ലഭ്യതയും"
+
+msgid "Available"
+msgstr "ലഭ്യമാണ്"
+
+msgid "Unavailable"
+msgstr "ലഭ്യമല്ല"
+
+msgid "25 per page"
+msgstr "പേജിൽ 25 എണ്ണം"
+
+msgid "50 per page"
+msgstr "പേജിൽ 50 എണ്ണം"
+
+msgid "100 per page"
+msgstr "പേജിൽ 100 എണ്ണം"
+
+msgid "Showing %s–%s of %s products"
+msgstr "%s പേജിൽ %s മുതൽ %s വരെയുള്ള ഉൽപ്പന്നങ്ങൾ കാണിക്കുന്നു"
+
+msgid "Showing 0 products"
+msgstr "0 ഉൽപ്പന്നങ്ങൾ കാണിക്കുന്നു"
+
+msgid "Previous"
+msgstr "മുമ്പത്തെ"
+
+msgid "Next"
+msgstr "അടുത്തത്"
+
+msgid "Image"
+msgstr "ചിത്രം"
+
+msgid "Product Name & Specs"
+msgstr "ഉൽപ്പന്നത്തിന്റെ പേരും വിവരങ്ങളും"
+
+msgid "Category"
+msgstr "വിഭാഗം"
+
+msgid "Shop Price"
+msgstr "കടയിലെ വില"
+
+msgid "Availability"
+msgstr "ലഭ്യത"
+
+msgid "Actions"
+msgstr "നടപടികൾ"
+
+msgid "Edit"
+msgstr "എഡിറ്റ് ചെയ്യുക"
+
+msgid "Shop Product"
+msgstr "കടയിലെ ഉൽപ്പന്നം"
+
+msgid "Catalog Product"
+msgstr "കാറ്റലോഗ് ഉൽപ്പന്നം"
+
+msgid "Brand"
+msgstr "ബ്രാൻഡ്"
+
+msgid "Unit"
+msgstr "അളവ്/യൂണിറ്റ്"
+
+msgid "SKU"
+msgstr "എസ്‌കെയു"
+
+msgid "Barcode"
+msgstr "ബാർകോഡ്"
+
+msgid "Add an Existing Product"
+msgstr "നിലവിലുള്ള ഉൽപ്പന്നം ചേർക്കുക"
+
+msgid "Add a New Product"
+msgstr "പുതിയ ഉൽപ്പന്നം ചേർക്കുക"
+
+msgid "Search the NearMart product catalog and add an existing product to your shop."
+msgstr "നിയർമാർട്ട് ഉൽപ്പന്ന കാറ്റലോഗ് തിരഞ്ഞ് നിലവിലുള്ള ഒരു ഉൽപ്പന്നം നിങ്ങളുടെ കടയിലേക്ക് ചേർക്കുക."
+
+msgid "Add a product that is not currently in the NearMart catalog. It will initially be available only in your shop."
+msgstr "നിലവിൽ നിയർമാർട്ട് കാറ്റലോഗിൽ ഇല്ലാത്ത ഒരു ഉൽപ്പന്നം ചേർക്കുക. ഇത് ആദ്യം നിങ്ങളുടെ കടയിൽ മാത്രം ലഭ്യമാകും."
+
+msgid "Can't find what you're looking for?"
+msgstr "നിങ്ങൾ തിരയുന്നത് കണ്ടെത്താൻ കഴിഞ്ഞില്ലേ?"
+
+msgid "Request Product"
+msgstr "അഭ്യർത്ഥന സമർപ്പിക്കുക"
+
+msgid "Add New Product"
+msgstr "പുതിയ ഉൽപ്പന്നം ചേർക്കുക"
+
+msgid "Similar Existing Product Found:"
+msgstr "സമാനമായ നിലവിലുള്ള ഉൽപ്പന്നം കണ്ടെത്തി:"
+
+msgid "Use Existing Product"
+msgstr "നിലവിലുള്ള ഉൽപ്പന്നം ഉപയോഗിക്കുക"
+
+msgid "Dismiss"
+msgstr "നിരസിക്കുക"
+
+msgid "Shop Price (₹)"
+msgstr "കടയിലെ വില (₹)"
+
+msgid "Sale Price (₹)"
+msgstr "ഓഫർ വില (₹)"
+
+msgid "Stock Qty"
+msgstr "സ്റ്റോക്ക് അളവ്"
+
+msgid "Shop SKU"
+msgstr "കടയിലെ എസ്‌കെയു"
+
+msgid "Listing Status"
+msgstr "ലിസ്റ്റിംഗ് സ്റ്റാറ്റസ്"
+
+msgid "Active (Visible to customers)"
+msgstr "ആക്ടീവ് (ഉപഭോക്താക്കൾക്ക് കാണാം)"
+
+msgid "Inactive (Hidden)"
+msgstr "ഇനാക്ടീവ് (മറച്ചിരിക്കുന്നത്)"
+
+msgid "Save to My Catalog"
+msgstr "എന്റെ കാറ്റലോഗിലേക്ക് സേവ് ചെയ്യുക"
+
+msgid "Save New Product"
+msgstr "പുതിയ ഉൽപ്പന്നം സേവ് ചെയ്യുക"
+
+msgid "Update Product"
+msgstr "ഉൽപ്പന്നം അപ്ഡേറ്റ് ചെയ്യുക"
+
+msgid "Edit Catalog Product"
+msgstr "കാറ്റലോഗ് ഉൽപ്പന്നം എഡിറ്റ് ചെയ്യുക"
+
+msgid "Master product specifications are managed by platform admins and cannot be changed here."
+msgstr "മാസ്റ്റർ ഉൽപ്പന്ന വിവരങ്ങൾ പ്ലാറ്റ്‌ഫോം അഡ്മിനാണ് നിയന്ത്രിക്കുന്നത്, ഇവിടെ മാറ്റാൻ കഴിയില്ല."
+
+msgid "Pending Review"
+msgstr "പരിശോധനയിൽ"
+
+msgid "Under Review"
+msgstr "പരിശോധിച്ചു വരുന്നു"
+
+msgid "Approved – Ready to Add"
+msgstr "അംഗീകരിച്ചു – ചേർക്കാൻ തയ്യാറാണ്"
+
+msgid "Added to Catalog"
+msgstr "കാറ്റലോഗിൽ ചേർത്തു"
+
+msgid "Rejected"
+msgstr "നിരസിച്ചു"
+
+msgid "Add to My Catalog"
+msgstr "എന്റെ കാറ്റലോഗിലേക്ക് ചേർക്കുക"
+
+msgid "Add Approved Product to My Catalog"
+msgstr "അംഗീകരിച്ച ഉൽപ്പന്നം എന്റെ കാറ്റലോഗിലേക്ക് ചേർക്കുക"
+
+msgid "Product Name"
+msgstr "ഉൽപ്പന്നത്തിന്റെ പേര്"
+
+msgid "Details"
+msgstr "വിവരങ്ങൾ"
+
+msgid "Status"
+msgstr "സ്റ്റാറ്റസ്"
+
+msgid "Action"
+msgstr "നടപടി"
+
+msgid "Submit Request"
+msgstr "അഭ്യർത്ഥന സമർപ്പിക്കുക"
+
+msgid "Can't find a product in our catalog? Submit a request below. Admin will review and add the product to the NearMart platform."
+msgstr "ഞങ്ങളുടെ കാറ്റലോഗിൽ ഒരു ഉൽപ്പന്നം കണ്ടെത്താൻ കഴിയുന്നില്ലേ? താഴെ ഒരു അഭ്യർത്ഥന സമർപ്പിക്കുക. അഡ്മിൻ പരിശോധിച്ച് നിയർമാർട്ട് പ്ലാറ്റ്‌ഫോമിലേക്ക് ഉൽപ്പന്നം ചേർക്കും."
+
+msgid "Product added to your shop catalog successfully!"
+msgstr "ഉൽപ്പന്നം നിങ്ങളുടെ കടയിലെ കാറ്റലോഗിലേക്ക് വിജയകരമായി ചേർത്തു!"
+
+msgid "Product updated successfully!"
+msgstr "ഉൽപ്പന്നം വിജയകരമായി അപ്‌ഡേറ്റ് ചെയ്തു!"
+
+msgid "Product removed from your shop catalog."
+msgstr "നിങ്ങളുടെ കടയിലെ കാറ്റലോഗിൽ നിന്ന് ഉൽപ്പന്നം നീക്കം ചെയ്തു."
+
+msgid "Your product request has been submitted successfully! Admin will review it shortly."
+msgstr "നിങ്ങളുടെ ഉൽപ്പന്ന അഭ്യർത്ഥന വിജയകരമായി സമർപ്പിച്ചു! അഡ്മിൻ ഉടൻ തന്നെ ഇത് പരിശോധിക്കും."
+
+msgid "This product is already in your catalog!"
+msgstr "ഈ ഉൽപ്പന്നം ഇതിനകം നിങ്ങളുടെ കാറ്റലോഗിലുണ്ട്!"
+
+msgid "Server error adding product. Please try again."
+msgstr "ഉൽപ്പന്നം ചേർക്കുന്നതിൽ സെർവർ പിശക്. ദയവായി വീണ്ടും ശ്രമിക്കുക."
+
+msgid "Server error updating product. Please try again."
+msgstr "ഉൽപ്പന്നം അപ്‌ഡേറ്റ് ചെയ്യുന്നതിൽ സെർവർ പിശക്. ദയവായി വീണ്ടും ശ്രമിക്കുക."
+
+msgid "Server error removing product. Please try again."
+msgstr "ഉൽപ്പന്നം നീക്കം ചെയ്യുന്നതിൽ സെർവർ പിശക്. ദയവായി വീണ്ടും ശ്രമിക്കുക."
+
+msgid "Please log in with a merchant or staff account to access your shop catalog."
+msgstr "നിങ്ങളുടെ കടയുടെ കാറ്റലോഗ് ആക്‌സസ് ചെയ്യുന്നതിന് ഒരു മെർച്ചന്റ് അല്ലെങ്കിൽ സ്റ്റാഫ് അക്കൗണ്ട് ഉപയോഗിച്ച് ലോഗിൻ ചെയ്യുക."
+
+msgid "Go to Merchant Login →"
+msgstr "മെർച്ചന്റ് ലോഗിനിലേക്ക് പോകുക →"
+
+msgid "Merchant Login"
+msgstr "മെർച്ചന്റ് ലോഗിൻ"
+
+msgid "Login to your merchant account"
+msgstr "നിങ്ങളുടെ മെർച്ചന്റ് അക്കൗണ്ടിലേക്ക് ലോഗിൻ ചെയ്യുക"
+
+msgid "Username or Email Address"
+msgstr "യൂസർനെയിം അല്ലെങ്കിൽ ഇമെയിൽ വിലാസം"
+
+msgid "Password"
+msgstr "പാസ്‌വേഡ്"
+
+msgid "Remember Me"
+msgstr "ഓർത്തുവെക്കുക"
+
+msgid "Log In"
+msgstr "ലോഗിൻ ചെയ്യുക"
+
+msgid "Register your store"
+msgstr "നിങ്ങളുടെ കട രജിസ്റ്റർ ചെയ്യുക"
+
+msgid "Language"
+msgstr "ഭാഷ"
+

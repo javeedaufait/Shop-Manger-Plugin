@@ -44,7 +44,9 @@ class SOM_Plugin {
 	 * Register actions and hooks.
 	 */
 	private function init_hooks() {
-		add_action( 'init', array( __CLASS__, 'load_textdomain' ) );
+		add_action( 'init', array( __CLASS__, 'load_textdomain' ), 5 );
+		add_filter( 'plugin_locale', array( __CLASS__, 'filter_plugin_locale' ), 10, 2 );
+		add_filter( 'determine_locale', array( __CLASS__, 'filter_determine_locale' ), 10, 1 );
 		SOM_Post_Types::init();
 		SOM_Taxonomies::init();
 		SOM_Roles::init();
@@ -69,7 +71,45 @@ class SOM_Plugin {
 	 * Load plugin textdomain for i18n support.
 	 */
 	public static function load_textdomain() {
-		load_plugin_textdomain( 'nearmart', false, dirname( plugin_basename( SOM_PLUGIN_FILE ) ) . '/languages' );
+		$user_id = get_current_user_id();
+		$locale  = 'en_US';
+		if ( $user_id ) {
+			$pref = get_user_meta( $user_id, 'nm_preferred_language', true );
+			if ( 'ml' === $pref ) {
+				$locale = 'ml_IN';
+			}
+		}
+
+		unload_textdomain( 'nearmart' );
+		if ( 'ml_IN' === $locale ) {
+			load_textdomain( 'nearmart', SOM_PLUGIN_DIR . 'languages/nearmart-ml_IN.mo' );
+		} else {
+			load_plugin_textdomain( 'nearmart', false, dirname( plugin_basename( SOM_PLUGIN_FILE ) ) . '/languages' );
+		}
+	}
+
+	public static function filter_plugin_locale( $locale, $domain ) {
+		if ( 'nearmart' === $domain ) {
+			$user_id = get_current_user_id();
+			if ( $user_id ) {
+				$pref = get_user_meta( $user_id, 'nm_preferred_language', true );
+				if ( 'ml' === $pref ) {
+					return 'ml_IN';
+				}
+			}
+		}
+		return $locale;
+	}
+
+	public static function filter_determine_locale( $locale ) {
+		$user_id = get_current_user_id();
+		if ( $user_id ) {
+			$pref = get_user_meta( $user_id, 'nm_preferred_language', true );
+			if ( 'ml' === $pref ) {
+				return 'ml_IN';
+			}
+		}
+		return $locale;
 	}
 
 	/**

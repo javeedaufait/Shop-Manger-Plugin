@@ -1,6 +1,10 @@
 /* Shop Onboarding Manager - Mobile-First Styles */
-.som-onboarding-card, .som-merchant-card, .som-merchant-dashboard-wrap {
+.som-onboarding-card, .som-merchant-card {
 	max-width: 800px;
+}
+
+.som-merchant-dashboard-wrap {
+	max-width: 1050px;
 	margin: 20px auto;
 	background: #ffffff;
 	border: 1px solid #e2e8f0;
@@ -832,6 +836,7 @@
 	display: flex;
 	align-items: center;
 	gap: 8px;
+	flex-wrap: wrap;
 }
 
 .som-nav-link {
