@@ -626,7 +626,7 @@ class SOM_Merchant_Dashboard {
 						</div>
 					</div>
 					<div style="margin-top: 16px;">
-						<a href="<?php echo esc_url( home_url( '/merchant-catalog/' ) ); ?>" class="som-submit-btn" style="text-decoration:none; display:block; text-align:center;">
+						<a href="<?php echo esc_url( function_exists( 'nm_get_page_link' ) ? nm_get_page_link( 'merchant-catalog' ) : home_url( '/merchant-catalog/' ) ); ?>" class="som-submit-btn" style="text-decoration:none; display:block; text-align:center;">
 							&#128722; <?php esc_html_e( 'Manage Full Catalog &rarr;', 'nearmart' ); ?>
 						</a>
 					</div>

@@ -188,13 +188,29 @@ class SOM_Merchant_Manager {
 		$shop_id = get_user_meta( $user->ID, 'som_shop_id', true );
 		$shop_name = $shop_id ? get_the_title( $shop_id ) : __( 'Unassigned', 'nearmart' );
 
+		$user_pref     = get_user_meta( $user->ID, 'nm_preferred_language', true );
+		$redirect_url  = function_exists( 'nm_get_page_link' ) ? nm_get_page_link( 'merchant-dashboard' ) : home_url( '/merchant-dashboard/' );
+		$referer       = wp_get_referer();
+
+		if ( 'ml' === $user_pref || ( $referer && false !== strpos( $referer, '/ml/' ) ) ) {
+			if ( function_exists( 'pll_get_post' ) ) {
+				$dash_p = get_page_by_path( 'merchant-dashboard' );
+				if ( $dash_p ) {
+					$ml_dash_id = pll_get_post( $dash_p->ID, 'ml' );
+					if ( $ml_dash_id ) {
+						$redirect_url = get_permalink( $ml_dash_id );
+					}
+				}
+			}
+		}
+
 		wp_send_json_success(
 			array(
 				'message'      => __( 'Login successful!', 'nearmart' ),
 				'user'         => $user->display_name,
 				'shop_id'      => $shop_id,
 				'shop_name'    => $shop_name,
-				'redirect_url' => home_url( '/merchant-dashboard/' ),
+				'redirect_url' => $redirect_url,
 			)
 		);
 	}

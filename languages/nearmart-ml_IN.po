@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NearMart Shop Onboarding Manager\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-01 12:30+0530\n"
-"PO-Revision-Date: 2026-09-01 12:30+0530\n"
+"POT-Creation-Date: 2026-09-01 12:37+0530\n"
+"PO-Revision-Date: 2026-09-01 12:37+0530\n"
 "Last-Translator: NearMart Team <support@nearmart.local>\n"
 "Language-Team: Malayalam <ml@li.org>\n"
 "Language: ml_IN\n"
@@ -599,4 +599,43 @@ msgstr "വിഭാഗം:"
 
 msgid "Address:"
 msgstr "വിലാസം:"
+
+msgid "Manage Full Catalog &rarr;"
+msgstr "മുഴുവൻ കാറ്റലോഗും കാണുക →"
+
+msgid "Manage Full Catalog →"
+msgstr "മുഴുവൻ കാറ്റലോഗും കാണുക →"
+
+msgid "Manage Full Catalog"
+msgstr "മുഴുവൻ കാറ്റലോഗും കാണുക"
+
+msgid "Manage your store details, catalog items, and account verification."
+msgstr "നിങ്ങളുടെ കടയുടെ വിവരങ്ങളും കാറ്റലോഗും അക്കൗണ്ട് സ്ഥിരീകരണവും ഇവിടെ പരിശോധിക്കാം."
+
+msgid "Verified Shop"
+msgstr "സ്ഥിരീകരിച്ച കട"
+
+msgid "Verification Pending"
+msgstr "സ്ഥിരീകരണം ബാക്കി"
+
+msgid "Shop Information"
+msgstr "കടയുടെ വിവരങ്ങൾ"
+
+msgid "Shop Name:"
+msgstr "കടയുടെ പേര്:"
+
+msgid "Owner:"
+msgstr "ഉടമ:"
+
+msgid "Phone:"
+msgstr "ഫോൺ:"
+
+msgid "Go to Merchant Login &rarr;"
+msgstr "വ്യാപാരി ലോഗിനിലേക്ക് പോകുക →"
+
+msgid "Please log in with a merchant account to access your dashboard."
+msgstr "നിങ്ങളുടെ ഡാഷ്‌ബോർഡ് കാണാൻ ദയവായി വ്യാപാരി അക്കൗണ്ട് ഉപയോഗിച്ച് ലോഗിൻ ചെയ്യുക."
+
+msgid "No shop is currently linked to your merchant user account. Please contact NearMart support."
+msgstr "നിങ്ങളുടെ അക്കൗണ്ടുമായി കടകളൊന്നും ബന്ധിപ്പിച്ചിട്ടില്ല. ദയവായി നിയർമാർട്ട് സപ്പോർട്ടുമായി ബന്ധപ്പെടുക."
 
