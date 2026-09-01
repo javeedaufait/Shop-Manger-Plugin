@@ -71,10 +71,18 @@ class SOM_Plugin {
 	 * Load plugin textdomain for i18n support.
 	 */
 	public static function load_textdomain() {
-		$user_id = get_current_user_id();
-		$locale  = 'en_US';
-		if ( $user_id ) {
-			$pref = get_user_meta( $user_id, 'nm_preferred_language', true );
+		$locale = 'en_US';
+
+		if ( function_exists( 'pll_current_language' ) ) {
+			$cur_pll = pll_current_language();
+			if ( 'ml' === $cur_pll ) {
+				$locale = 'ml_IN';
+			} elseif ( 'en' === $cur_pll ) {
+				$locale = 'en_US';
+			}
+		} elseif ( is_user_logged_in() ) {
+			$user_id = get_current_user_id();
+			$pref    = get_user_meta( $user_id, 'nm_preferred_language', true );
 			if ( 'ml' === $pref ) {
 				$locale = 'ml_IN';
 			}
@@ -90,9 +98,18 @@ class SOM_Plugin {
 
 	public static function filter_plugin_locale( $locale, $domain ) {
 		if ( 'nearmart' === $domain ) {
-			$user_id = get_current_user_id();
-			if ( $user_id ) {
-				$pref = get_user_meta( $user_id, 'nm_preferred_language', true );
+			if ( function_exists( 'pll_current_language' ) ) {
+				$cur_pll = pll_current_language();
+				if ( 'ml' === $cur_pll ) {
+					return 'ml_IN';
+				} elseif ( 'en' === $cur_pll ) {
+					return 'en_US';
+				}
+			}
+
+			if ( is_user_logged_in() ) {
+				$user_id = get_current_user_id();
+				$pref    = get_user_meta( $user_id, 'nm_preferred_language', true );
 				if ( 'ml' === $pref ) {
 					return 'ml_IN';
 				}
@@ -102,9 +119,18 @@ class SOM_Plugin {
 	}
 
 	public static function filter_determine_locale( $locale ) {
-		$user_id = get_current_user_id();
-		if ( $user_id ) {
-			$pref = get_user_meta( $user_id, 'nm_preferred_language', true );
+		if ( function_exists( 'pll_current_language' ) ) {
+			$cur_pll = pll_current_language();
+			if ( 'ml' === $cur_pll ) {
+				return 'ml_IN';
+			} elseif ( 'en' === $cur_pll ) {
+				return 'en_US';
+			}
+		}
+
+		if ( is_user_logged_in() ) {
+			$user_id = get_current_user_id();
+			$pref    = get_user_meta( $user_id, 'nm_preferred_language', true );
 			if ( 'ml' === $pref ) {
 				return 'ml_IN';
 			}

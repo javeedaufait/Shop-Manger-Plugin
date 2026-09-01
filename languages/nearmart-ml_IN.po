@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: NearMart Shop Onboarding Manager\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-31 17:40+0530\n"
-"PO-Revision-Date: 2026-08-31 17:40+0530\n"
+"POT-Creation-Date: 2026-09-01 12:30+0530\n"
+"PO-Revision-Date: 2026-09-01 12:30+0530\n"
 "Last-Translator: NearMart Team <support@nearmart.local>\n"
 "Language-Team: Malayalam <ml@li.org>\n"
 "Language: ml_IN\n"
@@ -22,7 +22,7 @@ msgid "My Catalog"
 msgstr "എന്റെ കാറ്റലോഗ്"
 
 msgid "My Product Requests"
-msgstr "എന്റെ ഉൽപ്പന്ന അഭ്യർത്ഥനകൾ"
+msgstr "എന്റെ ഉൽപ്പന്ന അപേക്ഷകൾ"
 
 msgid "Log Out"
 msgstr "ലോഗ് ഔട്ട്"
@@ -40,7 +40,7 @@ msgid "Active Products"
 msgstr "സജീവ ഉൽപ്പന്നങ്ങൾ"
 
 msgid "Out of Stock"
-msgstr "സ്റ്റോക്കില്ല"
+msgstr "സ്റ്റോക്കില്ലാത്തവ"
 
 msgid "Pending Requests"
 msgstr "തീർപ്പുകൽപ്പിക്കാത്ത അഭ്യർത്ഥനകൾ"
@@ -70,7 +70,7 @@ msgid "Add Product to Catalog"
 msgstr "കാറ്റലോഗിലേക്ക് ഉൽപ്പന്നം ചേർക്കുക"
 
 msgid "Search by product name, brand, SKU or barcode..."
-msgstr "ഉൽപ്പന്നത്തിന്റെ പേര്, ബ്രാൻഡ്, എസ്‌കെയു അല്ലെങ്കിൽ ബാർകോഡ് ഉപയോഗിച്ച് തിരയുക..."
+msgstr "ഉൽപ്പന്നത്തിന്റെ പേര്, ബ്രാൻഡ്, ബാർകോഡ് ഉപയോഗിച്ച് തിരയുക..."
 
 msgid "Search Product (Name, Brand, SKU, or Barcode)"
 msgstr "ഉൽപ്പന്നം തിരയുക (പേര്, ബ്രാൻഡ്, എസ്‌കെയു, അല്ലെങ്കിൽ ബാർകോഡ്)"
@@ -103,16 +103,16 @@ msgid "Showing 0 products"
 msgstr "0 ഉൽപ്പന്നങ്ങൾ കാണിക്കുന്നു"
 
 msgid "Previous"
-msgstr "മുമ്പത്തെ"
+msgstr "മുമ്പത്തെ പേജ്"
 
 msgid "Next"
-msgstr "അടുത്തത്"
+msgstr "അടുത്ത പേജ്"
 
 msgid "Image"
 msgstr "ചിത്രം"
 
 msgid "Product Name & Specs"
-msgstr "ഉൽപ്പന്നത്തിന്റെ പേരും വിവരങ്ങളും"
+msgstr "ഉൽപ്പന്നത്തിന്റെ പേര് & വിവരങ്ങൾ"
 
 msgid "Category"
 msgstr "വിഭാഗം"
@@ -253,7 +253,7 @@ msgid "Can't find a product in our catalog? Submit a request below. Admin will r
 msgstr "ഞങ്ങളുടെ കാറ്റലോഗിൽ ഒരു ഉൽപ്പന്നം കണ്ടെത്താൻ കഴിയുന്നില്ലേ? താഴെ ഒരു അഭ്യർത്ഥന സമർപ്പിക്കുക. അഡ്മിൻ പരിശോധിച്ച് നിയർമാർട്ട് പ്ലാറ്റ്‌ഫോമിലേക്ക് ഉൽപ്പന്നം ചേർക്കും."
 
 msgid "Product added to your shop catalog successfully!"
-msgstr "ഉൽപ്പന്നം നിങ്ങളുടെ കടയിലെ കാറ്റലോഗിലേക്ക് വിജയകരമായി ചേർത്തു!"
+msgstr "ഉൽപ്പന്നം നിങ്ങളുടെ കാറ്റലോഗിൽ വിജയകരമായി ചേർത്തു!"
 
 msgid "Product updated successfully!"
 msgstr "ഉൽപ്പന്നം വിജയകരമായി അപ്‌ഡേറ്റ് ചെയ്തു!"
@@ -262,7 +262,7 @@ msgid "Product removed from your shop catalog."
 msgstr "നിങ്ങളുടെ കടയിലെ കാറ്റലോഗിൽ നിന്ന് ഉൽപ്പന്നം നീക്കം ചെയ്തു."
 
 msgid "Your product request has been submitted successfully! Admin will review it shortly."
-msgstr "നിങ്ങളുടെ ഉൽപ്പന്ന അഭ്യർത്ഥന വിജയകരമായി സമർപ്പിച്ചു! അഡ്മിൻ ഉടൻ തന്നെ ഇത് പരിശോധിക്കും."
+msgstr "നിങ്ങളുടെ ഉൽപ്പന്ന അപേക്ഷ സമർപ്പിച്ചു! അഡ്മിൻ വേഗത്തിൽ പരിശോധിക്കും."
 
 msgid "This product is already in your catalog!"
 msgstr "ഈ ഉൽപ്പന്നം ഇതിനകം നിങ്ങളുടെ കാറ്റലോഗിലുണ്ട്!"
@@ -295,7 +295,7 @@ msgid "Password"
 msgstr "പാസ്‌വേഡ്"
 
 msgid "Remember Me"
-msgstr "ഓർത്തുവെക്കുക"
+msgstr "ഓർമ്മിക്കുക"
 
 msgid "Log In"
 msgstr "ലോഗിൻ ചെയ്യുക"
@@ -464,4 +464,139 @@ msgstr "ഫീൽഡ് ഏജന്റ് ലോഗിൻ"
 
 msgid "Are you a shop owner? Learn how to join NearMart →"
 msgstr "നിങ്ങൾ ഒരു കടയുടമയാണോ? എങ്ങനെ പങ്കാളിയാകാമെന്ന് അറിയൂ →"
+
+msgid "Merchant Dashboard"
+msgstr "വ്യാപാരി ഡാഷ്‌ബോർഡ്"
+
+msgid "Access your shop onboarding portal"
+msgstr "നിങ്ങളുടെ വ്യാപാരി പോർട്ടലിലേക്ക് പ്രവേശിക്കുക"
+
+msgid "Enter username"
+msgstr "യൂസർനെയിം നൽകുക"
+
+msgid "Enter password"
+msgstr "പാസ്‌വേഡ് നൽകുക"
+
+msgid "Logging in..."
+msgstr "ലോഗിൻ ചെയ്യുന്നു..."
+
+msgid "Invalid username or password."
+msgstr "തെറ്റായ യൂസർനെയിം അല്ലെങ്കിൽ പാസ്‌വേഡ്."
+
+msgid "Account is not registered as a Merchant."
+msgstr "ഈ അക്കൗണ്ട് ഒരു വ്യാപാരിയായി രജിസ്റ്റർ ചെയ്തിട്ടില്ല."
+
+msgid "Login successful!"
+msgstr "ലോഗിൻ വിജയകരം!"
+
+msgid "Unassigned"
+msgstr "ചേർത്തിട്ടില്ല"
+
+msgid "Permission denied."
+msgstr "അനുവാദമില്ല."
+
+msgid "Merchant account created successfully!"
+msgstr "വ്യാപാരി അക്കൗണ്ട് വിജയകരമായി നിർമ്മിച്ചു!"
+
+msgid "Shop Details Confirmation"
+msgstr "കടയുടെ വിവരങ്ങൾ സ്ഥിരീകരിക്കൽ"
+
+msgid "Please verify and confirm your shop details below."
+msgstr "താഴെയുള്ള കടയുടെ വിവരങ്ങൾ പരിശോധിച്ച് സ്ഥിരീകരിക്കുക."
+
+msgid "Participation Agreement"
+msgstr "പങ്കാളിത്ത കരാർ"
+
+msgid "Please review and accept the terms of participation."
+msgstr "പങ്കാളിത്ത നിബന്ധനകൾ പരിശോധിച്ച് സ്വീകരിക്കുക."
+
+msgid "Accept Agreement"
+msgstr "കരാർ സ്വീകരിക്കുക"
+
+msgid "Confirm Details"
+msgstr "വിവരങ്ങൾ സ്ഥിരീകരിക്കുക"
+
+msgid "Shop details confirmed successfully!"
+msgstr "കടയുടെ വിവരങ്ങൾ വിജയകരമായി സ്ഥിരീകരിച്ചു!"
+
+msgid "Participation agreement accepted!"
+msgstr "പങ്കാളിത്ത കരാർ സ്വീകരിച്ചു!"
+
+msgid "Request Changes"
+msgstr "മാറ്റങ്ങൾ ആവശ്യപ്പെടുക"
+
+msgid "Submit Change Request"
+msgstr "മാറ്റങ്ങൾക്കുള്ള അപേക്ഷ സമർപ്പിക്കുക"
+
+msgid "Catalog Overview"
+msgstr "കാറ്റലോഗ് അവലോകനം"
+
+msgid "Available Products"
+msgstr "ലഭ്യമായ ഉൽപ്പന്നങ്ങൾ"
+
+msgid "Add Product to My Catalog"
+msgstr "എന്റെ കാറ്റലോഗിലേക്ക് ചേർക്കുക"
+
+msgid "Loading catalog items..."
+msgstr "ഉൽപ്പന്നങ്ങൾ ലഭ്യമാക്കുന്നു..."
+
+msgid "Edit Product"
+msgstr "ഉൽപ്പന്നം എഡിറ്റ് ചെയ്യുക"
+
+msgid "Remove"
+msgstr "നീക്കം ചെയ്യുക"
+
+msgid "Active"
+msgstr "സജീവം"
+
+msgid "Active Listed"
+msgstr "പട്ടികയിൽ ഉള്ളവ"
+
+msgid "Brand (Optional)"
+msgstr "ബ്രാൻഡ് (നിർബന്ധമില്ല)"
+
+msgid "Category (Optional)"
+msgstr "വിഭാഗം (നിർബന്ധമില്ല)"
+
+msgid "Barcode / SKU (Optional)"
+msgstr "ബാർകോഡ് / SKU (നിർബന്ധമില്ല)"
+
+msgid "Barcode / SKU"
+msgstr "ബാർകോഡ് / SKU"
+
+msgid "Approximate Unit/Size (Optional)"
+msgstr "അളവ് / യൂണിറ്റ് (നിർബന്ധമില്ല)"
+
+msgid "Additional Notes / Description (Optional)"
+msgstr "കൂടുതൽ വിവരങ്ങൾ (നിർബന്ധമില്ല)"
+
+msgid "Catalog product updated successfully!"
+msgstr "കാറ്റലോഗ് ഉൽപ്പന്നം വിജയകരമായി പുതുക്കി!"
+
+msgid "Product removed from your catalog successfully!"
+msgstr "ഉൽപ്പന്നം കാറ്റലോഗിൽ നിന്ന് വിജയകരമായി നീക്കം ചെയ്തു!"
+
+msgid "Failed to add product to catalog."
+msgstr "കാറ്റലോഗിലേക്ക് ഉൽപ്പന്നം ചേർക്കാൻ സാധിച്ചില്ല."
+
+msgid "Failed to update catalog product."
+msgstr "കാറ്റലോഗ് ഉൽപ്പന്നം പുതുക്കാൻ സാധിച്ചില്ല."
+
+msgid "Failed to remove product from catalog."
+msgstr "ഉൽപ്പന്നം നീക്കം ചെയ്യാൻ സാധിച്ചില്ല."
+
+msgid "Failed to submit product request. Please try again."
+msgstr "അപേക്ഷ സമർപ്പിക്കാൻ സാധിച്ചില്ല. വീണ്ടും ശ്രമിക്കുക."
+
+msgid "A merchant with this username already exists."
+msgstr "ഈ യൂസർനെയിമിൽ മറ്റൊരു വ്യാപാരി നിലവിലുണ്ട്."
+
+msgid "A merchant with this email address already exists."
+msgstr "ഈ ഇമെയിൽ വിലാസത്തിൽ മറ്റൊരു വ്യാപാരി നിലവിലുണ്ട്."
+
+msgid "Category:"
+msgstr "വിഭാഗം:"
+
+msgid "Address:"
+msgstr "വിലാസം:"
 

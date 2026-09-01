@@ -238,9 +238,15 @@ class SOM_Merchant_Catalog {
 	 * @return string HTML content.
 	 */
 	public static function render_portal_nav( $active_tab = 'catalog' ) {
-		$dashboard_url = home_url( '/merchant-dashboard/' );
-		$catalog_url   = home_url( '/merchant-catalog/' );
-		$logout_url    = wp_logout_url( home_url( '/merchant-login/' ) );
+		if ( function_exists( 'nm_get_page_link' ) ) {
+			$dashboard_url = nm_get_page_link( 'merchant-dashboard' );
+			$catalog_url   = nm_get_page_link( 'merchant-catalog' );
+			$logout_url    = wp_logout_url( nm_get_page_link( 'merchant-login' ) );
+		} else {
+			$dashboard_url = home_url( '/merchant-dashboard/' );
+			$catalog_url   = home_url( '/merchant-catalog/' );
+			$logout_url    = wp_logout_url( home_url( '/merchant-login/' ) );
+		}
 
 		$user_id      = get_current_user_id();
 		$current_lang = get_user_meta( $user_id, 'nm_preferred_language', true );
@@ -267,13 +273,7 @@ class SOM_Merchant_Catalog {
 					&#128221; <?php esc_html_e( 'My Product Requests', 'nearmart' ); ?>
 				</a>
 
-				<!-- Phase ML-2 Language Switcher Dropdown (With Scalable Min-Width & Line-Height) -->
-				<div class="som-lang-switcher" style="display:inline-flex; align-items:center; margin-right:4px;">
-					<select id="som_merchant_lang_select" class="som-select" style="min-width:115px; height:36px; padding:4px 10px; font-size:0.88rem; font-weight:600; line-height:1.4; border-radius:6px; border:1px solid #cbd5e1; cursor:pointer; background:#ffffff; color:#1e293b; vertical-align:middle;">
-						<option value="en" <?php selected( $current_lang, 'en' ); ?>>English</option>
-						<option value="ml" <?php selected( $current_lang, 'ml' ); ?>>മലയാളം</option>
-					</select>
-				</div>
+
 
 				<a href="<?php echo esc_url( $logout_url ); ?>" class="som-nav-link logout">
 					&#128682; <?php esc_html_e( 'Log Out', 'nearmart' ); ?>
@@ -281,32 +281,7 @@ class SOM_Merchant_Catalog {
 			</div>
 		</div>
 
-		<!-- Universal Portal Header Language Change JS Handler -->
-		<script>
-		if (typeof jQuery !== 'undefined') {
-			jQuery(document).ready(function($) {
-				$(document).off('change.somLang').on('change.somLang', '#som_merchant_lang_select', function() {
-					var langVal = $(this).val();
-					var ajaxUrl = '<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>';
-					var nonceVal = '<?php echo esc_js( $nonce ); ?>';
-					$.ajax({
-						url: ajaxUrl,
-						type: 'POST',
-						data: {
-							action: 'som_merchant_set_language',
-							nonce: nonceVal,
-							lang: langVal
-						},
-						success: function(res) {
-							if (res && res.success) {
-								window.location.reload();
-							}
-						}
-					});
-				});
-			});
-		}
-		</script>
+
 		<?php
 		return ob_get_clean();
 	}
