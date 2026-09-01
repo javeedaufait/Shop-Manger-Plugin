@@ -349,11 +349,11 @@ class SOM_Admin_Product_Requests {
 				</div>
 
 				<!-- Action Mode Selector -->
-				<div style="display: flex; gap: 8px; border-bottom: 2px solid #e2e8f0; margin-bottom: 16px;">
-					<button type="button" id="som_req_tab_create" class="button button-primary" style="font-weight: 700;">
+				<div class="som-modal-tab-bar">
+					<button type="button" id="som_req_tab_create" class="button button-primary som-modal-tab-btn">
 						&#10133; <?php esc_html_e( 'Create New Master Product', 'nearmart' ); ?>
 					</button>
-					<button type="button" id="som_req_tab_link" class="button button-secondary" style="font-weight: 700;">
+					<button type="button" id="som_req_tab_link" class="button button-secondary som-modal-tab-btn">
 						&#128279; <?php esc_html_e( 'Link Existing Master / Update Status', 'nearmart' ); ?>
 					</button>
 				</div>
@@ -371,7 +371,7 @@ class SOM_Admin_Product_Requests {
 						<input type="text" id="som_create_title_ml" class="som-input" placeholder="e.g. ഓർഗാനിക് മൾട്ടിഗ്രെയിൻ ആട്ട 5kg" />
 					</div>
 
-					<div class="som-form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+					<div class="som-form-row som-grid-2col">
 						<div>
 							<label for="som_create_category" class="som-label"><?php esc_html_e( 'Category', 'nearmart' ); ?></label>
 							<input type="text" id="som_create_category" class="som-input" />
@@ -382,7 +382,7 @@ class SOM_Admin_Product_Requests {
 						</div>
 					</div>
 
-					<div class="som-form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+					<div class="som-form-row som-grid-2col">
 						<div>
 							<label for="som_create_unit" class="som-label"><?php esc_html_e( 'Unit / Size', 'nearmart' ); ?></label>
 							<input type="text" id="som_create_unit" class="som-input" />

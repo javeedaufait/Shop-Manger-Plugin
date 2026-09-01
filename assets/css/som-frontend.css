@@ -22,8 +22,12 @@
 	box-sizing: border-box;
 }
 
-.som-onboarding-card *, .som-merchant-card *, .som-merchant-dashboard-wrap * {
-	box-sizing: border-box;
+.som-onboarding-card, .som-onboarding-card *,
+.som-merchant-card, .som-merchant-card *,
+.som-merchant-dashboard-wrap, .som-merchant-dashboard-wrap *,
+.som-modal-overlay, .som-modal-overlay *,
+.som-modal-content, .som-modal-content * {
+	box-sizing: border-box !important;
 }
 
 .som-card-header, .som-dashboard-header {
@@ -721,11 +725,15 @@
 	background: #fee2e2;
 }
 
-/* Modals */
+/* ==========================================================================
+   MODALS (ADMIN & FRONTEND)
+   ========================================================================== */
 .som-modal-overlay {
 	position: fixed;
 	top: 0;
 	left: 0;
+	right: 0;
+	bottom: 0;
 	width: 100%;
 	height: 100%;
 	background: rgba(15, 23, 42, 0.6);
@@ -735,18 +743,32 @@
 	align-items: center;
 	justify-content: center;
 	padding: 20px;
+	box-sizing: border-box;
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+
+/* Ensure hidden modals stay hidden */
+.som-modal-overlay[style*="display: none"],
+.som-modal-overlay[style*="display:none"],
+.som-modal-overlay.is-hidden {
+	display: none !important;
 }
 
 .som-modal-content {
-	background: #ffffff;
+	background: #ffffff !important;
+	border: 1px solid #c3c4c7;
 	border-radius: 12px;
 	width: 100%;
-	max-width: 580px;
+	max-width: 640px;
 	max-height: 90vh;
 	overflow-y: auto;
-	box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+	overflow-x: hidden;
+	box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.25);
 	padding: 24px;
 	position: relative;
+	margin: auto;
+	box-sizing: border-box;
 }
 
 .som-modal-header {
@@ -771,6 +793,73 @@
 	cursor: pointer;
 	color: #64748b;
 	padding: 4px;
+}
+
+.som-modal-tab-bar {
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
+	border-bottom: 2px solid #e2e8f0;
+	margin-bottom: 16px;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.som-modal-tab-btn {
+	font-weight: 700 !important;
+	white-space: normal !important;
+	line-height: 1.3 !important;
+	padding: 8px 12px !important;
+	height: auto !important;
+	min-height: 38px !important;
+	text-align: center !important;
+	flex: 1 1 140px !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	box-sizing: border-box !important;
+	max-width: 100% !important;
+}
+
+.som-modal-tab-btn.button-primary {
+	background: #2271b1 !important;
+	border-color: #2271b1 !important;
+	color: #ffffff !important;
+}
+
+.som-modal-tab-btn.button-secondary {
+	background: #f6f7f7 !important;
+	border-color: #dcdcde !important;
+	color: #2c3338 !important;
+}
+
+.som-modal-tab-btn.button-secondary:hover {
+	background: #f0f0f1 !important;
+	border-color: #0a4b78 !important;
+	color: #0a4b78 !important;
+}
+
+.som-grid-2col {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 12px;
+	margin-bottom: 12px;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.som-grid-2col > * {
+	min-width: 0;
+	max-width: 100%;
+	box-sizing: border-box;
+}
+
+.som-modal-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+	flex-wrap: wrap;
+	margin-top: 16px;
 }
 
 .som-master-search-results {
@@ -798,26 +887,65 @@
 
 .som-master-item-info {
 	display: flex;
-	align-items: center;
-	gap: 10px;
+	flex-direction: column;
+	gap: 2px;
 }
 
-.som-catalog-pagination {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding-top: 14px;
-	border-top: 1px solid #e2e8f0;
-	font-size: 0.9rem;
+.som-master-item-title {
+	font-weight: 600;
+	color: #0f172a;
+}
+
+.som-master-item-meta {
+	font-size: 0.8rem;
 	color: #64748b;
 }
 
-.som-pagination-btns {
-	display: flex;
-	gap: 8px;
+.som-master-item-price {
+	font-size: 0.85rem;
+	font-weight: 700;
+	color: #15803d;
 }
 
-/* Portal Navigation Header */
+@media (max-width: 600px) {
+	.som-modal-overlay {
+		padding: 8px;
+	}
+	.som-modal-content {
+		width: 100% !important;
+		max-width: 100% !important;
+		padding: 16px 12px !important;
+		max-height: 94vh !important;
+		border-radius: 8px !important;
+	}
+	.som-modal-tab-bar {
+		flex-direction: column;
+		gap: 6px;
+	}
+	.som-modal-tab-btn {
+		width: 100% !important;
+		flex: 1 1 100% !important;
+	}
+	.som-grid-2col {
+		grid-template-columns: 1fr !important;
+		gap: 8px !important;
+	}
+	.som-modal-actions {
+		flex-direction: column-reverse;
+		width: 100%;
+	}
+	.som-modal-actions button,
+	.som-modal-actions a {
+		width: 100% !important;
+		text-align: center !important;
+		justify-content: center !important;
+		padding: 10px !important;
+		height: auto !important;
+		min-height: 40px !important;
+		box-sizing: border-box !important;
+	}
+}
+
 .som-portal-nav {
 	display: flex;
 	align-items: center;

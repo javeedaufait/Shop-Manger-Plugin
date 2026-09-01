@@ -446,6 +446,7 @@ class SOM_Admin_Catalog {
 			return;
 		}
 		wp_enqueue_script( 'jquery' );
+		wp_enqueue_style( 'som-frontend-style', SOM_PLUGIN_URL . 'assets/css/som-frontend.css', array(), SOM_VERSION );
 	}
 
 	/**
@@ -455,6 +456,9 @@ class SOM_Admin_Catalog {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'Unauthorized access.', 'nearmart' ) );
 		}
+
+		wp_enqueue_script( 'jquery' );
+		wp_enqueue_style( 'som-frontend-style', SOM_PLUGIN_URL . 'assets/css/som-frontend.css', array(), SOM_VERSION );
 
 		$shops = get_posts(
 			array(
@@ -561,8 +565,8 @@ class SOM_Admin_Catalog {
 		</div>
 
 		<!-- ADMIN MODAL 1: Link Standalone Product to Master -->
-		<div id="som_admin_link_modal" class="som-modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:99999; align-items:center; justify-content:center;">
-			<div style="background:#fff; width:100%; max-width:600px; border-radius:8px; padding:20px; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
+		<div id="som_admin_link_modal" class="som-modal-overlay" style="display:none;">
+			<div class="som-modal-content" style="max-width:600px;">
 				<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:12px; margin-bottom:16px;">
 					<h3 style="margin:0;">&#128279; <?php esc_html_e( 'Link Shop Product to WooCommerce Master Product', 'nearmart' ); ?></h3>
 					<button type="button" class="button-link" onclick="document.getElementById('som_admin_link_modal').style.display='none';">&times;</button>
@@ -583,7 +587,7 @@ class SOM_Admin_Catalog {
 					<input type="hidden" id="som_admin_link_selected_mpid" value="" />
 				</div>
 
-				<div style="display:flex; justify-content:flex-end; gap:10px;">
+				<div class="som-modal-actions">
 					<button type="button" class="button" onclick="document.getElementById('som_admin_link_modal').style.display='none';">Cancel</button>
 					<button type="button" id="som_admin_btn_confirm_link" class="button button-primary" disabled>&#128279; Link Product</button>
 				</div>
@@ -591,19 +595,19 @@ class SOM_Admin_Catalog {
 		</div>
 
 		<!-- ADMIN MODAL 2: Dual-Mode Add Product to Shop Catalog -->
-		<div id="som_admin_add_modal" class="som-modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:99999; align-items:center; justify-content:center;">
-			<div style="background:#fff; width:100%; max-width:640px; border-radius:8px; padding:20px; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
+		<div id="som_admin_add_modal" class="som-modal-overlay" style="display:none;">
+			<div class="som-modal-content" style="max-width:640px;">
 				<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:12px; margin-bottom:16px;">
 					<h3 style="margin:0;">&#10133; <?php esc_html_e( 'Add Product to Shop Catalog', 'nearmart' ); ?></h3>
 					<button type="button" class="button-link" onclick="document.getElementById('som_admin_add_modal').style.display='none';">&times;</button>
 				</div>
 
 				<!-- Dual Tab Switcher -->
-				<div style="display:flex; gap:10px; border-bottom:2px solid #e2e8f0; margin-bottom:16px;">
-					<button type="button" id="som_admin_tab_btn_master" class="button button-secondary active" style="font-weight:700;">
+				<div class="som-modal-tab-bar">
+					<button type="button" id="som_admin_tab_btn_master" class="button button-secondary active som-modal-tab-btn">
 						&#128065; Search Existing Master Product
 					</button>
-					<button type="button" id="som_admin_tab_btn_standalone" class="button button-secondary" style="font-weight:700;">
+					<button type="button" id="som_admin_tab_btn_standalone" class="button button-secondary som-modal-tab-btn">
 						&#10133; Add Standalone New Product
 					</button>
 				</div>
@@ -620,7 +624,7 @@ class SOM_Admin_Catalog {
 						<input type="hidden" id="som_admin_add_pid" value="" />
 						<p style="font-weight:700; color:#16a34a; margin-bottom:12px;" id="som_admin_add_selected_title"></p>
 
-						<div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+						<div class="som-grid-2col">
 							<div>
 								<label style="font-weight:700; display:block; font-size:0.85rem;">Shop Price (₹) *</label>
 								<input type="number" step="0.01" id="som_admin_add_price" class="regular-text" style="width:100%;" required />
@@ -631,7 +635,7 @@ class SOM_Admin_Catalog {
 							</div>
 						</div>
 
-						<div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+						<div class="som-grid-2col">
 							<div>
 								<label style="font-weight:700; display:block; font-size:0.85rem;">Availability</label>
 								<select id="som_admin_add_stock_status" style="width:100%;">
@@ -645,7 +649,7 @@ class SOM_Admin_Catalog {
 							</div>
 						</div>
 
-						<div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+						<div class="som-grid-2col">
 							<div>
 								<label style="font-weight:700; display:block; font-size:0.85rem;">Shop SKU</label>
 								<input type="text" id="som_admin_add_shop_sku" class="regular-text" style="width:100%;" />
@@ -659,7 +663,7 @@ class SOM_Admin_Catalog {
 							</div>
 						</div>
 
-						<div style="display:flex; justify-content:flex-end; gap:10px;">
+						<div class="som-modal-actions">
 							<button type="button" class="button" onclick="document.getElementById('som_admin_add_modal').style.display='none';">Cancel</button>
 							<button type="submit" id="som_admin_btn_save_add" class="button button-primary">Save Master Product to Shop</button>
 						</div>
@@ -674,7 +678,7 @@ class SOM_Admin_Catalog {
 							<input type="text" id="som_admin_st_name" class="regular-text" style="width:100%;" required placeholder="e.g. Fresh Organic Milk 1L" />
 						</div>
 
-						<div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+						<div class="som-grid-2col">
 							<div>
 								<label style="font-weight:700; display:block; font-size:0.85rem;">Category</label>
 								<input type="text" id="som_admin_st_category" class="regular-text" style="width:100%;" placeholder="e.g. Dairy" />
@@ -685,7 +689,7 @@ class SOM_Admin_Catalog {
 							</div>
 						</div>
 
-						<div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+						<div class="som-grid-2col">
 							<div>
 								<label style="font-weight:700; display:block; font-size:0.85rem;">Unit / Size</label>
 								<input type="text" id="som_admin_st_unit" class="regular-text" style="width:100%;" placeholder="e.g. 1L, 500g" />
@@ -696,7 +700,7 @@ class SOM_Admin_Catalog {
 							</div>
 						</div>
 
-						<div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+						<div class="som-grid-2col">
 							<div>
 								<label style="font-weight:700; display:block; font-size:0.85rem;">Shop Price (₹) *</label>
 								<input type="number" step="0.01" id="som_admin_st_price" class="regular-text" style="width:100%;" required placeholder="0.00" />
@@ -707,7 +711,7 @@ class SOM_Admin_Catalog {
 							</div>
 						</div>
 
-						<div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+						<div class="som-grid-2col">
 							<div>
 								<label style="font-weight:700; display:block; font-size:0.85rem;">Availability</label>
 								<select id="som_admin_st_stock_status" style="width:100%;">
@@ -721,7 +725,7 @@ class SOM_Admin_Catalog {
 							</div>
 						</div>
 
-						<div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+						<div class="som-grid-2col">
 							<div>
 								<label style="font-weight:700; display:block; font-size:0.85rem;">Shop SKU</label>
 								<input type="text" id="som_admin_st_shop_sku" class="regular-text" style="width:100%;" />
@@ -735,7 +739,7 @@ class SOM_Admin_Catalog {
 							</div>
 						</div>
 
-						<div style="display:flex; justify-content:flex-end; gap:10px;">
+						<div class="som-modal-actions">
 							<button type="button" class="button" onclick="document.getElementById('som_admin_add_modal').style.display='none';">Cancel</button>
 							<button type="submit" id="som_admin_btn_save_standalone" class="button button-primary">Save Standalone Product to Shop</button>
 						</div>
@@ -745,8 +749,8 @@ class SOM_Admin_Catalog {
 		</div>
 
 		<!-- ADMIN MODAL 3: Edit Shop Product -->
-		<div id="som_admin_edit_modal" class="som-modal-overlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:99999; align-items:center; justify-content:center;">
-			<div style="background:#fff; width:100%; max-width:600px; border-radius:8px; padding:20px; box-shadow:0 10px 25px rgba(0,0,0,0.2);">
+		<div id="som_admin_edit_modal" class="som-modal-overlay" style="display:none;">
+			<div class="som-modal-content" style="max-width:600px;">
 				<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #e2e8f0; padding-bottom:12px; margin-bottom:16px;">
 					<h3 style="margin:0;">&#9998; <?php esc_html_e( 'Edit Shop Catalog Entry', 'nearmart' ); ?></h3>
 					<button type="button" class="button-link" onclick="document.getElementById('som_admin_edit_modal').style.display='none';">&times;</button>
@@ -765,7 +769,7 @@ class SOM_Admin_Catalog {
 							<label style="font-weight:700; display:block; font-size:0.85rem;">Product Name *</label>
 							<input type="text" id="som_admin_edit_custom_name" class="regular-text" style="width:100%;" />
 						</div>
-						<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+						<div class="som-grid-2col">
 							<div>
 								<label style="font-weight:700; display:block; font-size:0.85rem;">Category</label>
 								<input type="text" id="som_admin_edit_custom_category" class="regular-text" style="width:100%;" />
@@ -777,7 +781,7 @@ class SOM_Admin_Catalog {
 						</div>
 					</div>
 
-					<div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+					<div class="som-grid-2col">
 						<div>
 							<label style="font-weight:700; display:block; font-size:0.85rem;">Shop Price (₹) *</label>
 							<input type="number" step="0.01" id="som_admin_edit_price" class="regular-text" style="width:100%;" required />
@@ -788,7 +792,7 @@ class SOM_Admin_Catalog {
 						</div>
 					</div>
 
-					<div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+					<div class="som-grid-2col">
 						<div>
 							<label style="font-weight:700; display:block; font-size:0.85rem;">Availability</label>
 							<select id="som_admin_edit_stock_status" style="width:100%;">
@@ -802,7 +806,7 @@ class SOM_Admin_Catalog {
 						</div>
 					</div>
 
-					<div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+					<div class="som-grid-2col">
 						<div>
 							<label style="font-weight:700; display:block; font-size:0.85rem;">Shop SKU</label>
 							<input type="text" id="som_admin_edit_shop_sku" class="regular-text" style="width:100%;" />
@@ -816,7 +820,7 @@ class SOM_Admin_Catalog {
 						</div>
 					</div>
 
-					<div style="display:flex; justify-content:flex-end; gap:10px;">
+					<div class="som-modal-actions">
 						<button type="button" class="button" onclick="document.getElementById('som_admin_edit_modal').style.display='none';">Cancel</button>
 						<button type="submit" id="som_admin_btn_save_edit" class="button button-primary">Update Product</button>
 					</div>
