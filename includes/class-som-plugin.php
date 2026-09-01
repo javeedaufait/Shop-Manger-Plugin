@@ -60,6 +60,7 @@ class SOM_Plugin {
 		SOM_Product_Request_Repository::init();
 		SOM_Admin_Product_Requests::init();
 		SOM_REST_API::init();
+		SOM_Mobile_Auth::init();
 		SOM_Catalog_Repository::init();
 		SOM_Master_Product::init();
 		SOM_Catalog_Permissions::init();
