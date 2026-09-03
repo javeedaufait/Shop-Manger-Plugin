@@ -99,7 +99,7 @@ class SOM_Admin_Manager {
 			wp_set_object_terms( $shop_id, 'verified', 'shop_status' );
 
 			// Evaluate commitment transition.
-			if ( class_exists( 'SOM_Merchant_Dashboard' ) ) {
+			if ( class_exists( 'SOM_Merchant_Dashboard' ) && method_exists( 'SOM_Merchant_Dashboard', 'evaluate_commitment_status' ) ) {
 				SOM_Merchant_Dashboard::evaluate_commitment_status( $shop_id );
 			}
 
@@ -128,7 +128,7 @@ class SOM_Admin_Manager {
 					update_post_meta( $shop_id, 'som_verified_at', current_time( 'mysql' ) );
 					update_post_meta( $shop_id, 'som_verified_by', $user_id );
 				}
-				if ( class_exists( 'SOM_Merchant_Dashboard' ) ) {
+				if ( class_exists( 'SOM_Merchant_Dashboard' ) && method_exists( 'SOM_Merchant_Dashboard', 'evaluate_commitment_status' ) ) {
 					SOM_Merchant_Dashboard::evaluate_commitment_status( $shop_id );
 				}
 			}

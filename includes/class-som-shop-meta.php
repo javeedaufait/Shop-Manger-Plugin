@@ -432,7 +432,7 @@ class SOM_Shop_Meta {
 		}
 
 		// Re-evaluate commitment status in case status was set to Verified in admin.
-		if ( class_exists( 'SOM_Merchant_Dashboard' ) ) {
+		if ( class_exists( 'SOM_Merchant_Dashboard' ) && method_exists( 'SOM_Merchant_Dashboard', 'evaluate_commitment_status' ) ) {
 			SOM_Merchant_Dashboard::evaluate_commitment_status( $post_id );
 		}
 	}

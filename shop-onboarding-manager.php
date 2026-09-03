@@ -36,6 +36,7 @@ require_once SOM_PLUGIN_DIR . 'includes/class-som-product-request-repository.php
 require_once SOM_PLUGIN_DIR . 'includes/class-som-admin-product-requests.php';
 require_once SOM_PLUGIN_DIR . 'includes/class-som-rest-api.php';
 require_once SOM_PLUGIN_DIR . 'includes/class-som-mobile-auth.php';
+require_once SOM_PLUGIN_DIR . 'includes/class-som-mobile-shops.php';
 require_once SOM_PLUGIN_DIR . 'includes/class-som-catalog-repository.php';
 require_once SOM_PLUGIN_DIR . 'includes/class-som-master-product.php';
 require_once SOM_PLUGIN_DIR . 'includes/class-som-catalog-permissions.php';

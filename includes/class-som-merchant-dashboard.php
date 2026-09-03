@@ -36,6 +36,28 @@ class SOM_Merchant_Dashboard {
 	}
 
 	/**
+	 * Evaluate and update shop status to 'committed' if conditions are met.
+	 *
+	 * Conditions:
+	 * 1. Shop has taxonomy status 'verified'.
+	 * 2. Merchant has accepted agreement (som_agreement_accepted == true).
+	 *
+	 * @param int $shop_id Shop Post ID.
+	 * @return bool Whether status was changed to committed.
+	 */
+	public static function evaluate_commitment_status( $shop_id ) {
+		$agreement_accepted = (bool) get_post_meta( $shop_id, 'som_agreement_accepted', true );
+		$is_verified        = has_term( 'verified', 'shop_status', $shop_id );
+
+		if ( $is_verified && $agreement_accepted ) {
+			wp_set_object_terms( $shop_id, 'committed', 'shop_status' );
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * AJAX endpoint: Confirm Shop Details.
 	 */
 	public static function ajax_confirm_details() {
@@ -72,6 +94,8 @@ class SOM_Merchant_Dashboard {
 		update_post_meta( $shop_id, 'som_agreement_version', '1.0' );
 		update_post_meta( $shop_id, 'som_agreement_accepted_at', current_time( 'mysql' ) );
 		update_post_meta( $shop_id, 'som_agreement_accepted_by', $user_id );
+
+		self::evaluate_commitment_status( $shop_id );
 
 		wp_send_json_success( array( 'message' => __( 'Participation agreement accepted successfully!', 'nearmart' ) ) );
 	}
