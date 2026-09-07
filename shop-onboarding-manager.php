@@ -29,6 +29,7 @@ require_once SOM_PLUGIN_DIR . 'includes/class-som-shop-meta.php';
 require_once SOM_PLUGIN_DIR . 'includes/class-som-merchant-manager.php';
 require_once SOM_PLUGIN_DIR . 'includes/class-som-merchant-dashboard.php';
 require_once SOM_PLUGIN_DIR . 'includes/class-som-merchant-catalog.php';
+require_once SOM_PLUGIN_DIR . 'includes/class-som-merchant-orders.php';
 require_once SOM_PLUGIN_DIR . 'includes/class-som-form-handler.php';
 require_once SOM_PLUGIN_DIR . 'includes/class-som-admin-manager.php';
 require_once SOM_PLUGIN_DIR . 'includes/class-som-admin-catalog.php';

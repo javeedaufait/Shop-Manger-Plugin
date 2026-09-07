@@ -1089,3 +1089,233 @@
 		grid-template-columns: 1fr;
 	}
 }
+
+/* ==========================================================================
+   Merchant Orders Management Styles (APP-8.1)
+   ========================================================================== */
+
+.som-orders-filter-bar {
+	display: flex;
+	gap: 12px;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 16px;
+}
+
+.som-orders-search-wrap {
+	flex: 1;
+	min-width: 280px;
+}
+
+.som-orders-filters {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+	align-items: center;
+}
+
+.som-orders-table td {
+	vertical-align: middle;
+	padding: 12px 10px;
+}
+
+.som-orders-table tr:hover {
+	background-color: #f8fafc;
+}
+
+.som-badge.pickup-badge {
+	background: #eef2ff;
+	color: #4338ca;
+	border: 1px dashed #a5b4fc;
+	font-family: monospace;
+	font-size: 0.8rem;
+	font-weight: 700;
+	padding: 2px 6px;
+	display: inline-block;
+	margin-top: 3px;
+}
+
+.som-badge.purple {
+	background: #f3e8ff;
+	color: #7e22ce;
+	border: 1px solid #e9d5ff;
+}
+
+.som-badge.orange {
+	background: #fff7ed;
+	color: #c2410c;
+	border: 1px solid #ffedd5;
+}
+
+.som-badge.blue {
+	background: #eff6ff;
+	color: #1d4ed8;
+	border: 1px solid #dbeafe;
+}
+
+.som-badge.gray {
+	background: #f1f5f9;
+	color: #475569;
+	border: 1px solid #e2e8f0;
+}
+
+/* Order Details Modal Grid */
+.som-order-meta-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 14px;
+	margin-bottom: 16px;
+}
+
+.som-order-meta-box {
+	background: #f8fafc;
+	border: 1px solid #e2e8f0;
+	border-radius: 10px;
+	padding: 14px 16px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.som-order-meta-box.pickup-code-box {
+	background: #eef2ff;
+	border: 2px dashed #c7d2fe;
+	text-align: center;
+	align-items: center;
+}
+
+.meta-box-label {
+	font-size: 0.76rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	color: #64748b;
+	margin-bottom: 6px;
+}
+
+.meta-box-code {
+	font-size: 1.6rem;
+	font-weight: 900;
+	color: #312e81;
+	font-family: monospace;
+	letter-spacing: 1px;
+	margin: 4px 0 6px;
+}
+
+.meta-box-hint {
+	font-size: 0.75rem;
+	color: #4338ca;
+	font-weight: 600;
+}
+
+.meta-info-row {
+	font-size: 0.88rem;
+	color: #1e293b;
+	margin-bottom: 6px;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.meta-info-note {
+	background: #ffffff;
+	border: 1px solid #e2e8f0;
+	border-radius: 6px;
+	padding: 8px 10px;
+	font-size: 0.82rem;
+	color: #334155;
+	font-style: italic;
+	margin-top: 6px;
+}
+
+.status-summary-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 6px;
+	font-size: 0.84rem;
+}
+
+.status-summary-row.wc-row {
+	border-top: 1px solid #e2e8f0;
+	padding-top: 6px;
+	margin-top: 6px;
+}
+
+.status-title {
+	color: #64748b;
+	font-weight: 600;
+}
+
+/* Totals Summary */
+.som-order-totals-summary {
+	background: #f8fafc;
+	border: 1px solid #e2e8f0;
+	border-radius: 8px;
+	padding: 14px 18px;
+	margin-top: 16px;
+}
+
+.totals-line {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-size: 0.9rem;
+	color: #475569;
+	margin-bottom: 6px;
+}
+
+.totals-line.provisional-note {
+	background: #faf5ff;
+	border: 1px solid #e9d5ff;
+	border-radius: 6px;
+	padding: 8px 12px;
+	margin: 8px 0;
+	font-size: 0.82rem;
+}
+
+.totals-line.grand-total {
+	border-top: 1.5px solid #cbd5e1;
+	padding-top: 10px;
+	margin-top: 8px;
+	font-size: 1.05rem;
+	font-weight: 800;
+	color: #0f172a;
+}
+
+.totals-line.grand-total .total-price {
+	font-size: 1.3rem;
+	font-weight: 900;
+	color: #059669;
+}
+
+/* APP-8.1 Foundation Scope Notice */
+.som-scope-notice {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	background: #eff6ff;
+	border: 1px solid #bfdbfe;
+	border-radius: 8px;
+	padding: 10px 14px;
+	font-size: 0.82rem;
+	color: #1e40af;
+	margin-top: 14px;
+	line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+	.som-orders-filter-bar {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.som-orders-filters {
+		flex-direction: column;
+	}
+
+	.som-orders-filters select {
+		width: 100%;
+	}
+}

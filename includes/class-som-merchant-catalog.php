@@ -240,10 +240,12 @@ class SOM_Merchant_Catalog {
 	public static function render_portal_nav( $active_tab = 'catalog' ) {
 		if ( function_exists( 'nm_get_page_link' ) ) {
 			$dashboard_url = nm_get_page_link( 'merchant-dashboard' );
+			$orders_url    = nm_get_page_link( 'merchant-orders' );
 			$catalog_url   = nm_get_page_link( 'merchant-catalog' );
 			$logout_url    = wp_logout_url( nm_get_page_link( 'merchant-login' ) );
 		} else {
 			$dashboard_url = home_url( '/merchant-dashboard/' );
+			$orders_url    = home_url( '/merchant-orders/' );
 			$catalog_url   = home_url( '/merchant-catalog/' );
 			$logout_url    = wp_logout_url( home_url( '/merchant-login/' ) );
 		}
@@ -252,9 +254,10 @@ class SOM_Merchant_Catalog {
 		$current_lang = get_user_meta( $user_id, 'nm_preferred_language', true );
 		$current_lang = in_array( $current_lang, array( 'en', 'ml' ), true ) ? $current_lang : 'en';
 
-		$dash_active = 'dashboard' === $active_tab ? ' active' : '';
-		$cat_active  = 'catalog' === $active_tab ? ' active' : '';
-		$nonce       = wp_create_nonce( 'som_merchant_dashboard_nonce' );
+		$dash_active   = 'dashboard' === $active_tab ? ' active' : '';
+		$orders_active = 'orders' === $active_tab ? ' active' : '';
+		$cat_active    = 'catalog' === $active_tab ? ' active' : '';
+		$nonce         = wp_create_nonce( 'som_merchant_dashboard_nonce' );
 
 		ob_start();
 		?>
@@ -266,14 +269,15 @@ class SOM_Merchant_Catalog {
 				<a href="<?php echo esc_url( $dashboard_url ); ?>" class="som-nav-link<?php echo esc_attr( $dash_active ); ?>">
 					&#127968; <?php esc_html_e( 'Dashboard', 'nearmart' ); ?>
 				</a>
+				<a href="<?php echo esc_url( $orders_url ); ?>" class="som-nav-link<?php echo esc_attr( $orders_active ); ?>">
+					&#128230; <?php esc_html_e( 'Orders', 'nearmart' ); ?>
+				</a>
 				<a href="<?php echo esc_url( $catalog_url ); ?>" class="som-nav-link<?php echo esc_attr( $cat_active ); ?>">
 					&#128722; <?php esc_html_e( 'My Catalog', 'nearmart' ); ?>
 				</a>
 				<a href="#" id="som_btn_open_my_requests" class="som-nav-link">
 					&#128221; <?php esc_html_e( 'My Product Requests', 'nearmart' ); ?>
 				</a>
-
-
 
 				<a href="<?php echo esc_url( $logout_url ); ?>" class="som-nav-link logout">
 					&#128682; <?php esc_html_e( 'Log Out', 'nearmart' ); ?>

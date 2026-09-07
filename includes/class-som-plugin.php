@@ -54,6 +54,7 @@ class SOM_Plugin {
 		SOM_Merchant_Manager::init();
 		SOM_Merchant_Dashboard::init();
 		SOM_Merchant_Catalog::init();
+		SOM_Merchant_Orders::init();
 		SOM_Form_Handler::init();
 		SOM_Admin_Manager::init();
 		SOM_Admin_Catalog::init();
@@ -69,6 +70,16 @@ class SOM_Plugin {
 		SOM_Catalog_Permissions::init();
 
 		add_action( 'init', array( __CLASS__, 'register_catalog_rewrites' ) );
+		add_action( 'init', array( __CLASS__, 'ensure_portal_pages_exist' ) );
+	}
+
+	/**
+	 * Ensure essential portal pages exist automatically.
+	 */
+	public static function ensure_portal_pages_exist() {
+		if ( ! get_page_by_path( 'merchant-orders' ) ) {
+			self::create_merchant_orders_page();
+		}
 	}
 
 		/**
@@ -175,6 +186,7 @@ class SOM_Plugin {
 		self::create_merchant_login_page();
 		self::create_merchant_dashboard_page();
 		self::create_merchant_catalog_page();
+		self::create_merchant_orders_page();
 		self::create_join_nearmart_page();
 
 		self::register_catalog_rewrites();
@@ -251,6 +263,25 @@ class SOM_Plugin {
 					'post_title'     => 'My Catalog',
 					'post_name'      => 'merchant-catalog',
 					'post_content'   => '[som_merchant_catalog]',
+					'post_status'    => 'publish',
+					'post_type'      => 'page',
+					'comment_status' => 'closed',
+				)
+			);
+		}
+	}
+
+	/**
+	 * Ensure the /merchant-orders/ page exists with [som_merchant_orders] shortcode.
+	 */
+	public static function create_merchant_orders_page() {
+		$page = get_page_by_path( 'merchant-orders' );
+		if ( ! $page ) {
+			wp_insert_post(
+				array(
+					'post_title'     => 'Store Orders',
+					'post_name'      => 'merchant-orders',
+					'post_content'   => '[som_merchant_orders]',
 					'post_status'    => 'publish',
 					'post_type'      => 'page',
 					'comment_status' => 'closed',

@@ -1034,9 +1034,12 @@ class SOM_Mobile_Orders {
 			);
 		}
 
-		$status = sanitize_text_field( (string) $request->get_param( 'status' ) );
-		$limit  = min( 50, max( 1, absint( $request->get_param( 'limit' ) ) ) );
-		$page   = max( 1, absint( $request->get_param( 'page' ) ) );
+		$status             = sanitize_text_field( (string) ( $request->get_param( 'fulfillment_status' ) ?: $request->get_param( 'status' ) ) );
+		$pricing_status     = sanitize_text_field( (string) $request->get_param( 'pricing_status' ) );
+		$payment_status     = sanitize_text_field( (string) $request->get_param( 'payment_status' ) );
+		$search             = sanitize_text_field( (string) ( $request->get_param( 'search' ) ?: $request->get_param( 'q' ) ) );
+		$limit              = min( 100, max( 1, absint( $request->get_param( 'limit' ) ?: 20 ) ) );
+		$page               = max( 1, absint( $request->get_param( 'page' ) ?: 1 ) );
 
 		$meta_query = array( 'relation' => 'AND' );
 		if ( $shop_id > 0 ) {
@@ -1047,10 +1050,26 @@ class SOM_Mobile_Orders {
 			);
 		}
 
-		if ( ! empty( $status ) && in_array( $status, self::FULFILLMENT_STATUSES, true ) ) {
+		if ( ! empty( $status ) && 'all' !== $status && in_array( $status, self::FULFILLMENT_STATUSES, true ) ) {
 			$meta_query[] = array(
 				'key'     => '_nearmart_fulfillment_status',
 				'value'   => $status,
+				'compare' => '=',
+			);
+		}
+
+		if ( ! empty( $pricing_status ) && 'all' !== $pricing_status && in_array( $pricing_status, self::PRICING_STATUSES, true ) ) {
+			$meta_query[] = array(
+				'key'     => '_nearmart_pricing_status',
+				'value'   => $pricing_status,
+				'compare' => '=',
+			);
+		}
+
+		if ( ! empty( $payment_status ) && 'all' !== $payment_status && in_array( $payment_status, self::PAYMENT_STATUSES, true ) ) {
+			$meta_query[] = array(
+				'key'     => '_nearmart_payment_status',
+				'value'   => $payment_status,
 				'compare' => '=',
 			);
 		}
@@ -1064,15 +1083,56 @@ class SOM_Mobile_Orders {
 			'meta_query' => $meta_query,
 		);
 
+		// If search is numeric and matches an ID
+		if ( ! empty( $search ) && is_numeric( $search ) ) {
+			$direct_order = wc_get_order( absint( $search ) );
+			if ( $direct_order && ( $is_admin || absint( $direct_order->get_meta( '_nearmart_shop_id' ) ) === $shop_id ) ) {
+				$formatted = self::format_order( $direct_order );
+				return new WP_REST_Response(
+					array(
+						'success' => true,
+						'data'    => array(
+							'orders'     => array( $formatted ),
+							'pagination' => array(
+								'page'        => 1,
+								'limit'       => $limit,
+								'total'       => 1,
+								'total_pages' => 1,
+							),
+						),
+					),
+					200
+				);
+			}
+		}
+
 		$wc_results = wc_get_orders( $query_args );
 		$orders     = array();
 
 		if ( $wc_results && isset( $wc_results->orders ) ) {
 			foreach ( $wc_results->orders as $wc_order ) {
 				$formatted = self::format_order( $wc_order );
-				if ( $formatted ) {
-					$orders[] = $formatted;
+				if ( ! $formatted ) {
+					continue;
 				}
+
+				// Apply search term filter on non-ID string searches
+				if ( ! empty( $search ) ) {
+					$s = mb_strtolower( trim( $search ) );
+					$order_num  = mb_strtolower( $formatted['order_number'] ?? '' );
+					$pickup     = mb_strtolower( $formatted['pickup_code'] ?? '' );
+					$cust_name  = mb_strtolower( $formatted['customer_name'] ?? '' );
+					$cust_phone = mb_strtolower( $formatted['customer_phone'] ?? '' );
+
+					if ( false === mb_strpos( $order_num, $s ) &&
+						 false === mb_strpos( $pickup, $s ) &&
+						 false === mb_strpos( $cust_name, $s ) &&
+						 false === mb_strpos( $cust_phone, $s ) ) {
+						continue;
+					}
+				}
+
+				$orders[] = $formatted;
 			}
 		}
 
