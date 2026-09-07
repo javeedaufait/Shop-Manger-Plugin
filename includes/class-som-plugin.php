@@ -62,6 +62,8 @@ class SOM_Plugin {
 		SOM_REST_API::init();
 		SOM_Mobile_Auth::init();
 		SOM_Mobile_Shops::init();
+		SOM_Mobile_Cart::init();
+		SOM_Mobile_Orders::init();
 		SOM_Catalog_Repository::init();
 		SOM_Master_Product::init();
 		SOM_Catalog_Permissions::init();
