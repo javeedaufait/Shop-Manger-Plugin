@@ -428,8 +428,8 @@ class SOM_Merchant_Catalog {
 
 						<div class="som-form-row">
 							<div class="som-form-group">
-								<label for="som_add_price" class="som-label required"><?php esc_html_e( 'Shop Price (₹)', 'nearmart' ); ?></label>
-								<input type="number" step="0.01" id="som_add_price" name="price" class="som-input" required placeholder="0.00" />
+								<label for="som_add_price" class="som-label"><?php esc_html_e( 'Shop Price (₹)', 'nearmart' ); ?> <span style="font-weight: normal; color: #64748b; font-size: 0.8rem;"><?php esc_html_e( '(Leave blank or 0 for weighed produce)', 'nearmart' ); ?></span></label>
+								<input type="number" step="0.01" id="som_add_price" name="price" class="som-input" placeholder="<?php esc_attr_e( '0.00 (Price decided at shop)', 'nearmart' ); ?>" />
 							</div>
 							<div class="som-form-group">
 								<label for="som_add_sale_price" class="som-label"><?php esc_html_e( 'Sale Price (₹)', 'nearmart' ); ?></label>
@@ -525,8 +525,8 @@ class SOM_Merchant_Catalog {
 
 						<div class="som-form-row">
 							<div class="som-form-group">
-								<label for="som_st_price" class="som-label required"><?php esc_html_e( 'Shop Price (₹)', 'nearmart' ); ?></label>
-								<input type="number" step="0.01" id="som_st_price" name="price" class="som-input" required placeholder="0.00" />
+								<label for="som_st_price" class="som-label"><?php esc_html_e( 'Shop Price (₹)', 'nearmart' ); ?> <span style="font-weight: normal; color: #64748b; font-size: 0.8rem;"><?php esc_html_e( '(Leave blank or 0 for weighed produce)', 'nearmart' ); ?></span></label>
+								<input type="number" step="0.01" id="som_st_price" name="price" class="som-input" placeholder="<?php esc_attr_e( '0.00 (Price decided at shop)', 'nearmart' ); ?>" />
 							</div>
 							<div class="som-form-group">
 								<label for="som_st_sale_price" class="som-label"><?php esc_html_e( 'Sale Price (₹)', 'nearmart' ); ?></label>
@@ -633,8 +633,8 @@ class SOM_Merchant_Catalog {
 
 					<div class="som-form-row">
 						<div class="som-form-group">
-							<label for="som_edit_price" class="som-label required"><?php esc_html_e( 'Shop Price (₹)', 'nearmart' ); ?></label>
-							<input type="number" step="0.01" id="som_edit_price" name="price" class="som-input" required />
+							<label for="som_edit_price" class="som-label"><?php esc_html_e( 'Shop Price (₹)', 'nearmart' ); ?> <span style="font-weight: normal; color: #64748b; font-size: 0.8rem;"><?php esc_html_e( '(0.00 = Price decided at shop)', 'nearmart' ); ?></span></label>
+							<input type="number" step="0.01" id="som_edit_price" name="price" class="som-input" placeholder="0.00" />
 						</div>
 						<div class="som-form-group">
 							<label for="som_edit_sale_price" class="som-label"><?php esc_html_e( 'Sale Price (₹)', 'nearmart' ); ?></label>
@@ -761,8 +761,8 @@ class SOM_Merchant_Catalog {
 
 					<div class="som-form-row">
 						<div class="som-form-group">
-							<label for="som_fulfill_price" class="som-label required"><?php esc_html_e( 'Shop Price (₹)', 'nearmart' ); ?></label>
-							<input type="number" step="0.01" id="som_fulfill_price" name="price" class="som-input" required placeholder="0.00" />
+							<label for="som_fulfill_price" class="som-label"><?php esc_html_e( 'Shop Price (₹)', 'nearmart' ); ?> <span style="font-weight: normal; color: #64748b; font-size: 0.8rem;"><?php esc_html_e( '(0.00 = Price decided at shop)', 'nearmart' ); ?></span></label>
+							<input type="number" step="0.01" id="som_fulfill_price" name="price" class="som-input" placeholder="0.00" />
 						</div>
 						<div class="som-form-group">
 							<label for="som_fulfill_sale_price" class="som-label"><?php esc_html_e( 'Sale Price (₹)', 'nearmart' ); ?></label>
@@ -885,7 +885,9 @@ class SOM_Merchant_Catalog {
 									html += '<td style="padding:8px 12px;"><span style="font-size:0.85rem; color:#475569;">' + escapeHtml(item.category) + '</span></td>';
 
 									html += '<td style="padding:8px 12px;"><span class="som-cat-price" style="font-weight:700; color:#0f172a;">';
-									if (item.sale_price) {
+									if (parseFloat(item.price) <= 0) {
+										html += '<span style="color:#d97706; font-size:0.8rem; background:#fef3c7; padding:2px 6px; border-radius:4px; font-weight:700;"><?php echo esc_js( __( 'At Shop (Weighed)', 'nearmart' ) ); ?></span>';
+									} else if (item.sale_price) {
 										html += '<del style="color:#94a3b8; font-weight:400; font-size:0.82rem; margin-right:4px;">₹' + item.price + '</del> ₹' + item.sale_price;
 									} else {
 										html += '₹' + item.price;

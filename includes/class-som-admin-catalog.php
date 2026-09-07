@@ -626,8 +626,8 @@ class SOM_Admin_Catalog {
 
 						<div class="som-grid-2col">
 							<div>
-								<label style="font-weight:700; display:block; font-size:0.85rem;">Shop Price (₹) *</label>
-								<input type="number" step="0.01" id="som_admin_add_price" class="regular-text" style="width:100%;" required />
+								<label style="font-weight:700; display:block; font-size:0.85rem;">Shop Price (₹) <span style="font-weight:normal; color:#64748b; font-size:0.8rem;">(Leave blank or 0 for weighed produce)</span></label>
+								<input type="number" step="0.01" id="som_admin_add_price" class="regular-text" style="width:100%;" placeholder="0.00 (Price decided at shop)" />
 							</div>
 							<div>
 								<label style="font-weight:700; display:block; font-size:0.85rem;">Sale Price (₹)</label>
@@ -702,8 +702,8 @@ class SOM_Admin_Catalog {
 
 						<div class="som-grid-2col">
 							<div>
-								<label style="font-weight:700; display:block; font-size:0.85rem;">Shop Price (₹) *</label>
-								<input type="number" step="0.01" id="som_admin_st_price" class="regular-text" style="width:100%;" required placeholder="0.00" />
+								<label style="font-weight:700; display:block; font-size:0.85rem;">Shop Price (₹) <span style="font-weight:normal; color:#64748b; font-size:0.8rem;">(Leave blank or 0 for weighed produce)</span></label>
+								<input type="number" step="0.01" id="som_admin_st_price" class="regular-text" style="width:100%;" placeholder="0.00 (Price decided at shop)" />
 							</div>
 							<div>
 								<label style="font-weight:700; display:block; font-size:0.85rem;">Sale Price (₹)</label>
@@ -783,8 +783,8 @@ class SOM_Admin_Catalog {
 
 					<div class="som-grid-2col">
 						<div>
-							<label style="font-weight:700; display:block; font-size:0.85rem;">Shop Price (₹) *</label>
-							<input type="number" step="0.01" id="som_admin_edit_price" class="regular-text" style="width:100%;" required />
+							<label style="font-weight:700; display:block; font-size:0.85rem;">Shop Price (₹) <span style="font-weight:normal; color:#64748b; font-size:0.8rem;">(0.00 = Price decided at shop)</span></label>
+							<input type="number" step="0.01" id="som_admin_edit_price" class="regular-text" style="width:100%;" placeholder="0.00" />
 						</div>
 						<div>
 							<label style="font-weight:700; display:block; font-size:0.85rem;">Sale Price (₹)</label>
@@ -914,7 +914,7 @@ class SOM_Admin_Catalog {
 								}
 
 								html += '<td>' + escapeHtml(item.category) + '</td>';
-								html += '<td>₹' + item.price + (item.sale_price ? ' <del style="color:#94a3b8;">₹' + item.sale_price + '</del>' : '') + '</td>';
+								html += '<td>' + (parseFloat(item.price) <= 0 ? '<span style="color:#d97706; font-size:0.8rem; background:#fef3c7; padding:2px 6px; border-radius:4px; font-weight:700;">At Shop (Weighed)</span>' : '₹' + item.price + (item.sale_price ? ' <del style="color:#94a3b8;">₹' + item.sale_price + '</del>' : '')) + '</td>';
 								html += '<td>' + (item.stock_status === 'instock' ? '<span style="color:#16a34a; font-weight:700;">Available</span>' : '<span style="color:#dc2626; font-weight:700;">Unavailable</span>') + '</td>';
 								html += '<td>' + item.status + '</td>';
 
