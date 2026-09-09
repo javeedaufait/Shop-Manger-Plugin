@@ -84,6 +84,11 @@ class SOM_Mobile_Orders {
 		// Hook 4: Suppress premature customer processing/completed emails when price is pending
 		add_filter( 'woocommerce_email_enabled_customer_processing_order', array( __CLASS__, 'filter_suppress_provisional_emails' ), 10, 2 );
 		add_filter( 'woocommerce_email_enabled_customer_completed_order', array( __CLASS__, 'filter_suppress_provisional_emails' ), 10, 2 );
+		// Hook 5: WooCommerce Admin Orders Table Custom Column (HPOS & Legacy CPT)
+		add_filter( 'manage_woocommerce_page_wc-orders_columns', array( __CLASS__, 'add_admin_order_columns' ) );
+		add_action( 'manage_woocommerce_page_wc-orders_custom_column', array( __CLASS__, 'render_admin_order_column_hpos' ), 10, 2 );
+		add_filter( 'manage_edit-shop_order_columns', array( __CLASS__, 'add_admin_order_columns' ) );
+		add_action( 'manage_shop_order_posts_custom_column', array( __CLASS__, 'render_admin_order_column_cpt' ), 10, 2 );
 	}
 
 	/**
@@ -1273,8 +1278,8 @@ class SOM_Mobile_Orders {
 			if ( 'store_priced' === $pricing_type ) {
 				$matched = $weighed_map[ "item_{$item_id}" ] ?? $weighed_map[ "cat_{$catalog_id}" ] ?? null;
 				if ( $matched ) {
-					$input_actual_qty  = floatval( $matched['actual_quantity'] ?? $matched['actual_qty'] ?? $matched['quantity'] ?? 1 );
-					$input_unit_price  = floatval( $matched['unit_price'] ?? $matched['price'] ?? 0 );
+					$input_actual_qty  = floatval( $matched['actual_quantity'] ?? $matched['actual_qty'] ?? $matched['actual_weight'] ?? $matched['quantity'] ?? 1 );
+					$input_unit_price  = floatval( $matched['unit_price'] ?? $matched['price'] ?? $matched['rate'] ?? 0 );
 
 					if ( $input_actual_qty <= 0 ) {
 						$input_actual_qty = 1.0;
@@ -1373,13 +1378,84 @@ class SOM_Mobile_Orders {
 			);
 		}
 
+		$current_status = (string) $wc_order->get_meta( '_nearmart_fulfillment_status' );
+		if ( empty( $current_status ) ) {
+			$current_status = 'pending';
+		}
+
+		// Enforce state transitions:
+		// pending -> accepted -> preparing -> ready_for_pickup -> completed
+		// pending -> preparing
+		// pending -> rejected
+		$allowed_transitions = array(
+			'pending'          => array( 'accepted', 'preparing', 'rejected', 'cancelled' ),
+			'accepted'         => array( 'preparing', 'cancelled' ),
+			'preparing'        => array( 'ready_for_pickup', 'cancelled' ),
+			'ready_for_pickup' => array( 'completed', 'cancelled' ),
+			'completed'        => array(),
+			'cancelled'        => array(),
+			'rejected'         => array(),
+		);
+
+		$valid_targets = $allowed_transitions[ $current_status ] ?? array();
+		if ( ! in_array( $status, $valid_targets, true ) ) {
+			return new WP_REST_Response(
+				array(
+					'success' => false,
+					'code'    => 'INVALID_TRANSITION',
+					'message' => sprintf(
+						/* translators: 1: current status, 2: target status */
+						__( 'Cannot transition order fulfillment status from %1$s to %2$s.', 'nearmart' ),
+						$current_status,
+						$status
+					),
+				),
+				409
+			);
+		}
+
+		// Guard: Do not allow ready_for_pickup while store-priced items remain unweighed
+		if ( 'ready_for_pickup' === $status ) {
+			$pricing_status = (string) $wc_order->get_meta( '_nearmart_pricing_status' );
+			$has_unweighed  = false;
+
+			foreach ( $wc_order->get_items( 'line_item' ) as $item ) {
+				$ptype   = $item->get_meta( '_pricing_type' );
+				$pstatus = $item->get_meta( '_pricing_status' );
+				if ( 'store_priced' === $ptype && 'finalized' !== $pstatus ) {
+					$has_unweighed = true;
+					break;
+				}
+			}
+
+			if ( $has_unweighed || 'pending_verification' === $pricing_status ) {
+				return new WP_REST_Response(
+					array(
+						'success' => false,
+						'code'    => 'UNWEIGHED_PRODUCE',
+						'message' => __( 'Store-priced produce must be weighed and finalized before marking order ready for pickup.', 'nearmart' ),
+					),
+					409
+				);
+			}
+		}
+
+		// Rejection reason handling
+		if ( 'rejected' === $status ) {
+			$reason = sanitize_text_field( (string) $request->get_param( 'reason' ) );
+			if ( ! empty( $reason ) ) {
+				$wc_order->update_meta_data( '_nearmart_rejection_reason', $reason );
+				$wc_order->add_order_note( sprintf( 'Order rejected by merchant. Reason: %s', $reason ) );
+			}
+		}
+
+		// Update fulfillment status
 		$wc_order->update_meta_data( '_nearmart_fulfillment_status', $status );
 		$wc_status = self::map_fulfillment_to_wc_status( $status, $wc_order->get_meta( '_nearmart_payment_status' ) );
 		$wc_order->set_status( $wc_status );
 
-		if ( 'completed' === $status ) {
-			$wc_order->update_meta_data( '_nearmart_payment_status', 'paid' );
-		}
+		// Note: We do NOT automatically mark payment as 'paid' when completing.
+		// Fulfillment, pricing, and payment statuses are kept strictly independent.
 
 		$wc_order->save();
 
@@ -1413,7 +1489,7 @@ class SOM_Mobile_Orders {
 			case 'accepted':
 			case 'preparing':
 			case 'ready_for_pickup':
-				return 'paid' === $payment_status ? 'processing' : 'on-hold';
+				return 'processing';
 			case 'pending':
 			default:
 				return 'paid' === $payment_status ? 'processing' : 'on-hold';
@@ -1499,6 +1575,7 @@ class SOM_Mobile_Orders {
 			}
 
 			$items[] = array(
+				'order_item_id'      => (int) $item_id,
 				'product_id'         => $catalog_id > 0 ? $catalog_id : $item->get_product_id(),
 				'name'               => $item->get_name(),
 				'item_type'          => $item_type,
@@ -1515,6 +1592,48 @@ class SOM_Mobile_Orders {
 
 			$total_quantity += $qty;
 		}
+
+		// Check if store-priced produce needs weighing
+		$requires_weighing = false;
+		foreach ( $items as $it ) {
+			if ( 'store_priced' === $it['pricing_type'] && 'finalized' !== $it['pricing_status'] ) {
+				$requires_weighing = true;
+				break;
+			}
+		}
+
+		// Calculate available merchant fulfillment actions
+		$available_actions = array();
+		switch ( $fulfillment_status ) {
+			case 'pending':
+				$available_actions = array( 'accept', 'reject' );
+				break;
+			case 'accepted':
+				$available_actions = array( 'start_preparing' );
+				break;
+			case 'preparing':
+				if ( $requires_weighing ) {
+					$available_actions = array( 'weigh_produce' );
+				} else {
+					$available_actions = array( 'mark_ready_for_pickup' );
+					if ( $has_store_priced ) {
+						$available_actions[] = 'weigh_produce';
+					}
+				}
+				break;
+			case 'ready_for_pickup':
+				$available_actions = array( 'confirm_pickup' );
+				break;
+			case 'completed':
+			case 'cancelled':
+			case 'rejected':
+			default:
+				$available_actions = array();
+				break;
+		}
+
+		$rejection_reason = $order->get_meta( '_nearmart_rejection_reason' );
+		$rejection_reason = ! empty( $rejection_reason ) ? (string) $rejection_reason : null;
 
 		// Payment Eligibility Calculation
 		$online_payment_eligible = ( 'fixed' === $pricing_status );
@@ -1554,6 +1673,9 @@ class SOM_Mobile_Orders {
 			'estimated_total'      => $estimated_total ? round( $estimated_total, 2 ) : null,
 			'final_total'          => $is_total_final ? round( $wc_total, 2 ) : null,
 			'has_pending_prices'   => ! $is_total_final,
+			'requires_weighing'    => $requires_weighing,
+			'available_actions'    => $available_actions,
+			'rejection_reason'     => $rejection_reason,
 			'payment_eligibility'  => $payment_eligibility,
 			'items'                => $items,
 			'item_count'           => count( $items ),
@@ -1730,4 +1852,93 @@ class SOM_Mobile_Orders {
 			delete_transient( 'nearmart_cart_' . $context['cart_session'] );
 		}
 	}
+
+	/**
+	 * Add NearMart custom column to WooCommerce Orders Admin table.
+	 *
+	 * @param array $columns
+	 * @return array
+	 */
+	public static function add_admin_order_columns( $columns ) {
+		$new_columns = array();
+		foreach ( $columns as $key => $label ) {
+			$new_columns[ $key ] = $label;
+			if ( 'order_status' === $key ) {
+				$new_columns['nearmart_fulfillment'] = __( 'NearMart Fulfillment', 'nearmart' );
+			}
+		}
+		if ( ! isset( $new_columns['nearmart_fulfillment'] ) ) {
+			$new_columns['nearmart_fulfillment'] = __( 'NearMart Fulfillment', 'nearmart' );
+		}
+		return $new_columns;
+	}
+
+	/**
+	 * Render NearMart column content in HPOS orders table.
+	 *
+	 * @param string   $column
+	 * @param WC_Order $order
+	 */
+	public static function render_admin_order_column_hpos( $column, $order ) {
+		if ( 'nearmart_fulfillment' === $column && $order instanceof WC_Order ) {
+			self::render_admin_order_column_content( $order );
+		}
+	}
+
+	/**
+	 * Render NearMart column content in legacy CPT shop_order table.
+	 *
+	 * @param string $column
+	 * @param int    $post_id
+	 */
+	public static function render_admin_order_column_cpt( $column, $post_id ) {
+		if ( 'nearmart_fulfillment' === $column ) {
+			$order = wc_get_order( $post_id );
+			if ( $order instanceof WC_Order ) {
+				self::render_admin_order_column_content( $order );
+			}
+		}
+	}
+
+	/**
+	 * Render NearMart fulfillment badge, store name, and pickup code in WooCommerce admin.
+	 *
+	 * @param WC_Order $order
+	 */
+	public static function render_admin_order_column_content( WC_Order $order ) {
+		$shop_id = absint( $order->get_meta( '_nearmart_shop_id' ) );
+		if ( ! $shop_id ) {
+			echo '<span style="color:#94a3b8;">—</span>';
+			return;
+		}
+
+		$fulfillment = (string) $order->get_meta( '_nearmart_fulfillment_status' ) ?: 'pending';
+		$pickup_code = (string) $order->get_meta( '_nearmart_pickup_code' );
+		$shop_name   = get_the_title( $shop_id );
+
+		$badge_styles = array(
+			'pending'          => array( 'bg' => '#fffbeb', 'color' => '#b45309', 'label' => '⏳ Pending' ),
+			'accepted'         => array( 'bg' => '#eff6ff', 'color' => '#1d4ed8', 'label' => '✓ Accepted' ),
+			'preparing'        => array( 'bg' => '#eef2ff', 'color' => '#4338ca', 'label' => '📦 Preparing' ),
+			'ready_for_pickup' => array( 'bg' => '#ecfdf5', 'color' => '#047857', 'label' => '🛍️ Ready for Pickup' ),
+			'completed'        => array( 'bg' => '#f1f5f9', 'color' => '#475569', 'label' => '🎉 Picked Up' ),
+			'rejected'         => array( 'bg' => '#fef2f2', 'color' => '#b91c1c', 'label' => '✕ Rejected' ),
+			'cancelled'        => array( 'bg' => '#fef2f2', 'color' => '#b91c1c', 'label' => '✕ Cancelled' ),
+		);
+
+		$st = isset( $badge_styles[ $fulfillment ] ) ? $badge_styles[ $fulfillment ] : array( 'bg' => '#f8fafc', 'color' => '#64748b', 'label' => ucfirst( $fulfillment ) );
+
+		echo '<div style="display:flex; flex-direction:column; gap:4px; align-items:flex-start;">';
+		echo '<span style="display:inline-block; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:700; background:' . esc_attr( $st['bg'] ) . '; color:' . esc_attr( $st['color'] ) . ';">' . esc_html( $st['label'] ) . '</span>';
+
+		if ( ! empty( $pickup_code ) ) {
+			echo '<span style="font-size:11px; font-weight:700; font-family:monospace; color:#1e3a8a; background:#eff6ff; padding:1px 5px; border-radius:3px;">' . esc_html( $pickup_code ) . '</span>';
+		}
+
+		if ( ! empty( $shop_name ) ) {
+			echo '<span style="font-size:11px; color:#64748b;">🏬 ' . esc_html( $shop_name ) . '</span>';
+		}
+		echo '</div>';
+	}
+
 }
