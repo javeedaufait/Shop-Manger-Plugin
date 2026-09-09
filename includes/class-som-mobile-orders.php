@@ -741,6 +741,9 @@ class SOM_Mobile_Orders {
 		$wc_order->calculate_totals();
 		$wc_order->save();
 
+		// Trigger Push Notification to assigned shop merchants
+		do_action( 'nearmart_order_created', $wc_order, $shop_id );
+
 		// Deduct Shop-Specific Inventory in wp_nearmart_shop_products
 		foreach ( $processed_items as $item_data ) {
 			if ( ! empty( $item_data['catalog_row']->stock_quantity ) && $item_data['catalog_row']->stock_quantity > 0 ) {
@@ -997,6 +1000,9 @@ class SOM_Mobile_Orders {
 		}
 
 		$wc_order->save();
+
+		// Trigger Push Notification to customer
+		do_action( 'nearmart_order_fulfillment_status_changed', $wc_order, $status, '' );
 
 		return new WP_REST_Response(
 			array(
@@ -1314,6 +1320,11 @@ class SOM_Mobile_Orders {
 		$wc_order->calculate_totals();
 		$wc_order->save();
 
+		// Trigger Push Notification to customer if all produce variable items are finalized
+		if ( ! empty( $all_variable_finalized ) ) {
+			do_action( 'nearmart_order_produce_finalized', $wc_order, floatval( $wc_order->get_total() ) );
+		}
+
 		return new WP_REST_Response(
 			array(
 				'success' => true,
@@ -1458,6 +1469,10 @@ class SOM_Mobile_Orders {
 		// Fulfillment, pricing, and payment statuses are kept strictly independent.
 
 		$wc_order->save();
+
+		// Trigger Push Notification to customer
+		$notif_reason = isset( $reason ) ? $reason : '';
+		do_action( 'nearmart_order_fulfillment_status_changed', $wc_order, $status, $current_status, $notif_reason );
 
 		return new WP_REST_Response(
 			array(
@@ -1636,7 +1651,7 @@ class SOM_Mobile_Orders {
 		$rejection_reason = ! empty( $rejection_reason ) ? (string) $rejection_reason : null;
 
 		// Payment Eligibility Calculation
-		$online_payment_eligible = ( 'fixed' === $pricing_status );
+		$online_payment_eligible = ( 'fixed' === $pricing_status || 'finalized' === $pricing_status );
 		$allowed_methods         = $online_payment_eligible
 			? array( 'upi', 'pay_at_store' )
 			: array( 'pay_at_store' );
