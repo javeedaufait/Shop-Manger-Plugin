@@ -41,7 +41,7 @@ class SOM_Push_Notifications {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( __CLASS__, 'handle_register_token' ),
-				'permission_callback' => array( 'SOM_Mobile_Auth', 'check_authenticated_permission' ),
+				'permission_callback' => array( 'SOM_Mobile_Auth', 'permissions_authenticated' ),
 				'args'                => array(
 					'token'     => array(
 						'required'          => true,
