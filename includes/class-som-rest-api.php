@@ -134,7 +134,49 @@ class SOM_REST_API {
 			)
 		);
 
-		// 4. GET /wp-json/nearmart/v1/products/{product_id}
+		// 4. GET /wp-json/nearmart/v1/products/search (APP-10.2)
+		register_rest_route(
+			self::NAMESPACE,
+			'/products/search',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( __CLASS__, 'search_nearby_products' ),
+				'permission_callback' => '__return_true',
+				'args'                => array(
+					'q'      => array(
+						'default'           => '',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+					'lat'    => array(
+						'required'          => false,
+						'sanitize_callback' => array( 'SOM_Mobile_Shops', 'sanitize_float' ),
+					),
+					'lng'    => array(
+						'required'          => false,
+						'sanitize_callback' => array( 'SOM_Mobile_Shops', 'sanitize_float' ),
+					),
+					'radius' => array(
+						'default'           => 30,
+						'sanitize_callback' => array( 'SOM_Mobile_Shops', 'sanitize_float' ),
+					),
+					'area'   => array(
+						'required'          => false,
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+					'page'   => array(
+						'default'           => 1,
+						'sanitize_callback' => 'absint',
+					),
+					'limit'  => array(
+						'default'           => 20,
+						'sanitize_callback' => 'absint',
+					),
+					'lang'   => self::get_lang_arg_definition(),
+				),
+			)
+		);
+
+		// 5. GET /wp-json/nearmart/v1/products/{product_id}
 		register_rest_route(
 			self::NAMESPACE,
 			'/products/(?P<product_id>\d+)',
@@ -505,5 +547,263 @@ class SOM_REST_API {
 		}
 
 		return self::format_error_response( 'product_not_found', __( 'Product not found or unavailable.', 'nearmart' ), 404 );
+	}
+
+	/**
+	 * Endpoint 5: GET /wp-json/nearmart/v1/products/search (APP-10.2).
+	 * Searches products across nearby shops within customer's delivery/pickup radius.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response
+	 */
+	public static function search_nearby_products( WP_REST_Request $request ) {
+		global $wpdb;
+
+		$q        = trim( (string) $request->get_param( 'q' ) );
+		$user_lat = $request->get_param( 'lat' );
+		$user_lng = $request->get_param( 'lng' );
+		$radius   = max( 1, min( 100, (float) ( $request->get_param( 'radius' ) ?: 30 ) ) );
+		$area     = trim( (string) $request->get_param( 'area' ) );
+		$page     = max( 1, (int) $request->get_param( 'page' ) );
+		$limit    = max( 1, min( 50, (int) $request->get_param( 'limit' ) ) );
+		$lang     = self::sanitize_lang_param( $request->get_param( 'lang' ) );
+
+		if ( empty( $q ) ) {
+			return new WP_REST_Response(
+				array(
+					'success' => true,
+					'data'    => array(
+						'products'   => array(),
+						'pagination' => array(
+							'page'        => $page,
+							'limit'       => $limit,
+							'total'       => 0,
+							'total_pages' => 0,
+						),
+						'query'      => '',
+					),
+				),
+				200
+			);
+		}
+
+		$has_coordinates = null !== $user_lat && null !== $user_lng && is_numeric( $user_lat ) && is_numeric( $user_lng );
+
+		// 1. Resolve eligible published shops within radius/area
+		$query_args = array(
+			'post_type'      => array( 'shop', 'shop_onboarding' ),
+			'post_status'    => 'publish',
+			'posts_per_page' => 150,
+		);
+		$shops_query = new WP_Query( $query_args );
+		$eligible_shops = array();
+
+		if ( $shops_query->have_posts() ) {
+			foreach ( $shops_query->posts as $post ) {
+				$shop_id = $post->ID;
+				$address = (string) get_post_meta( $shop_id, 'som_address', true );
+
+				// Area filter if no GPS coordinates
+				if ( ! empty( $area ) && ! $has_coordinates ) {
+					$title_matches   = stripos( $post->post_title, $area ) !== false;
+					$address_matches = stripos( $address, $area ) !== false;
+					if ( ! $title_matches && ! $address_matches ) {
+						continue;
+					}
+				}
+
+				$lat_raw  = get_post_meta( $shop_id, 'som_latitude', true );
+				$lng_raw  = get_post_meta( $shop_id, 'som_longitude', true );
+				$shop_lat = '' !== $lat_raw && is_numeric( $lat_raw ) ? (float) $lat_raw : null;
+				$shop_lng = '' !== $lng_raw && is_numeric( $lng_raw ) ? (float) $lng_raw : null;
+
+				$distance_km   = null;
+				$distance_text = null;
+
+				if ( $has_coordinates && null !== $shop_lat && null !== $shop_lng ) {
+					$distance_km = SOM_Mobile_Shops::calculate_haversine_distance( (float) $user_lat, (float) $user_lng, $shop_lat, $shop_lng );
+					if ( $distance_km > $radius ) {
+						continue;
+					}
+					$distance_text = $distance_km < 1
+						? round( $distance_km * 1000 ) . ' m'
+						: $distance_km . ' km';
+				}
+
+				$eligible_shops[ $shop_id ] = array(
+					'shop_id'       => $shop_id,
+					'shop_name'     => $post->post_title,
+					'shop_address'  => $address,
+					'distance_km'   => $distance_km,
+					'distance_text' => $distance_text,
+				);
+			}
+		}
+
+		if ( empty( $eligible_shops ) ) {
+			return new WP_REST_Response(
+				array(
+					'success' => true,
+					'data'    => array(
+						'products'   => array(),
+						'pagination' => array(
+							'page'        => $page,
+							'limit'       => $limit,
+							'total'       => 0,
+							'total_pages' => 0,
+						),
+						'query'      => $q,
+					),
+				),
+				200
+			);
+		}
+
+		$shop_ids     = array_keys( $eligible_shops );
+		$placeholders = implode( ',', array_fill( 0, count( $shop_ids ), '%d' ) );
+		$table_name   = SOM_Catalog_Repository::get_table_name();
+
+		// 2. Query matching products in wp_nearmart_shop_products
+		$like_param = '%' . $wpdb->esc_like( $q ) . '%';
+
+		// Match master WC products by title or Malayalam title
+		$matching_master_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT DISTINCT p.ID FROM {$wpdb->posts} p
+				LEFT JOIN {$wpdb->postmeta} pm ON (p.ID = pm.post_id AND pm.meta_key IN ('_nearmart_name_ml', '_nearmart_barcode', '_nearmart_unit'))
+				WHERE p.post_type = 'product' AND p.post_status = 'publish'
+				AND (p.post_title LIKE %s OR pm.meta_value LIKE %s)",
+				$like_param,
+				$like_param
+			)
+		);
+
+		$master_condition = '';
+		$query_params     = $shop_ids;
+		if ( ! empty( $matching_master_ids ) ) {
+			$master_placeholders = implode( ',', array_fill( 0, count( $matching_master_ids ), '%d' ) );
+			$master_condition    = "product_id IN ({$master_placeholders}) OR ";
+			$query_params        = array_merge( $query_params, $matching_master_ids );
+		}
+
+		$query_params[] = $like_param;
+		$query_params[] = $like_param;
+		$query_params[] = $like_param;
+		$query_params[] = $like_param;
+
+		$sql = "SELECT * FROM {$table_name}
+			WHERE shop_id IN ({$placeholders})
+			AND status = 'active'
+			AND stock_status != 'deleted'
+			AND (
+				{$master_condition}
+				custom_name LIKE %s
+				OR custom_brand LIKE %s
+				OR shop_sku LIKE %s
+				OR custom_barcode LIKE %s
+			)";
+
+		$rows = $wpdb->get_results( $wpdb->prepare( $sql, $query_params ) );
+
+		$matching_products = array();
+		if ( ! empty( $rows ) ) {
+			foreach ( $rows as $row ) {
+				$item = nearmart_format_catalog_item( $row );
+				if ( ! $item || 'active' !== $item['status'] ) {
+					continue;
+				}
+
+				// Check availability: exclude unavailable products per business rule
+				$is_available = ( 'instock' === $item['stock_status'] && ( null === $item['stock_quantity'] || $item['stock_quantity'] > 0 ) );
+				if ( ! $is_available ) {
+					continue;
+				}
+
+				$title       = $item['title'];
+				$description = '';
+				$cat_name    = $item['category'];
+
+				if ( ! empty( $row->product_id ) ) {
+					$title       = SOM_Master_Product::get_localized_title( $row->product_id, $lang );
+					$description = SOM_Master_Product::get_localized_description( $row->product_id, $lang );
+					$cat_terms   = wp_get_post_terms( $row->product_id, 'product_cat' );
+					if ( ! is_wp_error( $cat_terms ) && ! empty( $cat_terms ) ) {
+						$cat_name = SOM_Master_Product::get_localized_category_name( $cat_terms[0], $lang );
+					}
+				}
+
+				$shop_info = $eligible_shops[ $row->shop_id ] ?? null;
+				if ( ! $shop_info ) {
+					continue;
+				}
+
+				$price           = (float) $item['price'];
+				$sale_price      = null !== $item['sale_price'] && '' !== $item['sale_price'] ? (float) $item['sale_price'] : null;
+				$effective_price = ( null !== $sale_price && $sale_price < $price ) ? $sale_price : $price;
+
+				// Produce / Weighed at shop detection
+				$is_store_priced = ( $effective_price <= 0 || ! empty( $row->is_variable ) );
+				$pricing_type    = $is_store_priced ? 'store_priced' : 'fixed';
+
+				$matching_products[] = array(
+					'id'              => (int) $item['id'],
+					'shop_id'         => (int) $row->shop_id,
+					'shop_name'       => $shop_info['shop_name'],
+					'shop_address'    => $shop_info['shop_address'],
+					'distance_km'     => $shop_info['distance_km'],
+					'distance_text'   => $shop_info['distance_text'],
+					'name'            => $title,
+					'description'     => $description,
+					'image'           => $item['thumb_url'] ? (string) $item['thumb_url'] : null,
+					'category'        => $cat_name,
+					'brand'           => $item['brand'] ? (string) $item['brand'] : null,
+					'unit'            => $item['unit'] ? (string) $item['unit'] : null,
+					'barcode'         => $item['barcode'] ? (string) $item['barcode'] : null,
+					'price'           => $price,
+					'sale_price'      => $sale_price,
+					'available'       => true,
+					'stock_quantity'  => null !== $item['stock_quantity'] ? (int) $item['stock_quantity'] : null,
+					'shop_sku'        => $item['shop_sku'] ? (string) $item['shop_sku'] : null,
+					'pricing_type'    => $pricing_type,
+					'is_store_priced' => $is_store_priced,
+				);
+			}
+		}
+
+		// Sort by distance (nearest shops first) if coordinates available, then price
+		usort(
+			$matching_products,
+			function( $a, $b ) {
+				if ( null !== $a['distance_km'] && null !== $b['distance_km'] ) {
+					if ( $a['distance_km'] !== $b['distance_km'] ) {
+						return $a['distance_km'] <=> $b['distance_km'];
+					}
+				}
+				return $a['price'] <=> $b['price'];
+			}
+		);
+
+		// Server-side Pagination
+		$total_count = count( $matching_products );
+		$total_pages = max( 1, (int) ceil( $total_count / $limit ) );
+		$offset      = ( $page - 1 ) * $limit;
+		$paged       = array_slice( $matching_products, $offset, $limit );
+
+		return new WP_REST_Response(
+			array(
+				'success' => true,
+				'data'    => array(
+					'products'   => $paged,
+					'pagination' => array(
+						'page'        => $page,
+						'limit'       => $limit,
+						'total'       => $total_count,
+						'total_pages' => $total_pages,
+					),
+					'query'      => $q,
+				),
+			),
+			200
+		);
 	}
 }
