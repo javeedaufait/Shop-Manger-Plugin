@@ -744,21 +744,8 @@ class SOM_Mobile_Orders {
 		// Trigger Push Notification to assigned shop merchants
 		do_action( 'nearmart_order_created', $wc_order, $shop_id );
 
-		// Deduct Shop-Specific Inventory in wp_nearmart_shop_products
-		foreach ( $processed_items as $item_data ) {
-			if ( ! empty( $item_data['catalog_row']->stock_quantity ) && $item_data['catalog_row']->stock_quantity > 0 ) {
-				$new_stock = max( 0, $item_data['catalog_row']->stock_quantity - intval( ceil( $item_data['quantity'] ) ) );
-				if ( function_exists( 'nearmart_update_shop_product_by_id' ) ) {
-					nearmart_update_shop_product_by_id(
-						$item_data['catalog_id'],
-						array(
-							'stock_quantity' => $new_stock,
-							'stock_status'   => $new_stock > 0 ? 'instock' : 'outofstock',
-						)
-					);
-				}
-			}
-		}
+		// Note (APP-9.2 MVP): Automatic stock_quantity decrement is intentionally disabled.
+		// Product availability is managed explicitly by the merchant via stock_status ('instock' vs 'outofstock').
 
 		// 6. Clear Customer's Cart
 		self::clear_customer_cart( $context );

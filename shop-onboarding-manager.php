@@ -44,6 +44,7 @@ require_once SOM_PLUGIN_DIR . 'includes/class-som-catalog-permissions.php';
 require_once SOM_PLUGIN_DIR . 'includes/class-som-mobile-cart.php';
 require_once SOM_PLUGIN_DIR . 'includes/class-som-mobile-orders.php';
 require_once SOM_PLUGIN_DIR . 'includes/class-som-push-notifications.php';
+require_once SOM_PLUGIN_DIR . 'includes/class-som-mobile-merchant-catalog.php';
 require_once SOM_PLUGIN_DIR . 'includes/class-som-plugin.php';
 
 /**
