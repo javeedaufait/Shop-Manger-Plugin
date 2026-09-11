@@ -55,6 +55,10 @@ class SOM_Push_Notifications {
 						'default'           => '',
 						'sanitize_callback' => 'sanitize_text_field',
 					),
+					'lang'      => array(
+						'default'           => 'en',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
 				),
 			)
 		);
@@ -88,6 +92,7 @@ class SOM_Push_Notifications {
 		$token     = trim( (string) $request->get_param( 'token' ) );
 		$platform  = sanitize_text_field( (string) $request->get_param( 'platform' ) );
 		$device_id = sanitize_text_field( (string) $request->get_param( 'device_id' ) );
+		$lang      = sanitize_text_field( (string) $request->get_param( 'lang' ) );
 
 		if ( empty( $token ) || ! self::is_valid_expo_push_token( $token ) ) {
 			return new WP_REST_Response(
@@ -101,6 +106,10 @@ class SOM_Push_Notifications {
 		}
 
 		self::save_user_push_token( $user_id, $token, $platform, $device_id );
+
+		if ( ! empty( $lang ) && in_array( $lang, array( 'en', 'ml' ), true ) ) {
+			update_user_meta( $user_id, 'nearmart_preferred_lang', $lang );
+		}
 
 		return new WP_REST_Response(
 			array(
@@ -412,14 +421,25 @@ class SOM_Push_Notifications {
 		$order_number = $wc_order->get_meta( '_nearmart_order_number' ) ?: 'NM-ORD-' . $order_id;
 		$item_count   = $wc_order->get_item_count();
 
-		$title = 'New Order Received';
-		$body  = sprintf( 'New order %1$s received (%2$d items). Please review and accept.', $order_number, $item_count );
+		// Determine merchant language preference
+		$author_id = (int) get_post_field( 'post_author', $shop_id );
+		$merchant_lang = $author_id ? self::get_user_language( $author_id ) : 'en';
+
+		if ( 'ml' === $merchant_lang ) {
+			$title = 'പുതിയ ഓർഡർ ലഭിച്ചു';
+			$body  = sprintf( 'പുതിയ ഓർഡർ %1$s ലഭിച്ചു (%2$d ഇനങ്ങൾ). ദയവായി പരിശോധിച്ച് സ്വീകരിക്കുക.', $order_number, $item_count );
+		} else {
+			$title = 'New Order Received';
+			$body  = sprintf( 'New order %1$s received (%2$d items). Please review and accept.', $order_number, $item_count );
+		}
 
 		$deep_link_data = array(
 			'type'         => 'merchant_new_order',
-			'order_id'     => $order_id,
+			'order_id'     => (string) $order_id,
+			'orderId'      => (string) $order_id,
 			'order_number' => $order_number,
 			'target_role'  => 'merchant',
+			'user_type'    => 'merchant',
 		);
 
 		$sent = self::send_push( $merchant_tokens, $title, $body, $deep_link_data );
@@ -441,6 +461,10 @@ class SOM_Push_Notifications {
 	 */
 	public static function on_fulfillment_status_changed( $wc_order, $new_status, $old_status, $reason = '' ) {
 		$order_id    = $wc_order->get_id();
+
+		if ( empty( $reason ) ) {
+			$reason = (string) $wc_order->get_meta( '_nearmart_rejection_reason' );
+		}
 		$customer_id = $wc_order->get_customer_id();
 
 		if ( ! $customer_id ) {
@@ -527,10 +551,12 @@ class SOM_Push_Notifications {
 
 		$deep_link_data = array(
 			'type'         => 'order_status_update',
-			'order_id'     => $order_id,
+			'order_id'     => (string) $order_id,
+			'orderId'      => (string) $order_id,
 			'order_number' => $order_number,
 			'status'       => $new_status,
 			'target_role'  => 'customer',
+			'user_type'    => 'customer',
 		);
 
 		$sent = self::send_push( $customer_tokens, $title, $body, $deep_link_data );
@@ -580,10 +606,12 @@ class SOM_Push_Notifications {
 
 		$deep_link_data = array(
 			'type'         => 'order_produce_finalized',
-			'order_id'     => $order_id,
+			'order_id'     => (string) $order_id,
+			'orderId'      => (string) $order_id,
 			'order_number' => $order_number,
-			'final_total'  => $final_total,
+			'final_total'  => (float) $final_total,
 			'target_role'  => 'customer',
+			'user_type'    => 'customer',
 		);
 
 		$sent = self::send_push( $customer_tokens, $title, $body, $deep_link_data );
