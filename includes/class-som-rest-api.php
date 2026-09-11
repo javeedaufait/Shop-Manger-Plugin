@@ -197,6 +197,62 @@ class SOM_REST_API {
 				),
 			)
 		);
+
+		// 6. GET /wp-json/nearmart/v1/customer/favorites
+		register_rest_route(
+			self::NAMESPACE,
+			'/customer/favorites',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( __CLASS__, 'get_customer_favorites' ),
+				'permission_callback' => array( __CLASS__, 'permissions_authenticated_customer' ),
+				'args'                => array(
+					'lat'  => array(
+						'type'     => 'number',
+						'required' => false,
+					),
+					'lng'  => array(
+						'type'     => 'number',
+						'required' => false,
+					),
+					'lang' => self::get_lang_arg_definition(),
+				),
+			)
+		);
+
+		// 7. POST /wp-json/nearmart/v1/customer/favorites/{shop_id}
+		register_rest_route(
+			self::NAMESPACE,
+			'/customer/favorites/(?P<shop_id>\d+)',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( __CLASS__, 'add_customer_favorite' ),
+				'permission_callback' => array( __CLASS__, 'permissions_authenticated_customer' ),
+				'args'                => array(
+					'shop_id' => array(
+						'required'          => true,
+						'sanitize_callback' => 'absint',
+					),
+				),
+			)
+		);
+
+		// 8. DELETE /wp-json/nearmart/v1/customer/favorites/{shop_id}
+		register_rest_route(
+			self::NAMESPACE,
+			'/customer/favorites/(?P<shop_id>\d+)',
+			array(
+				'methods'             => WP_REST_Server::DELETABLE,
+				'callback'            => array( __CLASS__, 'remove_customer_favorite' ),
+				'permission_callback' => array( __CLASS__, 'permissions_authenticated_customer' ),
+				'args'                => array(
+					'shop_id' => array(
+						'required'          => true,
+						'sanitize_callback' => 'absint',
+					),
+				),
+			)
+		);
 	}
 
 	/**
@@ -801,6 +857,173 @@ class SOM_REST_API {
 						'total_pages' => $total_pages,
 					),
 					'query'      => $q,
+				),
+			),
+			200
+		);
+	}
+	/**
+	 * Permission callback: Ensure user is authenticated.
+	 *
+	 * @return bool|WP_Error
+	 */
+	public static function permissions_authenticated_customer() {
+		if ( class_exists( 'SOM_Mobile_Auth' ) && method_exists( 'SOM_Mobile_Auth', 'permissions_authenticated' ) ) {
+			return SOM_Mobile_Auth::permissions_authenticated();
+		}
+		if ( is_user_logged_in() && get_current_user_id() > 0 ) {
+			return true;
+		}
+		return new WP_Error(
+			'rest_not_logged_in',
+			__( 'Authentication required to manage favorite stores.', 'nearmart' ),
+			array( 'status' => 401 )
+		);
+	}
+
+	/**
+	 * Endpoint: GET /customer/favorites - List authenticated customer favorite shops.
+	 *
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response
+	 */
+	public static function get_customer_favorites( WP_REST_Request $request ) {
+		$user_id = get_current_user_id();
+		if ( ! $user_id ) {
+			return self::format_error_response( 'unauthorized', __( 'Authentication required.', 'nearmart' ), 401 );
+		}
+
+		$fav_ids = get_user_meta( $user_id, 'nearmart_favorite_shops', true );
+		if ( ! is_array( $fav_ids ) ) {
+			$fav_ids = array();
+		}
+		$fav_ids = array_values( array_unique( array_filter( array_map( 'absint', $fav_ids ) ) ) );
+
+		$lat  = $request->get_param( 'lat' );
+		$lng  = $request->get_param( 'lng' );
+		$lang = self::sanitize_lang_param( $request->get_param( 'lang' ) );
+
+		$valid_shops = array();
+		$valid_ids   = array();
+
+		foreach ( $fav_ids as $shop_id ) {
+			$shop_data = self::format_shop( $shop_id );
+			if ( ! $shop_data ) {
+				continue;
+			}
+
+			// Add distance if lat/lng are provided
+			if ( null !== $lat && null !== $lng && null !== $shop_data['latitude'] && null !== $shop_data['longitude'] ) {
+				if ( class_exists( 'SOM_Mobile_Shops' ) && method_exists( 'SOM_Mobile_Shops', 'calculate_haversine_distance' ) ) {
+					$dist_km = SOM_Mobile_Shops::calculate_haversine_distance( (float) $lat, (float) $lng, (float) $shop_data['latitude'], (float) $shop_data['longitude'] );
+					$shop_data['distance_km']   = $dist_km;
+					$shop_data['distance_text'] = $dist_km < 1 ? round( $dist_km * 1000 ) . ' m' : round( $dist_km, 1 ) . ' km';
+				}
+			}
+
+			$shop_data['is_favorite'] = true;
+			$valid_ids[]              = (int) $shop_id;
+			$valid_shops[]            = $shop_data;
+		}
+
+		// Sort by distance if calculated
+		if ( null !== $lat && null !== $lng ) {
+			usort(
+				$valid_shops,
+				function( $a, $b ) {
+					if ( isset( $a['distance_km'], $b['distance_km'] ) ) {
+						return $a['distance_km'] <=> $b['distance_km'];
+					}
+					return 0;
+				}
+			);
+		}
+
+		return new WP_REST_Response(
+			array(
+				'success' => true,
+				'data'    => array(
+					'shop_ids' => $valid_ids,
+					'shops'    => $valid_shops,
+				),
+			),
+			200
+		);
+	}
+
+	/**
+	 * Endpoint: POST /customer/favorites/{shop_id} - Add shop to customer favorites.
+	 *
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response
+	 */
+	public static function add_customer_favorite( WP_REST_Request $request ) {
+		$user_id = get_current_user_id();
+		if ( ! $user_id ) {
+			return self::format_error_response( 'unauthorized', __( 'Authentication required.', 'nearmart' ), 401 );
+		}
+
+		$shop_id = absint( $request->get_param( 'shop_id' ) );
+		$shop    = self::format_shop( $shop_id );
+
+		if ( ! $shop ) {
+			return self::format_error_response( 'invalid_shop_id', __( 'Shop not found or not active.', 'nearmart' ), 404 );
+		}
+
+		$fav_ids = get_user_meta( $user_id, 'nearmart_favorite_shops', true );
+		if ( ! is_array( $fav_ids ) ) {
+			$fav_ids = array();
+		}
+
+		if ( ! in_array( $shop_id, $fav_ids, true ) ) {
+			$fav_ids[] = $shop_id;
+			$fav_ids   = array_values( array_unique( array_map( 'absint', $fav_ids ) ) );
+			update_user_meta( $user_id, 'nearmart_favorite_shops', $fav_ids );
+		}
+
+		return new WP_REST_Response(
+			array(
+				'success' => true,
+				'message' => __( 'Shop added to favorites.', 'nearmart' ),
+				'data'    => array(
+					'favorited' => true,
+					'shop_id'   => $shop_id,
+					'shop_ids'  => $fav_ids,
+				),
+			),
+			200
+		);
+	}
+
+	/**
+	 * Endpoint: DELETE /customer/favorites/{shop_id} - Remove shop from customer favorites.
+	 *
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response
+	 */
+	public static function remove_customer_favorite( WP_REST_Request $request ) {
+		$user_id = get_current_user_id();
+		if ( ! $user_id ) {
+			return self::format_error_response( 'unauthorized', __( 'Authentication required.', 'nearmart' ), 401 );
+		}
+
+		$shop_id = absint( $request->get_param( 'shop_id' ) );
+		$fav_ids = get_user_meta( $user_id, 'nearmart_favorite_shops', true );
+		if ( ! is_array( $fav_ids ) ) {
+			$fav_ids = array();
+		}
+
+		$fav_ids = array_values( array_diff( array_map( 'absint', $fav_ids ), array( $shop_id ) ) );
+		update_user_meta( $user_id, 'nearmart_favorite_shops', $fav_ids );
+
+		return new WP_REST_Response(
+			array(
+				'success' => true,
+				'message' => __( 'Shop removed from favorites.', 'nearmart' ),
+				'data'    => array(
+					'favorited' => false,
+					'shop_id'   => $shop_id,
+					'shop_ids'  => $fav_ids,
 				),
 			),
 			200

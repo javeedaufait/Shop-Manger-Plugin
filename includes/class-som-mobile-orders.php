@@ -230,6 +230,23 @@ class SOM_Mobile_Orders {
 			)
 		);
 
+		// 2.5. GET /wp-json/nearmart/v1/orders/{order_id}/reorder - Live Reorder Validation
+		register_rest_route(
+			self::NAMESPACE,
+			'/orders/(?P<order_id>\d+)/reorder',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( __CLASS__, 'get_order_reorder_validation' ),
+				'permission_callback' => '__return_true',
+				'args'                => array(
+					'order_id' => array(
+						'type'     => 'integer',
+						'required' => true,
+					),
+				),
+			)
+		);
+
 		// 3. GET /wp-json/nearmart/v1/orders/{order_id} - Single Order Details
 		register_rest_route(
 			self::NAMESPACE,
@@ -1943,4 +1960,158 @@ class SOM_Mobile_Orders {
 		echo '</div>';
 	}
 
+	/**
+	 * Endpoint: GET /orders/{order_id}/reorder - Live Reorder Validation.
+	 *
+	 * Revalidates every product from a previous completed order against the live shop catalog.
+	 * Never blindly copies historical weights or prices. Preserves store-priced produce behavior.
+	 *
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response
+	 */
+	public static function get_order_reorder_validation( WP_REST_Request $request ) {
+		$order_id = absint( $request->get_param( 'order_id' ) );
+		$wc_order = function_exists( 'wc_get_order' ) ? wc_get_order( $order_id ) : null;
+
+		if ( ! $wc_order ) {
+			return new WP_REST_Response(
+				array(
+					'success' => false,
+					'code'    => 'ORDER_NOT_FOUND',
+					'message' => __( 'Order not found.', 'nearmart' ),
+				),
+				404
+			);
+		}
+
+		$shop_id   = absint( $wc_order->get_meta( '_nearmart_shop_id' ) );
+		$shop_name = (string) $wc_order->get_meta( '_nearmart_shop_name' );
+		if ( empty( $shop_name ) && $shop_id > 0 ) {
+			$shop_name = get_the_title( $shop_id );
+		}
+
+		$reorder_items     = array();
+		$available_count   = 0;
+		$unavailable_count = 0;
+
+		foreach ( $wc_order->get_items( 'line_item' ) as $item_id => $line_item ) {
+			$catalog_id = absint( $line_item->get_meta( '_nearmart_catalog_id' ) );
+			if ( ! $catalog_id ) {
+				$catalog_id = absint( $line_item->get_product_id() );
+			}
+			$historical_unit_price = (float) $line_item->get_meta( '_unit_price_snapshot' );
+			$historical_req_qty    = $line_item->get_meta( '_requested_qty' );
+			$requested_qty         = '' !== $historical_req_qty && null !== $historical_req_qty
+				? (float) $historical_req_qty
+				: (float) $line_item->get_quantity();
+
+			// Look up live catalog record
+			$catalog_row = null;
+			if ( class_exists( 'SOM_Catalog_Repository' ) ) {
+				if ( $catalog_id > 0 ) {
+					$catalog_row = SOM_Catalog_Repository::get_shop_product_by_id( $catalog_id );
+				}
+				if ( ! $catalog_row && $shop_id > 0 && $catalog_id > 0 ) {
+					$catalog_row = SOM_Catalog_Repository::get_shop_product( $shop_id, $catalog_id );
+				}
+			}
+
+			if ( ! $catalog_row ) {
+				$unavailable_count++;
+				$reorder_items[] = array(
+					'product_id'         => $catalog_id,
+					'name'               => $line_item->get_name(),
+					'unit'               => $line_item->get_meta( '_unit_snapshot' ) ?: null,
+					'image'              => $line_item->get_meta( '_image_snapshot' ) ?: null,
+					'brand'              => null,
+					'current_price'      => 0.0,
+					'regular_price'      => 0.0,
+					'sale_price'         => null,
+					'old_price'          => $historical_unit_price,
+					'price_changed'      => false,
+					'pricing_type'       => 'fixed',
+					'is_store_priced'    => false,
+					'available'          => false,
+					'stock_quantity'     => 0,
+					'requested_quantity' => $requested_qty > 0 ? $requested_qty : 1,
+					'can_reorder'        => false,
+					'unavailable_reason' => 'product_not_found',
+				);
+				continue;
+			}
+
+			$formatted = SOM_Catalog_Repository::format_catalog_item( $catalog_row );
+			$is_active = ( 'active' === $formatted['status'] );
+			$in_stock  = ( 'instock' === $formatted['stock_status'] );
+			$stock_qty = $formatted['stock_quantity'];
+
+			// Check stock availability
+			$is_available = $is_active && $in_stock && ( null === $stock_qty || $stock_qty > 0 );
+
+			$current_regular = (float) $formatted['price'];
+			$current_sale    = ( null !== $formatted['sale_price'] && '' !== $formatted['sale_price'] ) ? (float) $formatted['sale_price'] : null;
+			$effective_price = ( null !== $current_sale && $current_sale < $current_regular ) ? $current_sale : $current_regular;
+
+			// Store-priced produce detection:
+			// If price is 0 or product is variable produce, it must remain store-priced (weighed at store)
+			$is_store_priced = ( $effective_price <= 0 || ! empty( $catalog_row->is_variable ) );
+			$pricing_type    = $is_store_priced ? 'store_priced' : 'fixed';
+
+			$price_changed = false;
+			if ( ! $is_store_priced && $historical_unit_price > 0 && abs( $effective_price - $historical_unit_price ) > 0.01 ) {
+				$price_changed = true;
+			}
+
+			$unavailable_reason = null;
+			if ( ! $is_active ) {
+				$unavailable_reason = 'product_unavailable';
+			} elseif ( ! $in_stock || ( null !== $stock_qty && $stock_qty <= 0 ) ) {
+				$unavailable_reason = 'out_of_stock';
+			}
+
+			if ( $is_available ) {
+				$available_count++;
+			} else {
+				$unavailable_count++;
+			}
+
+			$reorder_items[] = array(
+				'product_id'         => (int) $formatted['id'],
+				'master_product_id'  => $formatted['product_id'],
+				'name'               => $formatted['title'],
+				'unit'               => $formatted['unit'] ? (string) $formatted['unit'] : null,
+				'image'              => $formatted['thumb_url'] ? (string) $formatted['thumb_url'] : null,
+				'brand'              => $formatted['brand'] ? (string) $formatted['brand'] : null,
+				'category'           => $formatted['category'] ? (string) $formatted['category'] : null,
+				'current_price'      => $is_store_priced ? 0.0 : $effective_price,
+				'regular_price'      => $current_regular,
+				'sale_price'         => $current_sale,
+				'old_price'          => $historical_unit_price,
+				'price_changed'      => $price_changed,
+				'pricing_type'       => $pricing_type,
+				'is_store_priced'    => $is_store_priced,
+				'available'          => $is_available,
+				'stock_quantity'     => $stock_qty,
+				'requested_quantity' => $requested_qty > 0 ? $requested_qty : 1,
+				'can_reorder'        => $is_available,
+				'unavailable_reason' => $unavailable_reason,
+			);
+		}
+
+		return new WP_REST_Response(
+			array(
+				'success' => true,
+				'data'    => array(
+					'order_id'          => $order_id,
+					'shop_id'           => $shop_id,
+					'shop_name'         => $shop_name,
+					'items'             => $reorder_items,
+					'all_available'     => 0 === $unavailable_count && $available_count > 0,
+					'available_count'   => $available_count,
+					'unavailable_count' => $unavailable_count,
+				),
+			),
+			200
+		);
+	}
 }
